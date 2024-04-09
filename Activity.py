@@ -1,3 +1,5 @@
+import datetime
+
 class Activity:
     activities_quantity = 0
 
@@ -5,7 +7,7 @@ class Activity:
         self.idActivity = id
         self.idCentral = Central
         self.codPostal = codPostal
-        self.appointment = appointment if appointment is not None else -1
+        self.appointment = appointment if appointment is not None else datetime.time(0, 0, 0)
         self.skill = skill
         self.x = x
         self.y = y
@@ -13,7 +15,10 @@ class Activity:
         self.state = 0
         Activity.activities_quantity += 1
 
-    
+    def resetStateToZeroIfNotOne(self):
+        if(self.state != 1):
+            self.state = 0
+
     def printActivity(self):
         print('  ID: {}; State: {}; X: {}; Y: {}'.format(self.idActivity, self.state, self.x, self.y))
 

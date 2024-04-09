@@ -4,8 +4,8 @@ Created on Fri Apr  5 14:43:14 2024
 
 @author: jgac0
 """
-from activity import Activity
-from clustering import *
+from Activity import Activity
+from Clustering import *
 from Workers import *
 import datetime
 import pandas as pd
@@ -58,10 +58,10 @@ print('\nPrimeiras 5 Atividades: \n')
 for i in range(0, 5):
     list_activities[i].printActivity() 
 
-
 print('\nDados Importados com Sucesso!!\n')
+plot_heatmap_activities(list_activities)
 
-cluster = KNearest_Neighbors(list_activities, list_workers[0].x, list_workers[0].y, 5)
+cluster = KNearest_Neighbors(list_activities, 46.63, -0.25, 5)
 
 print("As 5 activities mais próximas:")
 for activity in cluster:
@@ -71,8 +71,7 @@ for activity in cluster:
 DBSCANS(list_activities, cluster, 5, 25, 10)
 
 print("\n\nNovo Cluster:\n")
+print('Size: ', len(cluster))
 for activity in cluster:
     activity.printActivity()
 
-
-plot_activities_by_state(list_activities)
