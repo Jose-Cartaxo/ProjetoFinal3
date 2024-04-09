@@ -15,5 +15,5 @@ class Activity:
 
     
     def printActivity(self):
-        print('ID: {}; Central: {}; X: {}; Y: {}'.format(self.idActivity, self.idCentral, self.x, self.y))
+        print('  ID: {}; State: {}; X: {}; Y: {}'.format(self.idActivity, self.state, self.x, self.y))
 

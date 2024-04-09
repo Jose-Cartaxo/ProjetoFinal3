@@ -4,15 +4,16 @@ Created on Fri Apr  5 14:43:14 2024
 
 @author: jgac0
 """
-from Activity import Activity
-from Clustering import KNearest_Neighbors
+from activity import Activity
+from clustering import *
 from Workers import *
 import datetime
 import pandas as pd
 
 # Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('WORKERS.xlsx')
-activities_xlsx = pd.read_excel('ACTIVITIES.xlsx')
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER')
+activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
+values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
 
 # Exibir os primeiros registros dos dados importados
 print(workers_xlsx.head())
@@ -50,20 +51,28 @@ for indice, element in workers_xlsx.iterrows():
 
 print('\nPrimeiros 5 Trabalhadores: \n')
 for i in range(0, 5):
-    list_workers[i].printWorker()
+    if i < len(list_workers):
+        list_workers[i].printWorker()
 
 print('\nPrimeiras 5 Atividades: \n')
 for i in range(0, 5):
     list_activities[i].printActivity() 
 
 
-print('Dados Importados com Sucesso!!')
+print('\nDados Importados com Sucesso!!\n')
 
-
-
-activities_mais_proximas = KNearest_Neighbors(list_activities, list_workers[0].x, list_workers[0].y, 5)
+cluster = KNearest_Neighbors(list_activities, list_workers[0].x, list_workers[0].y, 5)
 
 print("As 5 activities mais próximas:")
-for distancia, activity in activities_mais_proximas:
-    print("Distância:", distancia)
-    activity.printActivity() 
+for activity in cluster:
+    activity.printActivity()
+
+
+DBSCANS(list_activities, cluster, 5, 25, 10)
+
+print("\n\nNovo Cluster:\n")
+for activity in cluster:
+    activity.printActivity()
+
+
+plot_activities_by_state(list_activities)
