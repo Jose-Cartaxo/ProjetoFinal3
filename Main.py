@@ -61,7 +61,7 @@ for i in range(0, 5):
 print('\nDados Importados com Sucesso!!\n')
 plot_heatmap_activities(list_activities)
 
-cluster = KNearest_Neighbors(list_activities, 46.63, -0.25, 5)
+cluster = KNearest_Neighbors(list_activities, list_workers[0].x, list_workers[0].y, 5)
 
 print("As 5 activities mais próximas:")
 for activity in cluster:
@@ -75,3 +75,6 @@ print('Size: ', len(cluster))
 for activity in cluster:
     activity.printActivity()
 
+
+for activity in cluster:
+    list_workers[0].x
