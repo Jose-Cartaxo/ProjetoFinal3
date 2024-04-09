@@ -11,7 +11,7 @@ import datetime
 import pandas as pd
 
 # Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER')
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
 
