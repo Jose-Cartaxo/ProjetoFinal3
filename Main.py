@@ -13,8 +13,15 @@ import pandas as pd
 # Carregar os dados do arquivo Excel
 workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
+
 values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
 values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+
+skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
+
+
+
 
 # Exibir os primeiros registros dos dados importados
 print(workers_xlsx.head())
