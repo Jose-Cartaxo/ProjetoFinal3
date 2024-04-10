@@ -1,13 +1,12 @@
 import math
 from Workers import *
 import matplotlib.pyplot as plt
-from Main import values_dict
 from matplotlib.lines import Line2D
 
 from numpy import double
 from Activity import *
-def Travel_Time( x1, y1, x2, y2):
-    return Distance_Calculator( x1, y1, x2, y2) * values_dict['TRAVEL_TIME']
+def Travel_Time( travel_mult, x1, y1, x2, y2):
+    return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
 
 def Distance_Calculator( x1, y1, x2, y2):
     R = 6373.0
@@ -26,9 +25,9 @@ def Distance_Calculator( x1, y1, x2, y2):
     distance = R * c
     return distance
 
-def KNearest_Neighbors(all_Activities, x, y, k):
+def KNearest_Neighbors(list_activities, x, y, k):
     distances = []
-    for activity in all_Activities:
+    for activity in list_activities:
         distance = Distance_Calculator(activity.x, activity.y, x, y)
         distances.append((distance, activity))
 
@@ -37,7 +36,7 @@ def KNearest_Neighbors(all_Activities, x, y, k):
     return  list_temp
     
 
-def DBSCANS(all_activities, x_Worker, y_Worker, cluster, distance_Min, distance_Max, iterations_Max):
+def DBSCANS(list_activities, x_Worker, y_Worker, cluster, distance_Min, distance_Max, iterations_Max):
     
     min_x_value = float('inf')
     max_x_value = float('-inf')
@@ -51,7 +50,7 @@ def DBSCANS(all_activities, x_Worker, y_Worker, cluster, distance_Min, distance_
         temp_cluster = []
         while previous_size == len(cluster) and radius <= distance_Max:
             for activity_clustered in cluster:
-                for activity in all_activities:
+                for activity in list_activities:
                     if activity.state == 0:
                         distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
                         if distance < radius:
@@ -77,16 +76,16 @@ def DBSCANS(all_activities, x_Worker, y_Worker, cluster, distance_Min, distance_
                 print('Raio: ', radius, ' Encontrou: ', len( temp_cluster))
                 cluster.extend(temp_cluster)
 
-    plot_activities_by_state(all_activities, x_Worker, y_Worker, min_x_value, max_x_value, min_y_value, max_y_value)
+    plot_activities_by_state(list_activities, x_Worker, y_Worker, min_x_value, max_x_value, min_y_value, max_y_value)
     return
 
 
 
-def plot_heatmap_activities(all_Activities):
+def plot_heatmap_activities(list_activities):
     # Extrair coordenadas x, y e timestamps
-    x_values = [task.x for task in all_Activities]
-    y_values = [task.y for task in all_Activities]
-    timestamps = [task.appointment.hour for task in all_Activities]
+    x_values = [task.x for task in list_activities]
+    y_values = [task.y for task in list_activities]
+    timestamps = [task.appointment.hour for task in list_activities]
 
 
     # Converter timestamps para valores numéricos para representar as cores
@@ -114,16 +113,16 @@ def plot_heatmap_activities(all_Activities):
 
 
 
-def plot_activities_by_state(all_Activities, x_worker, y_worker, x_min, x_max, y_min, y_max):
+def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, y_min, y_max):
 
-    x_values = [activity.x for activity in all_Activities]
-    y_values = [activity.y for activity in all_Activities]
+    x_values = [activity.x for activity in list_activities]
+    y_values = [activity.y for activity in list_activities]
     x_values.append(x_worker)
     y_values.append(y_worker)
 
     # Definir cores com base nos estados das tarefas
     cores = {0: 'red', 1: 'black', 2: 'green', 3: 'blue'}
-    cores_pontos = [cores[activity.state] for activity in all_Activities]
+    cores_pontos = [cores[activity.state] for activity in list_activities]
     cores_pontos.append(cores[3])
     
     plt.scatter(x_values, y_values, c=cores_pontos)
@@ -138,11 +137,11 @@ def plot_activities_by_state(all_Activities, x_worker, y_worker, x_min, x_max, y
     
 
     # defenir o zoom inicial
-    plt.xlim(x_min - 0.3, x_max + 0.3)
-    plt.ylim(y_min - 0.3, y_max + 0.3)
+    # plt.xlim(x_min - 0.3, x_max + 0.3)
+    # plt.ylim(y_min - 0.3, y_max + 0.3)
     
     # Adicionar números para cada ponto
-    for activity in all_Activities:
+    for activity in list_activities:
         #print(i)
         if activity.appointment == -1:
             plt.text(activity.x, activity.y, str(-1), fontsize=8, ha='right', va='bottom')
