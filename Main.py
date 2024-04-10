@@ -14,6 +14,7 @@ import pandas as pd
 workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
 
 # Exibir os primeiros registros dos dados importados
 print(workers_xlsx.head())
@@ -25,8 +26,8 @@ time_start_morning = datetime.time(8, 0, 0)
 time_end_morning = datetime.time(12, 0, 0)
 
 # Horario Tarde
-time_start_aftermoon = datetime.time(14, 0, 0)
-time_end_aftermoon = datetime.time(18, 0, 0)
+time_start_aftermoon = datetime.time(13, 0, 0)
+time_end_aftermoon = datetime.time(17, 0, 0)
 
 print('Works Blocks: ')
 work_block_morning = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 1, time_start_morning, time_end_morning)
@@ -61,14 +62,14 @@ for i in range(0, 5):
 print('\nDados Importados com Sucesso!!\n')
 plot_heatmap_activities(list_activities)
 
-cluster = KNearest_Neighbors(list_activities, list_workers[0].x, list_workers[0].y, 5)
+cluster = KNearest_Neighbors(list_activities, list_workers[1].x, list_workers[1].y, 5)
 
 print("As 5 activities mais próximas:")
 for activity in cluster:
     activity.printActivity()
 
 
-DBSCANS(list_activities, cluster, 5, 25, 10)
+DBSCANS(list_activities, list_workers[1].x, list_workers[1].y, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
 
 print("\n\nNovo Cluster:\n")
 print('Size: ', len(cluster))
