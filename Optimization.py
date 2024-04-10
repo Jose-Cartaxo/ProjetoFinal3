@@ -11,7 +11,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
     # Fazer a Atribuição para cada bloco de trabalho do trabalhador independentemente.
     frontier = []    
-    family = set()
+    family = []
     
     worker = Find_Worker_By_Id(list_workers, workBlock.idWorker)
     
@@ -20,15 +20,35 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
 
     while frontier:
-        current_Node = heapq.heappop(frontier)
+        
+        print('\n\n  LISTA COMPLETA  ', len(frontier))
+        """        
+        for node in frontier:
+            node.printNode()
+        """
 
+        frontier = sorted(frontier)
+
+        current_Node = frontier[0]
+
+        frontier.remove(current_Node)
+
+        print('\n\n  ESCOLHIDO  ')
+        current_Node.printNode()
+
+        
+        print('\n\n  LISTA COMPLETA  ', len(frontier))
+        """
+        for node in frontier:
+            node.printNode()
+        """
         #print('TIPO DO NODE:')
         #print(type(current_Node.end_Time))
         #print(type(workBlock.start))
 
         current_Time = current_Node.end_Time
 
-        next_Activities = []
+        foundActivity = False
         for activity in worker_Activities_Cluster:
 
             # Tempo necessário para se deslocar até a Atividade
@@ -54,22 +74,36 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
                 activity_End_Time = current_Time + timedelta(minutes=time_Required)
                 if activity_End_Time < workBlock.finish:
+                    foundActivity = True
+                    if activity.appointment.time() != time(0, 0, 0):
+                        print('ID: ', activity.idActivity, 'Time Before: ', travel_Time_Going)
+                        travel_Time_Going = travel_Time_Going * 0.2
+                        print('Time After: ', travel_Time_Going)
                     heapq.heappush(frontier, Node(activity.idActivity, travel_Time_Going, activity.x, activity.y, activity_End_Time , current_Node.family, current_Node))
-                    print('Adicionei')
-                else:
-                    print('Não volto a casa')
+                    # print('Adicionei')
+                # else:
+                    # print('Não volto a casa')
             
-            else:
-                print('Não chego a tempo')
-
-
+            # else:
+                # print('Não chego a tempo')
+        if not foundActivity:
+            print("A lista está vazia.")
+            path = []
+            while current_Node:
+                path.append(current_Node.id)
+                current_Node = current_Node.parent
+            return path[::-1]
+      
+    """  
     print("A lista está vazia.")
     path = []
     while current_Node:
         path.append(current_Node.id)
         current_Node = current_Node.parent
     return path[::-1]
-    """
+
+
+
                     if not next_Activities:
                         print("A lista está vazia.")
                         path = []

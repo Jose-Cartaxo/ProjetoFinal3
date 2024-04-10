@@ -10,7 +10,7 @@ class Node:
         self.end_Time = end_Time
         self.family = family.copy()
         self.parent = parent
-        family.add(id)
+        family.append(id)
         if parent:
             self.gen = parent.gen + 1
         else:
@@ -20,12 +20,14 @@ class Node:
         else:
             self.total_cost = 0
 
+    def printNode(self):
+        print('ID: ', self.id, ' Cost: ', self.total_cost, ' Gen: ', self.gen)
 
     # se for maior tem de retornar true
     def __lt__(self, other):
         if self.gen == 0:
-            return True
-        if other.gen == 0:
             return False
+        if other.gen == 0:
+            return True
 
         return (self.total_cost / self.gen) < (other.total_cost / other.gen)
