@@ -21,30 +21,26 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
     while frontier:
         
-        print('\n\n  LISTA COMPLETA  ', len(frontier))
+
         """        
+        print('\n\n  LISTA COMPLETA  ', len(frontier))
         for node in frontier:
             node.printNode()
         """
 
         frontier = sorted(frontier)
-
         current_Node = frontier[0]
-
         frontier.remove(current_Node)
 
-        print('\n\n  ESCOLHIDO  ')
-        current_Node.printNode()
+        # print('\n\n  ESCOLHIDO  ')
+        # current_Node.printNode()
 
         
-        print('\n\n  LISTA COMPLETA  ', len(frontier))
         """
+        print('\n\n  LISTA COMPLETA  ', len(frontier))
         for node in frontier:
             node.printNode()
         """
-        #print('TIPO DO NODE:')
-        #print(type(current_Node.end_Time))
-        #print(type(workBlock.start))
 
         current_Time = current_Node.end_Time
 
@@ -63,23 +59,30 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             #print('Consigo Chegar a Tempo? Tempo viagem: ', travel_Time_Going, 'Tempo Partida: ', current_Time.time(), ' Tempo Chegada: ', datetime_Arraival.time(), 'Tempo inicio Atividade: ', activity.appointment.time())
 
             # Verificar se consegue chegar a tempo a Atividade
-            if not Belongs_to_Family(current_Node, activity.idActivity) and (datetime_Arraival.time() < activity.appointment.time() or activity.appointment.time() == time(0, 0, 0)):
+            if (not Belongs_to_Family(current_Node, activity.idActivity)) and (datetime_Arraival.time() < activity.appointment.time() or activity.appointment.time() == time(0, 0, 0)):
 
                 # Tempo necessário para se deslocar da Atividade até Casa
                 travel_Time_Returning = Travel_Time(values_dict['TRAVEL_TIME'], activity.x, activity.y, worker.x, worker.y)
 
+                time_Required_for_Activity = skills_dict[activity.skill]
+
                 # Hora de Chegada a Casa
-                time_Required = travel_Time_Going + travel_Time_Returning + skills_dict[activity.skill]
+                time_Required = travel_Time_Going + time_Required_for_Activity + travel_Time_Returning
+
+                time_Required = current_Time + timedelta(minutes=time_Required)
 
                 # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
-                activity_End_Time = current_Time + timedelta(minutes=time_Required)
-                if activity_End_Time < workBlock.finish:
+                activity_End_Time = current_Time + timedelta(minutes=time_Required_for_Activity)
+                if time_Required < workBlock.finish:
                     foundActivity = True
                     if activity.appointment.time() != time(0, 0, 0):
-                        print('ID: ', activity.idActivity, 'Time Before: ', travel_Time_Going)
+                        # print('ID: ', activity.idActivity, 'Time Before: ', travel_Time_Going)
                         travel_Time_Going = travel_Time_Going * 0.2
-                        print('Time After: ', travel_Time_Going)
+                        # print('Time After: ', travel_Time_Going)
                     heapq.heappush(frontier, Node(activity.idActivity, travel_Time_Going, activity.x, activity.y, activity_End_Time , current_Node.family, current_Node))
+
+
+
                     # print('Adicionei')
                 # else:
                     # print('Não volto a casa')
@@ -94,7 +97,6 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 current_Node = current_Node.parent
             return path[::-1]
       
-    """  
     print("A lista está vazia.")
     path = []
     while current_Node:
@@ -104,6 +106,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
 
 
+    """  
                     if not next_Activities:
                         print("A lista está vazia.")
                         path = []
@@ -117,10 +120,10 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 def Belongs_to_Family(node, activity):
     while node:
         if node.id == activity:
-            print('Já pertence')
+            # print('Já pertence')
             return True
         node = node.parent
-    print('Não pertence')
+    # print('Não pertence')
     return False
 
 

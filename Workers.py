@@ -53,7 +53,7 @@ def Create_List_Work_Blocks():
     
     # Horario Manhã
     time_start_morning = datetime.combine(today, time(6, 0, 0))
-    time_end_morning = datetime.combine(today, time(15, 0, 0))
+    time_end_morning = datetime.combine(today, time(12, 0, 0))
 
     # Defina os horários da tarde
     time_start_afternoon = datetime.combine(today, time(13, 0, 0))

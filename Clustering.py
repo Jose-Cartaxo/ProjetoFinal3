@@ -5,6 +5,7 @@ from matplotlib.lines import Line2D
 
 from numpy import double
 from Activity import *
+
 def Travel_Time( travel_mult, x1, y1, x2, y2):
     return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
 
@@ -156,5 +157,5 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
     
     
     # plt.show(block=False)
-    plt.show()
+    plt.show(block=True)
     return

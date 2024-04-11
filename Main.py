@@ -90,6 +90,6 @@ for id in nodes_Id:
         worker = Find_Worker_By_Id(list_workers, id)
         worker.printWorker()
 
-plot_activities_by_state(cluster, list_workers[1].x, list_workers[1].y, 0, 0, 0, 0)
+plot_activities_by_state(list_activities, list_workers[1].x, list_workers[1].y, 0, 0, 0, 0)
 
 print('Bora')
