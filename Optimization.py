@@ -10,37 +10,19 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
 
     # Fazer a Atribuição para cada bloco de trabalho do trabalhador independentemente.
-    frontier = []    
-    family = []
+    frontier = []
     
     worker = Find_Worker_By_Id(list_workers, workBlock.idWorker)
     
     # inicio é o WorkBlock
-    heapq.heappush(frontier, Node(workBlock.idWorker, 0, worker.x, worker.y, workBlock.start , family, None))
+    heapq.heappush(frontier, Node(workBlock.idWorker, 0, worker.x, worker.y, workBlock.start , None))
 
 
     while frontier:
-        
-
-        """        
-        print('\n\n  LISTA COMPLETA  ', len(frontier))
-        for node in frontier:
-            node.printNode()
-        """
-
+    
         frontier = sorted(frontier)
         current_Node = frontier[0]
         frontier.remove(current_Node)
-
-        # print('\n\n  ESCOLHIDO  ')
-        # current_Node.printNode()
-
-        
-        """
-        print('\n\n  LISTA COMPLETA  ', len(frontier))
-        for node in frontier:
-            node.printNode()
-        """
 
         current_Time = current_Node.end_Time
 
@@ -50,57 +32,90 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             # Tempo necessário para se deslocar até a Atividade
             travel_Time_Going = Travel_Time(values_dict['TRAVEL_TIME'], current_Node.x, current_Node.y, activity.x, activity.y)
 
-            # Converter para DateTime para ser possivel adicioanar
-            # datetime_end = datetime.combine(datetime.today(), current_Node.end_Time)
-
             # Hora de Chegada a Atividade
             datetime_Arraival = current_Time + timedelta(minutes=travel_Time_Going)
-            
-            #print('Consigo Chegar a Tempo? Tempo viagem: ', travel_Time_Going, 'Tempo Partida: ', current_Time.time(), ' Tempo Chegada: ', datetime_Arraival.time(), 'Tempo inicio Atividade: ', activity.appointment.time())
 
             # Verificar se consegue chegar a tempo a Atividade
-            if (not Belongs_to_Family(current_Node, activity.idActivity)) and (datetime_Arraival.time() < activity.appointment.time() or activity.appointment.time() == time(0, 0, 0)):
+            if not Belongs_to_Family(current_Node, activity.idActivity):
+                if datetime_Arraival.time() < activity.appointment.time() :
+                
+                    # Tempo necessário para se deslocar da Atividade até Casa
+                    travel_Time_Returning = Travel_Time(values_dict['TRAVEL_TIME'], activity.x, activity.y, worker.x, worker.y)
 
-                # Tempo necessário para se deslocar da Atividade até Casa
-                travel_Time_Returning = Travel_Time(values_dict['TRAVEL_TIME'], activity.x, activity.y, worker.x, worker.y)
+                    # Tempo necessário para a Atividade em si
+                    time_Required_for_Activity = skills_dict[activity.skill]
 
-                time_Required_for_Activity = skills_dict[activity.skill]
+                    # Tempo necessário para chegar a Casa
+                    time_Required = time_Required_for_Activity + travel_Time_Returning
+                    
+                    # Tempo em que acaba a Tarefa
+                    activity_End_Time_Real = activity.appointment + timedelta(minutes=time_Required_for_Activity)
 
-                # Hora de Chegada a Casa
-                time_Required = travel_Time_Going + time_Required_for_Activity + travel_Time_Returning
+                    # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
+                    activity_End_Time_Home = activity.appointment + timedelta(minutes=time_Required)
+                    if activity_End_Time_Home.time() < workBlock.finish.time():
+                        foundActivity = True
 
-                time_Required = current_Time + timedelta(minutes=time_Required)
+                        datetimeAppointment = datetime.combine(datetime.today(), activity.appointment.time())
+                        datetimeCurrent_Time = datetime.combine(datetime.today(), current_Time.time())
 
-                # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
-                activity_End_Time = current_Time + timedelta(minutes=time_Required_for_Activity)
-                if time_Required < workBlock.finish:
-                    foundActivity = True
-                    if activity.appointment.time() != time(0, 0, 0):
-                        # print('ID: ', activity.idActivity, 'Time Before: ', travel_Time_Going)
-                        travel_Time_Going = travel_Time_Going * 0.2
-                        # print('Time After: ', travel_Time_Going)
-                    heapq.heappush(frontier, Node(activity.idActivity, travel_Time_Going, activity.x, activity.y, activity_End_Time , current_Node.family, current_Node))
+                        timeSpend = datetimeAppointment - datetimeCurrent_Time
+                        timeSpendMinutes = int (timeSpend.total_seconds() // 60)
+                        cost = timeSpendMinutes * 0.5
+
+                        print('Diferença entre: ', activity.appointment.time(), ' e: ', current_Time.time(),' igual a: ', timeSpend)
+
+                        print("Diferença de tempo:", timeSpend)
+                        print("Horas:", timeSpend.seconds // 3600)  # Obtém apenas as horas
+                        print("Minutos:", timeSpend.seconds // 60)
+
+
+                        heapq.heappush(frontier, Node(id = activity.idActivity, cost = cost, x = activity.x, y = activity.y, end_Time = activity_End_Time_Real , parent = current_Node))
+                        activity.state = 1
+
+                
 
 
 
-                    # print('Adicionei')
-                # else:
-                    # print('Não volto a casa')
-            
-            # else:
-                # print('Não chego a tempo')
+                elif activity.appointment.time() == time(0, 0, 0):
+
+                    # Tempo necessário para se deslocar da Atividade até Casa
+                    travel_Time_Returning = Travel_Time(values_dict['TRAVEL_TIME'], activity.x, activity.y, worker.x, worker.y)
+
+                    # Tempo necessário para a Atividade em si
+                    time_Required_for_Activity = skills_dict[activity.skill]
+
+                    # Tempo necessário para chegar a Casa
+                    time_Required = time_Required_for_Activity + travel_Time_Returning
+                    
+                    # Tempo em que acaba a Tarefa
+                    activity_End_Time_Real = datetime_Arraival + timedelta(minutes=time_Required_for_Activity)
+
+                    # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
+                    activity_End_Time_Home = datetime_Arraival + timedelta(minutes=time_Required)
+
+                    if activity_End_Time_Home.time() < workBlock.finish.time():
+                        foundActivity = True
+
+                        heapq.heappush(frontier, Node(id = activity.idActivity, cost = travel_Time_Going, x = activity.x, y = activity.y, end_Time = activity_End_Time_Real , parent = current_Node))
+                        activity.state = 1
+
+
+
         if not foundActivity:
             print("A lista está vazia.")
             path = []
             while current_Node:
-                path.append(current_Node.id)
+                path.append(current_Node)
+                # path.append(current_Node.id)
                 current_Node = current_Node.parent
             return path[::-1]
       
     print("A lista está vazia.")
     path = []
     while current_Node:
-        path.append(current_Node.id)
+        path.append(current_Node)
+        # path.append(current_Node.id)
         current_Node = current_Node.parent
     return path[::-1]
 

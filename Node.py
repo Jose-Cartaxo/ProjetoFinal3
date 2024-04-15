@@ -2,26 +2,27 @@ from re import X
 
 
 class Node:
-    def __init__(self, id, cost, x, y, end_Time, family, parent):
+    def __init__(self, id, cost, x, y, end_Time, parent):
         self.id = id
         self.cost = cost
         self.x = x 
         self.y = y
         self.end_Time = end_Time
-        self.family = family.copy()
         self.parent = parent
-        family.append(id)
+
         if parent:
             self.gen = parent.gen + 1
+            self.total_cost = parent.total_cost + cost
+            self.family = parent.family.copy()
         else:
             self.gen = 0
-        if parent:
-            self.total_cost = parent.total_cost + cost
-        else:
             self.total_cost = 0
+            self.family = []
+            self.family.append(id)
+        
 
     def printNode(self):
-        print('ID: ', self.id, ' Cost: ', self.total_cost, ' Gen: ', self.gen)
+        print('ID: ', self.id, ' Cost: ', self.total_cost, ' end_Time: ', self.end_Time, ' Gen: ', self.gen)
 
     # se for maior tem de retornar true
     def __lt__(self, other):

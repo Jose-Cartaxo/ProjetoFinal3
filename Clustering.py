@@ -45,7 +45,7 @@ def DBSCANS(list_activities, x_Worker, y_Worker, cluster, distance_Min, distance
     max_y_value = float('-inf')
 
     for i in range(iterations_Max): 
-        print(i)
+        # print(i)
         radius = distance_Min
         previous_size = len(cluster)
         temp_cluster = []
@@ -55,7 +55,7 @@ def DBSCANS(list_activities, x_Worker, y_Worker, cluster, distance_Min, distance
                     if activity.state == 0:
                         distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
                         if distance < radius:
-                            print('id: ', activity_clustered.idActivity, 'distance: ', distance, 'radius: ',radius)
+                            # print('id: ', activity_clustered.idActivity, 'distance: ', distance, 'radius: ',radius)
                             temp_cluster.append(activity)
                             activity.state = 2
 
@@ -71,10 +71,10 @@ def DBSCANS(list_activities, x_Worker, y_Worker, cluster, distance_Min, distance
 
 
             if len( temp_cluster) == 0:
-                print('Raio: ', radius, ' Não encontrou ninguém')
+                # print('Raio: ', radius, ' Não encontrou ninguém')
                 radius += 1
             else:
-                print('Raio: ', radius, ' Encontrou: ', len( temp_cluster))
+                # print('Raio: ', radius, ' Encontrou: ', len( temp_cluster))
                 cluster.extend(temp_cluster)
 
     plot_activities_by_state(list_activities, x_Worker, y_Worker, min_x_value, max_x_value, min_y_value, max_y_value)
@@ -108,6 +108,7 @@ def plot_heatmap_activities(list_activities):
     """
 
     # Mostrar o heatmap
+    plt.savefig('PNG_Graphics/HeatMap.png')
     plt.show()
 
 
@@ -147,7 +148,12 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
         if activity.appointment == -1:
             plt.text(activity.x, activity.y, str(-1), fontsize=8, ha='right', va='bottom')
         else:
-            plt.text(activity.x, activity.y, activity.appointment.hour, fontsize=8, ha='right', va='bottom')
+            id_activity = str(activity.idActivity)
+            appointment_hour = str(activity.appointment.hour)
+
+            string = id_activity + ' , ' + appointment_hour
+            plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
+            # plt.text(activity.x, activity.y, activity.appointment.hour, fontsize=8, ha='right', va='bottom')
             """
             hour = str(activity.appointment.hour).zfill(2)  # zfill(2) adiciona um zero à esquerda, se necessário
             minutes = str(activity.appointment.minute).zfill(2)
