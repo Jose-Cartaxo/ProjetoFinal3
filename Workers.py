@@ -24,11 +24,13 @@ def Find_Worker_By_Id(list_workers, id):
 
 class WorkBlock:
      
-    def __init__(self, idWorker, idBlock, start, finish):
+    def __init__(self, idWorker, x, y, idBlock, start, finish):
         self.idWorker = idWorker
         self.idBlock = idBlock
-        self.start = start
-        self.finish = finish
+        self.x = x
+        self.y = y
+        self.start = datetime.strptime(start, '%H:%M') 
+        self.finish = datetime.strptime(finish, '%H:%M') 
         self.block_List = []
 
     def printWorkBlock(self):
@@ -60,7 +62,7 @@ def Create_List_Work_Blocks():
     time_end_afternoon = datetime.combine(today, time(17, 0, 0))
 
 
-    work_block_morning = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 1, time_start_morning, time_end_morning)
-    work_block_aftermoon = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 2, time_start_afternoon, time_end_afternoon)
+    # work_block_morning = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 1, time_start_morning, time_end_morning)
+    # work_block_aftermoon = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 2, time_start_afternoon, time_end_afternoon)
 
-    return  [work_block_morning, work_block_aftermoon]
+    return  #[work_block_morning, work_block_aftermoon]

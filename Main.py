@@ -12,9 +12,9 @@ import pandas as pd
 from Optimization import Greedy
 
 # Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
 
-activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITY')
+activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 
 values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
 values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
@@ -31,7 +31,7 @@ skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
 
 
 
-tempo_list_work_blocks = Create_List_Work_Blocks()
+# tempo_list_work_blocks = Create_List_Work_Blocks()
 
 list_workers = []
 list_activities = []
@@ -43,9 +43,21 @@ for indice, element in activities_xlsx.iterrows():
     else: 
         list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
 
+
 for indice, element in workers_xlsx.iterrows():
-    for workBlock in tempo_list_work_blocks:
-        workBlock.idWorker = element['idTrabalhador']
+    hours_str = element['HorarioTrabalho']
+    print(hours_str)
+    hours_list = hours_str.split(',')
+    print(hours_list)
+    print(hours_list[0])
+    tempo_list_work_blocks = []
+    i = 0
+    for hours in hours_list:
+        print(hours)
+        start_hour, end_hour = hours.split(';')
+        tempo_list_work_blocks.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
+        i += 1
+    
     list_workers.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'], element['skills'], element['xCasa'], element['yCasa'], tempo_list_work_blocks))
 
 print('\nPrimeiros 5 Trabalhadores: \n')
@@ -61,59 +73,44 @@ print('\nDados Importados com Sucesso!!\n')
 plot_heatmap_activities(list_activities)
 
 
-
-
-
-cluster = KNearest_Neighbors(list_activities, list_workers[1].x, list_workers[1].y, int(values_dict['K_NEAREST_NEIGHBORS']))
-
-
-print("As 5 activities mais próximas:")
-for activity in cluster:
-    activity.printActivity()
-
-
-DBSCANS(list_activities, list_workers[1].x, list_workers[1].y, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
-
-print("\n\nNovo Cluster:\n")
-print('Size: ', len(cluster))
-for activity in cluster:
-    activity.printActivity()
-
 list_work_blocks = []
 for worker in list_workers:
     for workBlock in worker.work_Blocks:
         list_work_blocks.append(workBlock)
 
+for work_Block in list_work_blocks:
 
-def activitiesToState1(nodes):
-    for node in nodes:
-        node.printNode()
-        activity = Find_Activity_By_Id(list_activities, node.id)
-        if activity:
-            activity.state = 1
-
-nodes = Greedy(cluster, list_workers[1].work_Blocks[0], skills_dict, list_workers, values_dict) 
-activitiesToState1(nodes)
-
-activity_id_list = [node.id for node in nodes]
-plot_activities_by_order(list_activities, nodes, list_workers[1].x, list_workers[1].y)
+    cluster = KNearest_Neighbors(list_activities, work_Block.x, work_Block.y, int(values_dict['K_NEAREST_NEIGHBORS']))
 
 
-
-""" 
-nodes_Id = Greedy(cluster, list_workers[1].work_Blocks[0], skills_dict, list_workers, values_dict)
-
-
-for id in nodes_Id:
-    activity = Find_Activity_By_Id(list_activities, id)
-    if activity:
-        activity.state = 1
+    print("As 5 activities mais próximas:")
+    for activity in cluster:
         activity.printActivity()
-    else:
-        worker = Find_Worker_By_Id(list_workers, id)
-        worker.printWorker()
-"""
 
-#plot_activities_by_state(list_activities, list_workers[1].x, list_workers[1].y, 0, 0, 0, 0)
+
+    DBSCANS(list_activities, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+
+    print("\n\nNovo Cluster:\n")
+    print('Size: ', len(cluster))
+    for activity in cluster:
+        activity.printActivity()
+
+
+
+    def activitiesToState1(nodes):
+        for node in nodes:
+            node.printNode()
+            activity = Find_Activity_By_Id(list_activities, node.id)
+            if activity:
+                activity.state = 1
+
+    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict) 
+    activitiesToState1(nodes)
+
+    activity_id_list = [node.id for node in nodes]
+    plot_activities_by_order(cluster, nodes, work_Block)
+
+    for activity in list_activities:
+        activity.resetStateToZeroIfNotOne()
 
 print('Bora')

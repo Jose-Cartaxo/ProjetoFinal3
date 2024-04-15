@@ -1,8 +1,40 @@
+
+import openpyxl
+from random import uniform
+
+# Carregue o arquivo Excel
+workbook = openpyxl.load_workbook('WORKERS.xlsx')
+
+# Selecione a planilha desejada
+sheet = workbook['WORKERS']
+
+# Itere sobre as células na coluna em que deseja adicionar os valores aleatórios
+for cell in sheet['F']:
+    # Verifique se a célula não é a primeira linha (cabeçalho)
+    if cell.row != 1:
+        # Obtenha o valor atual da célula
+        valor_atual = cell.value
+        # Se o valor existente não for None, adicione um valor aleatório entre -0.1 e 0.1
+        if valor_atual is not None:
+            valor_aleatorio = uniform(-0.1, 0.1)
+            novo_valor = valor_atual + valor_aleatorio
+            # Escreva o novo valor de volta na célula
+            cell.value = novo_valor
+
+# Salve as alterações no arquivo Excel
+workbook.save('WORKERS2.xlsx')
+
+
+
+"""
+
 from Clustering import *
 
 print(Travel_Time( 1.1, 44.2747947, 0.5920027, 44.328734, 0.5913167))
 
 print(Travel_Time( 1.1, 44.3, 0.6, 44.328734, 0.5913167))
+
+"""
 
 
 """

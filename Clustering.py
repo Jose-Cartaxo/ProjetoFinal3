@@ -39,7 +39,7 @@ def KNearest_Neighbors(list_activities, x, y, k):
     return  list_temp
     
 
-def DBSCANS(list_activities, x_Worker, y_Worker, cluster, distance_Min, distance_Max, iterations_Max):
+def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, iterations_Max):
     
     min_x_value = float('inf')
     max_x_value = float('-inf')
@@ -79,7 +79,7 @@ def DBSCANS(list_activities, x_Worker, y_Worker, cluster, distance_Min, distance
                 # print('Raio: ', radius, ' Encontrou: ', len( temp_cluster))
                 cluster.extend(temp_cluster)
 
-    plot_activities_by_state(list_activities, x_Worker, y_Worker, min_x_value, max_x_value, min_y_value, max_y_value)
+    plot_activities_by_state(list_activities, work_Block)
     return
 
 
@@ -89,7 +89,6 @@ def plot_heatmap_activities(list_activities):
     x_values = [task.x for task in list_activities]
     y_values = [task.y for task in list_activities]
     timestamps = [task.appointment.hour for task in list_activities]
-
 
     # Converter timestamps para valores numéricos para representar as cores
     # Por exemplo, você pode usar a hora do timestamp como o valor da cor
@@ -107,18 +106,19 @@ def plot_heatmap_activities(list_activities):
 
     for activity in all_Activities:
         plt.text(activity.x, activity.y, activity.skill, fontsize=8, ha='right', va='bottom')
+
     """
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMap.png')
     plt.show()
 
-def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, y_min, y_max):
+def plot_activities_by_state(list_activities, work_Block):
 
     x_values = [activity.x for activity in list_activities]
     y_values = [activity.y for activity in list_activities]
-    x_values.append(x_worker)
-    y_values.append(y_worker)
+    x_values.append(work_Block.x)
+    y_values.append(work_Block.y)
 
     # Definir cores com base nos estados das tarefas
     cores = {0: 'red', 1: 'black', 2: 'green', 3: 'blue'}
@@ -126,7 +126,7 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
     cores_pontos.append(cores[3])
     
     plt.scatter(x_values, y_values, c=cores_pontos)
-    plt.title('Gráfico de Coordenadas das Tarefas')
+    plt.title('Cluster ' + str(work_Block.idWorker))
     plt.xlabel('Coordenada X')
     plt.ylabel('Coordenada Y')
     plt.legend(handles=[Line2D([], [], marker='o', color='red', label='Não contabilizadas', linestyle='None'),
@@ -135,32 +135,19 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
                         Line2D([], [], marker='o', color='blue', label='Atribuidas', linestyle='None')],
                 bbox_to_anchor=(1.05, 1), loc='upper left')
     
+    """
 
-    # defenir o zoom inicial
-    # plt.xlim(x_min - 0.3, x_max + 0.3)
-    # plt.ylim(y_min - 0.3, y_max + 0.3)
-    
-    # Adicionar números para cada ponto
     for activity in list_activities:
-        #print(i)
         if activity.appointment == -1:
             plt.text(activity.x, activity.y, str(-1), fontsize=8, ha='right', va='bottom')
         else:
-            # minute = str(activity.appointment.minute)
-            # hour = str(activity.appointment.hour)
-
-            # string = hour + ':' + minute
-            # plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
             plt.text(activity.x, activity.y, activity.idActivity, fontsize=8, ha='right', va='bottom')
-            """
-            hour = str(activity.appointment.hour).zfill(2)  # zfill(2) adiciona um zero à esquerda, se necessário
-            minutes = str(activity.appointment.minute).zfill(2)
-            hour_minute = hour + ':' + minutes
-            plt.text(activity.x, activity.y, hour_minute, fontsize=8, ha='right', va='bottom')
-            """
     
-    # plt.show(block=False)
-    plt.show(block=True)
+    """
+
+    
+    plt.show(block=False)
+    # plt.show(block=True)
     return
 
 
@@ -169,18 +156,16 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
 
 
 
-def plot_activities_by_order(list_activities, nodes, x_worker, y_worker):
-
+def plot_activities_by_order(list_activities, nodes, work_Block):
     
     activity_id_list = [node.id for node in nodes]
-
 
     x_values = []
     y_values = []
     points_colors = []
 
-    x_values.append(x_worker)
-    y_values.append(y_worker)
+    x_values.append(work_Block.x)
+    y_values.append(work_Block.y)
     points_colors.append(0)
 
     for num in activity_id_list:
@@ -188,15 +173,14 @@ def plot_activities_by_order(list_activities, nodes, x_worker, y_worker):
         if activity:
             x_values.append(activity.x)
             y_values.append(activity.y)
-            points_colors.append(1)
+            points_colors.append(3)
 
-    x_values.append(x_worker)
-    y_values.append(y_worker)
+    x_values.append(work_Block.x)
+    y_values.append(work_Block.y)
     points_colors.append(0)
 
     # Definir cores com base nos estados das tarefas
-    colors = {0: 'black', 1: 'green', 2: 'red'}
-    colors_order = [colors[color] for color in points_colors]
+    colors = {0: 'black', 1: 'grey', 2: 'red', 3: 'green'}
     
     
     for i in range(len(x_values)-1):
@@ -208,10 +192,13 @@ def plot_activities_by_order(list_activities, nodes, x_worker, y_worker):
         if activity.idActivity not in activity_id_list:
             x_values.append(activity.x)
             y_values.append(activity.y)
-            colors_order.append(colors[2])
+            points_colors.append(activity.state)
+
+
+    colors_order = [colors[color] for color in points_colors]
 
     plt.scatter(x_values, y_values, c=colors_order)
-    plt.title('Gráfico de Coordenadas das Tarefas')
+    plt.title(str(work_Block.idWorker) + ' Start:' + str(work_Block.start)+ ' End:' + str(work_Block.finish))
     plt.xlabel('Coordenada X')
     plt.ylabel('Coordenada Y')
     plt.legend(handles=[Line2D([], [], marker='o', color='green', label='Atribuidas', linestyle='None'),
@@ -238,7 +225,8 @@ def plot_activities_by_order(list_activities, nodes, x_worker, y_worker):
             string = hour + ':' + minute
             plt.text(activity.x, activity.y, string, fontsize=12, ha='right', va='bottom')
 
+    path = 'PNG_Graphics/' + str(work_Block.idWorker) + 'Block' + str(work_Block.idBlock) + '.png'
     
-    # plt.show(block=False)
+    plt.savefig(path)
     plt.show(block=True)
     return
