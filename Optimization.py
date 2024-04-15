@@ -1,4 +1,5 @@
 import heapq
+from Activity import Find_Activity_By_Id
 from Node import Node
 from Workers import Worker
 from Workers import Find_Worker_By_Id
@@ -15,7 +16,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
     worker = Find_Worker_By_Id(list_workers, workBlock.idWorker)
     
     # inicio é o WorkBlock
-    heapq.heappush(frontier, Node(workBlock.idWorker, 0, worker.x, worker.y, workBlock.start , None))
+    heapq.heappush(frontier, Node(workBlock.idWorker, 0, workBlock.start , None))
 
 
     while frontier:
@@ -29,8 +30,13 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         foundActivity = False
         for activity in worker_Activities_Cluster:
 
+            current_Activity = Find_Activity_By_Id(worker_Activities_Cluster,current_Node.id)
+            if not current_Activity:
+                current_Activity = Find_Worker_By_Id(list_workers, current_Node.id)
             # Tempo necessário para se deslocar até a Atividade
-            travel_Time_Going = Travel_Time(values_dict['TRAVEL_TIME'], current_Node.x, current_Node.y, activity.x, activity.y)
+            travel_Time_Going = Travel_Time(values_dict['TRAVEL_TIME'], current_Activity.x, current_Activity.y, activity.x, activity.y)
+            print('Tempo viagem de: ', current_Node.id, " ")
+
 
             # Hora de Chegada a Atividade
             datetime_Arraival = current_Time + timedelta(minutes=travel_Time_Going)
@@ -63,16 +69,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         timeSpendMinutes = int (timeSpend.total_seconds() // 60)
                         cost = timeSpendMinutes * 0.5
 
-                        print('Diferença entre: ', activity.appointment.time(), ' e: ', current_Time.time(),' igual a: ', timeSpend)
-
-                        print("Diferença de tempo:", timeSpend)
-                        print("Horas:", timeSpend.seconds // 3600)  # Obtém apenas as horas
-                        print("Minutos:", timeSpend.seconds // 60)
-
-
-                        heapq.heappush(frontier, Node(id = activity.idActivity, cost = cost, x = activity.x, y = activity.y, end_Time = activity_End_Time_Real , parent = current_Node))
-                        activity.state = 1
-
+                        heapq.heappush(frontier, Node(id = activity.idActivity, cost = cost, end_Time = activity_End_Time_Real , parent = current_Node))
                 
 
 
@@ -97,8 +94,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                     if activity_End_Time_Home.time() < workBlock.finish.time():
                         foundActivity = True
 
-                        heapq.heappush(frontier, Node(id = activity.idActivity, cost = travel_Time_Going, x = activity.x, y = activity.y, end_Time = activity_End_Time_Real , parent = current_Node))
-                        activity.state = 1
+                        heapq.heappush(frontier, Node(id = activity.idActivity, cost = travel_Time_Going, end_Time = activity_End_Time_Real , parent = current_Node))
 
 
 

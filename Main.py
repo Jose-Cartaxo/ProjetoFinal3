@@ -62,6 +62,8 @@ plot_heatmap_activities(list_activities)
 
 
 
+
+
 cluster = KNearest_Neighbors(list_activities, list_workers[1].x, list_workers[1].y, int(values_dict['K_NEAREST_NEIGHBORS']))
 
 
@@ -82,11 +84,21 @@ for worker in list_workers:
     for workBlock in worker.work_Blocks:
         list_work_blocks.append(workBlock)
 
-nodes = Greedy(cluster, list_workers[1].work_Blocks[0], skills_dict, list_workers, values_dict)
+
+def activitiesToState1(nodes):
+    for node in nodes:
+        node.printNode()
+        activity = Find_Activity_By_Id(list_activities, node.id)
+        if activity:
+            activity.state = 1
+
+nodes = Greedy(cluster, list_workers[1].work_Blocks[0], skills_dict, list_workers, values_dict) 
+activitiesToState1(nodes)
+
+activity_id_list = [node.id for node in nodes]
+plot_activities_by_order(list_activities, nodes, list_workers[1].x, list_workers[1].y)
 
 
-for node in nodes:
-    node.printNode()
 
 """ 
 nodes_Id = Greedy(cluster, list_workers[1].work_Blocks[0], skills_dict, list_workers, values_dict)
@@ -102,6 +114,6 @@ for id in nodes_Id:
         worker.printWorker()
 """
 
-plot_activities_by_state(list_activities, list_workers[1].x, list_workers[1].y, 0, 0, 0, 0)
+#plot_activities_by_state(list_activities, list_workers[1].x, list_workers[1].y, 0, 0, 0, 0)
 
 print('Bora')

@@ -1,4 +1,6 @@
 import math
+
+from matplotlib.pylab import f
 from Workers import *
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -111,10 +113,6 @@ def plot_heatmap_activities(list_activities):
     plt.savefig('PNG_Graphics/HeatMap.png')
     plt.show()
 
-
-
-
-
 def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, y_min, y_max):
 
     x_values = [activity.x for activity in list_activities]
@@ -148,12 +146,12 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
         if activity.appointment == -1:
             plt.text(activity.x, activity.y, str(-1), fontsize=8, ha='right', va='bottom')
         else:
-            id_activity = str(activity.idActivity)
-            appointment_hour = str(activity.appointment.hour)
+            # minute = str(activity.appointment.minute)
+            # hour = str(activity.appointment.hour)
 
-            string = id_activity + ' , ' + appointment_hour
-            plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
-            # plt.text(activity.x, activity.y, activity.appointment.hour, fontsize=8, ha='right', va='bottom')
+            # string = hour + ':' + minute
+            # plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
+            plt.text(activity.x, activity.y, activity.idActivity, fontsize=8, ha='right', va='bottom')
             """
             hour = str(activity.appointment.hour).zfill(2)  # zfill(2) adiciona um zero à esquerda, se necessário
             minutes = str(activity.appointment.minute).zfill(2)
@@ -161,6 +159,85 @@ def plot_activities_by_state(list_activities, x_worker, y_worker, x_min, x_max, 
             plt.text(activity.x, activity.y, hour_minute, fontsize=8, ha='right', va='bottom')
             """
     
+    # plt.show(block=False)
+    plt.show(block=True)
+    return
+
+
+
+
+
+
+
+def plot_activities_by_order(list_activities, nodes, x_worker, y_worker):
+
+    
+    activity_id_list = [node.id for node in nodes]
+
+
+    x_values = []
+    y_values = []
+    points_colors = []
+
+    x_values.append(x_worker)
+    y_values.append(y_worker)
+    points_colors.append(0)
+
+    for num in activity_id_list:
+        activity = Find_Activity_By_Id(list_activities, num)
+        if activity:
+            x_values.append(activity.x)
+            y_values.append(activity.y)
+            points_colors.append(1)
+
+    x_values.append(x_worker)
+    y_values.append(y_worker)
+    points_colors.append(0)
+
+    # Definir cores com base nos estados das tarefas
+    colors = {0: 'black', 1: 'green', 2: 'red'}
+    colors_order = [colors[color] for color in points_colors]
+    
+    
+    for i in range(len(x_values)-1):
+        plt.arrow(x_values[i], y_values[i], x_values[i+1] - x_values[i], y_values[i+1] - y_values[i],
+                color='blue', width=0.0005, head_width=0.005, length_includes_head=True)
+
+
+    for activity in list_activities:
+        if activity.idActivity not in activity_id_list:
+            x_values.append(activity.x)
+            y_values.append(activity.y)
+            colors_order.append(colors[2])
+
+    plt.scatter(x_values, y_values, c=colors_order)
+    plt.title('Gráfico de Coordenadas das Tarefas')
+    plt.xlabel('Coordenada X')
+    plt.ylabel('Coordenada Y')
+    plt.legend(handles=[Line2D([], [], marker='o', color='green', label='Atribuidas', linestyle='None'),
+                        Line2D([], [], marker='o', color='black', label='Ponto Partida', linestyle='None'),
+                        Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')],
+                bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    
+    for node in nodes:
+        activity = Find_Activity_By_Id(list_activities, node.id)
+        if activity:
+            minute = str(node.end_Time.minute)
+            hour = str(node.end_Time.hour)
+
+            string = hour + ':' + minute
+            plt.text(activity.x, activity.y, string, fontsize=12, ha='right', va='bottom')
+
+
+    for activity in list_activities:
+        if activity.idActivity not in activity_id_list:
+            minute = str(activity.appointment.minute)
+            hour = str(activity.appointment.hour)
+
+            string = hour + ':' + minute
+            plt.text(activity.x, activity.y, string, fontsize=12, ha='right', va='bottom')
+
     
     # plt.show(block=False)
     plt.show(block=True)

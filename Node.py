@@ -2,11 +2,9 @@ from re import X
 
 
 class Node:
-    def __init__(self, id, cost, x, y, end_Time, parent):
+    def __init__(self, id, cost, end_Time, parent):
         self.id = id
         self.cost = cost
-        self.x = x 
-        self.y = y
         self.end_Time = end_Time
         self.parent = parent
 
@@ -32,4 +30,4 @@ class Node:
             return True
         
         # return self.total_cost < other.total_cost 
-        return self.total_cost < other.total_cost
+        return (self.total_cost / self.gen) < (other.total_cost / other.gen)
