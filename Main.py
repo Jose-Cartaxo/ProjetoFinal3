@@ -111,7 +111,7 @@ for work_Block in list_work_blocks:
     nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict) 
     activitiesToState1(nodes)
 
-    activity_id_list = [node.id for node in nodes]
+    # activity_id_list = [node.id for node in nodes]
     plot_activities_by_order(cluster, nodes, work_Block)
 
     for activity in list_activities:

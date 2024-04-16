@@ -37,7 +37,7 @@ def KNearest_Neighbors(list_activities, x, y, k):
         distances.append((distance, activity))
 
     distances = sorted(distances, key=lambda x: x[0])
-    list_temp = [tupla[1] for tupla in distances[:k]]
+    list_temp = [tupla[1] for tupla in distances[:k] if tupla[1].state == 0]
     return  list_temp
     
 
