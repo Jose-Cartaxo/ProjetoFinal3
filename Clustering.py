@@ -8,9 +8,11 @@ from matplotlib.lines import Line2D
 from numpy import double
 from Activity import *
 
+# devolve a quantidade de Minutos necessários para relizar o trajeto
 def Travel_Time( travel_mult, x1, y1, x2, y2):
     return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
 
+# devolve a distancia em KM entre 2 pontos
 def Distance_Calculator( x1, y1, x2, y2):
     R = 6373.0
 

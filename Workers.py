@@ -29,8 +29,8 @@ class WorkBlock:
         self.idBlock = idBlock
         self.x = x
         self.y = y
-        self.start = datetime.strptime(start, '%H:%M') 
-        self.finish = datetime.strptime(finish, '%H:%M') 
+        self.start = datetime.strptime(start, '%H:%M').time()
+        self.finish = datetime.strptime(finish, '%H:%M').time()
         self.block_List = []
 
     def printWorkBlock(self):
@@ -47,22 +47,3 @@ class ActivityBlock:
         
     def printActivityBlock(self):
         print('idWorker: {}; idBlock: {}; Start: {}; Finish: {}'.format(self.idActivity, self.start, self.finish))
-
-
-def Create_List_Work_Blocks():
-        
-    today = datetime.today()
-    
-    # Horario Manhã
-    time_start_morning = datetime.combine(today, time(6, 0, 0))
-    time_end_morning = datetime.combine(today, time(12, 0, 0))
-
-    # Defina os horários da tarde
-    time_start_afternoon = datetime.combine(today, time(13, 0, 0))
-    time_end_afternoon = datetime.combine(today, time(17, 0, 0))
-
-
-    # work_block_morning = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 1, time_start_morning, time_end_morning)
-    # work_block_aftermoon = WorkBlock( '62764df6-b097-42b1-aa9c-65bf1c48ebc5', 2, time_start_afternoon, time_end_afternoon)
-
-    return  #[work_block_morning, work_block_aftermoon]
