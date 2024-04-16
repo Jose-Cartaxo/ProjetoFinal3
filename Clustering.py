@@ -79,7 +79,7 @@ def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, it
                 # print('Raio: ', radius, ' Encontrou: ', len( temp_cluster))
                 cluster.extend(temp_cluster)
 
-    plot_activities_by_state(list_activities, work_Block)
+    # plot_activities_by_state(list_activities, work_Block)
     return
 
 
@@ -148,6 +148,7 @@ def plot_activities_by_state(list_activities, work_Block):
     
     plt.show(block=False)
     # plt.show(block=True)
+    plt.close() 
     return
 
 
@@ -228,5 +229,7 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
     path = 'PNG_Graphics/' + str(work_Block.idWorker) + 'Block' + str(work_Block.idBlock) + '.png'
     
     plt.savefig(path)
-    plt.show(block=True)
+    # plt.show(block=False)
+    # plt.show(block=True)
+    plt.close() 
     return

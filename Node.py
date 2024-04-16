@@ -2,9 +2,11 @@ from re import X
 
 
 class Node:
-    def __init__(self, id, cost, end_Time, parent):
+    def __init__(self, id, cost, travel_Time, start_Time, end_Time, parent):
         self.id = id
         self.cost = cost
+        self.travel_Time = travel_Time
+        self.start_Time = start_Time
         self.end_Time = end_Time
         self.parent = parent
 

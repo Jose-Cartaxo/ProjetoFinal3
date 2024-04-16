@@ -4,12 +4,16 @@ Created on Fri Apr  5 14:43:14 2024
 
 @author: jgac0
 """
+
+import datetime
 from Activity import Activity
 from Activity import Find_Activity_By_Id
 from Clustering import *
 from Workers import *
 import pandas as pd
 from Optimization import Greedy
+
+start_time = datetime.now() # type: ignore
 
 # Carregar os dados do arquivo Excel
 workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
@@ -83,23 +87,23 @@ for work_Block in list_work_blocks:
     cluster = KNearest_Neighbors(list_activities, work_Block.x, work_Block.y, int(values_dict['K_NEAREST_NEIGHBORS']))
 
 
-    print("As 5 activities mais próximas:")
-    for activity in cluster:
-        activity.printActivity()
+    # print("As 5 activities mais próximas:")
+    # for activity in cluster:
+        # activity.printActivity()
 
 
     DBSCANS(list_activities, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
 
-    print("\n\nNovo Cluster:\n")
-    print('Size: ', len(cluster))
-    for activity in cluster:
-        activity.printActivity()
+    # print("\n\nNovo Cluster:\n")
+    # print('Size: ', len(cluster))
+    # for activity in cluster:
+        # activity.printActivity()
 
 
 
     def activitiesToState1(nodes):
         for node in nodes:
-            node.printNode()
+            # node.printNode()
             activity = Find_Activity_By_Id(list_activities, node.id)
             if activity:
                 activity.state = 1
@@ -113,4 +117,7 @@ for work_Block in list_work_blocks:
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
 
-print('Bora')
+end_time = datetime.now() # type: ignore
+
+elapsed_time = end_time - start_time
+print("Tempo decorrido:", elapsed_time, "segundos")

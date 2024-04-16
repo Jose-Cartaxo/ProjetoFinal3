@@ -16,7 +16,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
     worker = Find_Worker_By_Id(list_workers, workBlock.idWorker)
     
     # inicio é o WorkBlock
-    heapq.heappush(frontier, Node(workBlock.idWorker, 0, workBlock.start , None))
+    heapq.heappush(frontier, Node(workBlock.idWorker, 0, 0, workBlock.start, workBlock.start, None))
 
 
     while frontier:
@@ -35,7 +35,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 current_Activity = Find_Worker_By_Id(list_workers, current_Node.id)
             # Tempo necessário para se deslocar até a Atividade
             travel_Time_Going = Travel_Time(values_dict['TRAVEL_TIME'], current_Activity.x, current_Activity.y, activity.x, activity.y)
-            print('Tempo viagem de: ', current_Node.id, " ")
+            #print('Tempo viagem de: ', current_Node.id, " ")
 
 
             # Hora de Chegada a Atividade
@@ -107,7 +107,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 current_Node = current_Node.parent
             return path[::-1]
       
-    print("A lista está vazia.")
+    print("A lista2 está vazia.")
     path = []
     while current_Node:
         path.append(current_Node)
