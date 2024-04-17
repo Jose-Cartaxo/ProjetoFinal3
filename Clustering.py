@@ -5,7 +5,7 @@ from Workers import *
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from numpy import double
+from numpy import block, double
 from Activity import *
 
 # devolve a quantidade de Minutos necessários para relizar o trajeto
@@ -85,8 +85,30 @@ def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, it
     return
 
 
+def plot_heatmap_activities_by_state(list_activities):
+    # Extrair coordenadas x, y e timestamps
+    x_values = [task.x for task in list_activities]
+    y_values = [task.y for task in list_activities]
+    timestamps = [task.state for task in list_activities]
 
-def plot_heatmap_activities(list_activities):
+    # Converter timestamps para valores numéricos para representar as cores
+    # Por exemplo, você pode usar a hora do timestamp como o valor da cor
+    color_values = [timestamp for timestamp in timestamps]
+
+    # Criar heatmap
+    plt.figure(figsize=(8, 6))
+    heatmap = plt.scatter(x_values, y_values, c=color_values, cmap='viridis', s=100, alpha=0.7)
+    plt.colorbar(heatmap, label='State')
+    plt.title('Heatmap das Atividades por State')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+
+    # Mostrar o heatmap
+    plt.savefig('PNG_Graphics/HeatMapState.png')
+    plt.show()
+
+
+def plot_heatmap_activities_by_hour(list_activities):
     # Extrair coordenadas x, y e timestamps
     x_values = [task.x for task in list_activities]
     y_values = [task.y for task in list_activities]
@@ -113,7 +135,8 @@ def plot_heatmap_activities(list_activities):
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMap.png')
-    plt.show()
+    plt.show(block = True)
+    plt.close() 
 
 def plot_activities_by_state(list_activities, work_Block):
 
@@ -235,3 +258,28 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
     # plt.show(block=True)
     plt.close() 
     return
+
+def plot_activities_graph_by_state(list_activities):
+    list_states = [0,0]
+    for activity in list_activities:
+        list_states[activity.state] = list_states[activity.state] + 1 
+    
+
+    indices = range(len(list_states))
+
+    # Criar o gráfico de barras
+    plt.bar(indices, list_states)
+
+    # Adicionar rótulos aos eixos
+    plt.xlabel('State')
+    plt.ylabel('Quantidade')
+
+    # Adicionar título ao gráfico
+    plt.title('Gráfico Quantidade por State')
+
+    # Adicionar rótulos às barras
+    for i, valor in enumerate(list_states):
+        plt.text(i, valor, str(valor), ha='center', va='bottom')
+    
+    plt.show(block = True)
+    plt.close() 

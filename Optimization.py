@@ -90,7 +90,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 current_Activity = Find_Worker_By_Id(list_workers, current_Node.id)
             
             # Tempo necessário para se deslocar até a Atividade
-            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, activity.x, activity.y)
+            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, activity.x, activity.y) # type: ignore
 
 
             # Hora de Chegada a Atividade

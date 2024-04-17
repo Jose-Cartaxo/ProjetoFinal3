@@ -20,7 +20,7 @@ def Find_Worker_By_Id(list_workers, id):
     for worker in list_workers:
         if(worker.idWorker == id):
             return worker
-    raise ValueError(f"Item com o nome ",id," não encontrado na lista.")
+    return None
 
 class WorkBlock:
      
@@ -31,7 +31,7 @@ class WorkBlock:
         self.y = y
         self.start = datetime.strptime(start, '%H:%M').time()
         self.finish = datetime.strptime(finish, '%H:%M').time()
-        self.block_List = []
+        # self.block_List = []
 
     def printWorkBlock(self):
         print('    idBlock: {}; Start: {}; Finish: {}'.format( self.idBlock, self.start, self.finish))

@@ -74,7 +74,7 @@ for i in range(0, 5):
     list_activities[i].printActivity() 
 
 print('\nDados Importados com Sucesso!!\n')
-plot_heatmap_activities(list_activities)
+plot_heatmap_activities_by_hour(list_activities)
 
 
 list_work_blocks = []
@@ -117,6 +117,10 @@ for work_Block in list_work_blocks:
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
 
+print('Parou aqui')
+plot_activities_graph_by_state(list_activities)
+
+plot_heatmap_activities_by_state(list_activities)
 end_time = datetime.now() # type: ignore
 
 elapsed_time = end_time - start_time
