@@ -10,6 +10,7 @@ class Node:
         self.start_Time = start_Time # horas a que começa a realizar a tarefa
         self.end_Time = end_Time # horas em que termina a tarefa
         self.parent = parent # tarefa raelizada anteriormente
+        self.state = 1
 
         if parent:
             self.gen = parent.gen + 1 # o numero da atividade, a 3ª atividade a ser realizada vai ser gen 3
@@ -24,14 +25,26 @@ class Node:
         
 
     def printNode(self):
-        print('ID: ', self.id, ' Cost: ', self.total_cost, ' end_Time: ', self.end_Time, ' Gen: ', self.gen)
+        print('ID: ', self.id, ' Cost: ', self.cost,' TotalCost: ', self.total_cost, ' start_Time: ', self.start_Time, ' Gen: ', self.gen)
 
-    # se for maior tem de retornar true
+    # se for menor tem de retornar true
     def __lt__(self, other):
+
+
         if self.gen == 0:
             return False
         if other.gen == 0:
             return True
+        return self.total_cost < other.total_cost
+    
+        # return (self.total_cost / self.gen) < (other.total_cost / other.gen)
+
+        """
+        if self.gen == 0:
+            return True
+        if other.gen == 0:
+            return False
         
-        # return self.total_cost < other.total_cost 
-        return (self.total_cost / self.gen) < (other.total_cost / other.gen)
+        return self.total_cost > other.total_cost
+        # return (self.total_cost / self.gen) < (other.total_cost / other.gen)
+        """

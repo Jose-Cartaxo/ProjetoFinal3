@@ -84,7 +84,7 @@ for worker in list_workers:
 
 for work_Block in list_work_blocks:
 
-    cluster = KNearest_Neighbors(list_activities, work_Block.x, work_Block.y, int(values_dict['K_NEAREST_NEIGHBORS']))
+    cluster = KNearest_Neighbors(list_activities, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
 
 
     # print("As 5 activities mais próximas:")
@@ -116,6 +116,9 @@ for work_Block in list_work_blocks:
 
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
+    
+    print("Enter para continuar...")
+    input()
 
 print('Parou aqui')
 plot_activities_graph_by_state(list_activities)

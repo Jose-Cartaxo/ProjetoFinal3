@@ -30,16 +30,21 @@ def Distance_Calculator( x1, y1, x2, y2):
     distance = R * c
     return distance
 
-def KNearest_Neighbors(list_activities, x, y, k):
+def KNearest_Neighbors(list_activities, workblock, k):
     distances = []
     for activity in list_activities:
-        distance = Distance_Calculator(activity.x, activity.y, x, y)
+        distance = Distance_Calculator(activity.x, activity.y, workblock.x, workblock.y)
         distances.append((distance, activity))
 
     distances = sorted(distances, key=lambda x: x[0])
-    list_temp = [tupla[1] for tupla in distances[:k] if tupla[1].state == 0]
-    for temp in list_temp:
-        temp.state = 2
+    
+    list_temp = []
+    count = 0
+    for tupla in distances:
+        if (tupla[1].state == 0) and (tupla[1].appointment.time() < workblock.finish) and (tupla[1].appointment.time() > workblock.start) and (count < k):
+            list_temp.append(tupla[1])
+            tupla[1].state=2
+            count += 1
     return  list_temp
     
 
@@ -60,7 +65,7 @@ def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, it
                 for activity in list_activities:
                     if activity.state == 0:
                         distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
-                        if distance < radius:
+                        if distance < radius and (activity.appointment.time() < work_Block.finish and activity.appointment.time() > work_Block.start):
                             # print('id: ', activity_clustered.idActivity, 'distance: ', distance, 'radius: ',radius)
                             temp_cluster.append(activity)
                             activity.state = 2
@@ -204,10 +209,9 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
     # Definir cores com base nos estados das tarefas
     colors = {0: 'black', 1: 'grey', 2: 'red', 3: 'green'}
     
-    
     for i in range(len(x_values)-1):
         plt.arrow(x_values[i], y_values[i], x_values[i+1] - x_values[i], y_values[i+1] - y_values[i],
-                color='blue', width=0.0005, head_width=0.005, length_includes_head=True)
+                color='blue', width=0.0005, head_width=0.01, length_includes_head=True)
 
 
     for activity in list_activities:
@@ -225,20 +229,19 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
     plt.ylabel('Coordenada Y')
     plt.legend(handles=[Line2D([], [], marker='o', color='green', label='Atribuidas', linestyle='None'),
                         Line2D([], [], marker='o', color='black', label='Ponto Partida', linestyle='None'),
-                        Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')],
-                        bbox_to_anchor=(1.05, 1), loc='upper left')
+                        Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')])#,
+                        #bbox_to_anchor=(1.05, 1), loc='upper left')
     
     
     for node in nodes:
         activity = Find_Activity_By_Id(list_activities, node.id)
         if activity:
-            start = '|S: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute)
-            travel = '|T: ' + str(int(node.travel_Time))
-            end = '|E: ' +  str(node.end_Time.hour) + ':' + str(node.end_Time.minute)
-            act = '|A: ' + str(activity.appointment.hour) + ':' + str(activity.appointment.minute)
+            start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute)
+            travel = '|Tr: ' + str(int(node.travel_Time))
+            act = '|Ap: ' + str(activity.appointment.hour) + ':' + str(activity.appointment.minute)
             id = '|Id: ' + str(activity.idActivity)
-            string = travel + start + end + act + id
-            plt.text(activity.x, activity.y, string, fontsize=11, ha='right', va='bottom')
+            string =  id + act + travel + start
+            plt.text(activity.x, activity.y, string, fontsize=9, ha='right', va='top')
 
 
     for activity in list_activities:
@@ -246,8 +249,10 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             minute = str(activity.appointment.minute)
             hour = str(activity.appointment.hour)
 
-            string = hour + ':' + minute + str(activity.idActivity)
-            plt.text(activity.x, activity.y, string, fontsize=11, ha='right', va='bottom')
+            string = str(activity.idActivity) + ' | ' + hour + ':' + minute
+            plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
+
+    # plt.subplots_adjust(left=0.2, right=1.1, top=0.9, bottom=0.1)
 
     path = 'PNG_Graphics/' + str(work_Block.idWorker) + 'Block' + str(work_Block.idBlock) + '.png'
     
