@@ -6,8 +6,9 @@ from Workers import Find_Worker_By_Id
 from Clustering import Travel_Time
 from datetime import datetime, timedelta, time
 import pandas as pd
+import random
 
-def CostCalculator(total_time_spend, travel_time, activity_time, values_dict):
+def CostCalculator(total_time_spend, travel_time, values_dict):
 
     # print('Total: ', total_time_spend, ' Viagem: ', travel_time, ' Atividade: ', activity_time)
     travel_Consumption_By_Hour = values_dict['GAS_CONSUMPTION']
@@ -15,15 +16,13 @@ def CostCalculator(total_time_spend, travel_time, activity_time, values_dict):
     gas_Price = values_dict['GAS_PRICE']
     labor_Price_Hr = values_dict['LABOR_PRICE']
     labor_Price_Min = labor_Price_Hr / 60
-    labor_Gainz_Hr = values_dict['LABOR_GAINS']
-    labor_Gainz_Min = labor_Gainz_Hr / 60
     # print('gas_Price: ', gas_Price, ' labor_Price_Min: ', labor_Gainz_Min, ' labor_Gainz_Min: ', labor_Price_Min)
 
     # print('Total: ', (total_time_spend * labor_Price_Min), ' Viagem: ', ((travel_time * travel_Consumption_By_Min) * gas_Price), ' Atividade: ', (activity_time * labor_Gainz_Min))
 
     cost = (total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price)
 
-    cost = cost - (activity_time * labor_Gainz_Min)
+    # cost = cost - (activity_time * labor_Gainz_Min)
     # print('Custo: ', cost)
     # print('\n\n\n\n')
     return cost
@@ -42,6 +41,14 @@ def Belongs_to_Family(node, activity):
 
 def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict):
 
+
+    for act in worker_Activities_Cluster:
+        act.printActivity()
+
+    print("Enter para continuar...")
+    input()
+
+    # random.shuffle(worker_Activities_Cluster)
     # dia de "hoje"
     current_DateTime = datetime.now()
 
@@ -56,12 +63,26 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
     while frontier:
     
         travel_Time_By_1KM = values_dict['TRAVEL_TIME']
-
+    
         tolerance_For_Activity_Post = values_dict['WINDOW_TIME_POST']
         tolerance_For_Activity_Pre = values_dict['WINDOW_TIME_PRE']
+        
+
+        frontier = sorted(frontier)
+        for node in frontier:
+            print('\n RAMOS Extermidades' + str(node.id))
+            current_Node = node
+            while current_Node:
+                current_Node.printNode()
+                current_Node = current_Node.parent
+
+        
+        print("Enter para continuar...")
+        input()
+
 
         # organizar as "extermidades" de cada "ramo" por custo
-        frontier = sorted(frontier)
+        
         """
 
         print('\n\n')
@@ -76,12 +97,21 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         # pegar no ramo com menor custo
         current_Node = frontier[0]
 
+        print('\n Escolhido \n' + str(node.id))
+
+        while current_Node:
+            current_Node.printNode()
+            current_Node = current_Node.parent
+
+        current_Node = frontier[0]
         #remover o ramo como extermidade (depois adiciono as novas "extermidades" provenientes desta "extermidade", se não existirem novas extermidades, solução encontrada)
         frontier.remove(current_Node)
 
         current_Time = current_Node.end_Time
-
         foundActivity = False
+
+        print("Enter para continuar...")
+        input()
         for activity in worker_Activities_Cluster:
 
             current_Activity = Find_Activity_By_Id(worker_Activities_Cluster,current_Node.id)
@@ -163,7 +193,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             # calcular os custos, isto é, o custo do trabalhador, mais o custo do automóvel
 
                             # print('Ação instantanea')
-                            cost = CostCalculator(travel_Time_Going, travel_Time_Going, time_Required_for_Activity, values_dict)
+                            cost = CostCalculator(travel_Time_Going + time_Required_for_Activity, travel_Time_Going, values_dict)
 
                             heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real, current_Node))
 
@@ -191,12 +221,8 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         if activity_End_Time_Home.time() < workBlock.finish:
                             foundActivity = True
 
-                            timeSpend = min_Time_Activity - current_DateTime
-                            timeSpendMinutes = int (timeSpend.total_seconds() // 60)
-
-
                             #print('Ação demorada')
-                            cost = CostCalculator(timeSpendMinutes, travel_Time_Going, time_Required_for_Activity, values_dict)
+                            cost = CostCalculator(travel_Time_Going + time_Required_for_Activity, travel_Time_Going, values_dict)
 
                             heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, min_Time_Activity, activity_End_Time_Real , current_Node))
 
@@ -225,7 +251,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
 
                         # print('Brincadeira sem hora limite')
-                        cost = CostCalculator(travel_Time_Going, travel_Time_Going, time_Required_for_Activity, values_dict)
+                        cost = CostCalculator(travel_Time_Going + time_Required_for_Activity, travel_Time_Going,  values_dict)
                         heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real , current_Node))
 
 

@@ -1,4 +1,32 @@
 
+from Optimization import *
+
+
+# WORKER 1
+
+# travel_Time_Returning = Travel_Time(1.1, activity.x, activity.y, workBlock.x, workBlock.y)
+travel_Time_Going = Travel_Time(1.1, 46.6429571, -0.245801, 46.61595329435522, -0.210348095870298)
+print(travel_Time_Going)
+# travel_Time_Returning = Travel_Time(1.1, activity.x, activity.y, workBlock.x, workBlock.y)
+travel_Time_Going = Travel_Time(1.1, 46.6427645, -0.2239158, 46.61595329435522, -0.210348095870298)
+print(travel_Time_Going)
+
+no = Node(0,0,0,0,0,None)
+
+frontier = []
+heapq.heappush(frontier, Node(1, 1, 0,0, 0, no))
+heapq.heappush(frontier, Node(2, 3, 0,0, 0, no))
+heapq.heappush(frontier, Node(3, 2, 0,0, 0, no))
+heapq.heappush(frontier, Node(4, 4, 0,0, 0, no))
+heapq.heappush(frontier, Node(5, 5, 0,0, 0, no))
+frontier = sorted(frontier)
+for fr in frontier:
+    print(fr.id)
+
+# cost = CostCalculator(travel_Time_Going, travel_Time_Going, 25, values_dict)
+
+"""
+
 import openpyxl
 from random import uniform
 
@@ -24,7 +52,7 @@ for cell in sheet['F']:
 # Salve as alterações no arquivo Excel
 workbook.save('WORKERS2.xlsx')
 
-
+"""
 
 """
 

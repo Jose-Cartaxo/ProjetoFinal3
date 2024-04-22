@@ -50,14 +50,14 @@ for indice, element in activities_xlsx.iterrows():
 
 for indice, element in workers_xlsx.iterrows():
     hours_str = element['HorarioTrabalho']
-    print(hours_str)
+    # print(hours_str)
     hours_list = hours_str.split(',')
-    print(hours_list)
-    print(hours_list[0])
+    # print(hours_list)
+    # print(hours_list[0])
     tempo_list_work_blocks = []
     i = 0
     for hours in hours_list:
-        print(hours)
+        # print(hours)
         start_hour, end_hour = hours.split(';')
         tempo_list_work_blocks.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
         i += 1

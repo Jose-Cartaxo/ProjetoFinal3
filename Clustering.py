@@ -38,6 +38,8 @@ def KNearest_Neighbors(list_activities, x, y, k):
 
     distances = sorted(distances, key=lambda x: x[0])
     list_temp = [tupla[1] for tupla in distances[:k] if tupla[1].state == 0]
+    for temp in list_temp:
+        temp.state = 2
     return  list_temp
     
 
@@ -176,12 +178,6 @@ def plot_activities_by_state(list_activities, work_Block):
     plt.close() 
     return
 
-
-
-
-
-
-
 def plot_activities_by_order(list_activities, nodes, work_Block):
     
     activity_id_list = [node.id for node in nodes]
@@ -230,17 +226,19 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
     plt.legend(handles=[Line2D([], [], marker='o', color='green', label='Atribuidas', linestyle='None'),
                         Line2D([], [], marker='o', color='black', label='Ponto Partida', linestyle='None'),
                         Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')],
-                bbox_to_anchor=(1.05, 1), loc='upper left')
+                        bbox_to_anchor=(1.05, 1), loc='upper left')
     
     
     for node in nodes:
         activity = Find_Activity_By_Id(list_activities, node.id)
         if activity:
-            minute = str(node.end_Time.minute)
-            hour = str(node.end_Time.hour)
-
-            string = hour + ':' + minute
-            plt.text(activity.x, activity.y, string, fontsize=12, ha='right', va='bottom')
+            start = '|S: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute)
+            travel = '|T: ' + str(int(node.travel_Time))
+            end = '|E: ' +  str(node.end_Time.hour) + ':' + str(node.end_Time.minute)
+            act = '|A: ' + str(activity.appointment.hour) + ':' + str(activity.appointment.minute)
+            id = '|Id: ' + str(activity.idActivity)
+            string = travel + start + end + act + id
+            plt.text(activity.x, activity.y, string, fontsize=11, ha='right', va='bottom')
 
 
     for activity in list_activities:
@@ -248,8 +246,8 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             minute = str(activity.appointment.minute)
             hour = str(activity.appointment.hour)
 
-            string = hour + ':' + minute
-            plt.text(activity.x, activity.y, string, fontsize=12, ha='right', va='bottom')
+            string = hour + ':' + minute + str(activity.idActivity)
+            plt.text(activity.x, activity.y, string, fontsize=11, ha='right', va='bottom')
 
     path = 'PNG_Graphics/' + str(work_Block.idWorker) + 'Block' + str(work_Block.idBlock) + '.png'
     
