@@ -11,6 +11,7 @@ class Activity:
         # self.codPostal = codPostal
         self.appointment = appointment if appointment is not None else time(0, 0)
         self.skill = skill
+        self.creation = creation
         self.x = x
         self.y = y
         # 0 -> por marcar, 1 -> marcado, 2 -> a ser avaliada

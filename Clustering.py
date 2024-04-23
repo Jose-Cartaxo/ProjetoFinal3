@@ -140,10 +140,11 @@ def plot_heatmap_activities_by_hour(list_activities):
     """
 
     # Mostrar o heatmap
-    plt.savefig('PNG_Graphics/HeatMap.png')
-    plt.show(block = True)
+    plt.savefig('PNG_Graphics/HeatMapHours.png')
+    plt.show(block = False)
     plt.close() 
 
+'''
 def plot_activities_by_state(list_activities, work_Block):
 
     x_values = [activity.x for activity in list_activities]
@@ -181,6 +182,7 @@ def plot_activities_by_state(list_activities, work_Block):
     # plt.show(block=True)
     plt.close() 
     return
+'''
 
 def plot_activities_by_order(list_activities, nodes, work_Block):
     
@@ -322,5 +324,6 @@ def plot_activities_graph_by_state(list_activities):
     for i, valor in enumerate(list_states):
         plt.text(i, valor, str(valor), ha='center', va='bottom')
     
+    plt.savefig('PNG_Graphics/PlotMapState.png')
     plt.show(block = True)
     plt.close() 

@@ -13,7 +13,33 @@ from Workers import *
 import pandas as pd
 from Optimization import Greedy
 
-start_time = datetime.now() # type: ignore
+
+considerAppointment = True
+
+print("Deseja que seja considerada a prioridade das Atividades com marcação?")
+while True:
+    inp = input('"s" para sim, "n" para não: ')
+    if inp != 's' and inp != 'n':
+        print('Input errado!')
+    else:
+        if inp == 'n':
+            considerAppointment = False
+        break
+
+considerPriority = True
+
+print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")
+while True:
+    inp = input('"s" para sim, "n" para não: ')
+    if inp != 's' and inp != 'n':
+        print('Input errado!')
+    else:
+        if inp == 'n':
+            considerPriority = False
+        break
+            
+
+start_time = datetime.now()
 
 # Carregar os dados do arquivo Excel
 workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
@@ -112,7 +138,7 @@ for work_Block in list_work_blocks:
             if activity:
                 activity.state = 1
 
-    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict) 
+    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority) 
     activitiesToState1(nodes)
 
     # activity_id_list = [node.id for node in nodes]
@@ -124,11 +150,14 @@ for work_Block in list_work_blocks:
     # print("Enter para continuar...")
     # input()
 
-print('Parou aqui')
+end_time = datetime.now() # type: ignore
+elapsed_time = end_time - start_time
+print("Tempo decorrido:", elapsed_time, "segundos")
+
+
 plot_activities_graph_by_state(list_activities)
 
 plot_heatmap_activities_by_state(list_activities)
-end_time = datetime.now() # type: ignore
 
-elapsed_time = end_time - start_time
-print("Tempo decorrido:", elapsed_time, "segundos")
+
+

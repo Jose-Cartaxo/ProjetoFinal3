@@ -6,27 +6,35 @@ from Workers import Find_Worker_By_Id
 from Clustering import Travel_Time
 from datetime import datetime, timedelta, time
 import pandas as pd
-import random
 
-def CostCalculator(total_time_spend, travel_time, activity_time, values_dict):
+def CostCalculator(total_time_spend, travel_time, appointment, creationDate, values_dict, considerAppointment, considerPriority):
 
     # print('Total: ', total_time_spend, ' Viagem: ', travel_time, ' Atividade: ', activity_time)
+
     travel_Consumption_By_Hour = values_dict['GAS_CONSUMPTION']
     travel_Consumption_By_Min = travel_Consumption_By_Hour / 60
     gas_Price = values_dict['GAS_PRICE']
     labor_Price_Hr = values_dict['LABOR_PRICE']
     labor_Price_Min = labor_Price_Hr / 60
-    labor_Gainz_Hr = values_dict['LABOR_GAINS']
-    labor_Gainz_Min = labor_Gainz_Hr / 60
-    # print('gas_Price: ', gas_Price, ' labor_Price_Min: ', labor_Gainz_Min, ' labor_Gainz_Min: ', labor_Price_Min)
 
+    # print('gas_Price: ', gas_Price, ' labor_Price_Min: ', labor_Gainz_Min, ' labor_Gainz_Min: ', labor_Price_Min)
     # print('Total: ', (total_time_spend * labor_Price_Min), ' Viagem: ', ((travel_time * travel_Consumption_By_Min) * gas_Price), ' Atividade: ', (activity_time * labor_Gainz_Min))
 
     cost = ((total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price))
+
     #print('Gasto Trabalho: ' + str(total_time_spend * labor_Price_Min) + ', Gasto Viagem: ' + str((travel_time * travel_Consumption_By_Min) * gas_Price) + ', Total: ' + str(cost))
     # cost = cost - (activity_time * labor_Gainz_Min)
     # print('Custo: ', cost)
     # print('\n\n\n\n')
+
+    if considerAppointment and appointment:
+        cost = cost * values_dict['PRIORITY_APPOINTMENT']
+    if considerPriority:
+        todayDate = datetime.now().date()
+        daysDiference = (todayDate - creationDate).days
+        weeksDiference = daysDiference // 7
+        mult = values_dict['PRIORITY_CREATION'] ** weeksDiference
+        cost = cost * mult
     return cost
 
 
@@ -62,7 +70,7 @@ def Belongs_to_Family(node, activity):
 
 
 
-def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict):
+def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict, considerAppointment, considerPriority):
 
 
     # for act in worker_Activities_Cluster:
@@ -73,6 +81,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
     # random.shuffle(worker_Activities_Cluster)
     # dia de "hoje"
+
     current_DateTime = datetime.now()
 
     # "extermidades" de cada "ramo"
@@ -227,7 +236,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
 
                             # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
-                            cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
+                            cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, True, activity.creation, values_dict, considerAppointment, considerPriority)
                             # print('Entrei no inicio da Atividade: ',activity.idActivity, ', Cost: ', cost)
 
                             heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real, current_Node))
@@ -261,7 +270,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             
                             # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
 
-                            cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
+                            cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, True, activity.creation, values_dict, considerAppointment, considerPriority)
                             
                             # print('Entrei a meio da Atividade: ',activity.idActivity, ', Cost: ', cost)
                             
@@ -294,7 +303,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         
                         # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
                         
-                        cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
+                        cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, False, activity.creation, values_dict, considerAppointment, considerPriority)
 
                         # print('Entrei ATOA: ',activity.idActivity, ', Cost: ', cost)
 
@@ -318,9 +327,9 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
                 minutesDayEnd = workBlock.finish.hour * 60 + workBlock.finish.minute
 
-                cost = CostCalculator(minutesDayStart - minutesDayEnd, travel_Time_Returning, 0, values_dict)
+                cost = CostCalculator(minutesDayStart - minutesDayEnd, travel_Time_Returning, False, activity.creation, values_dict, considerAppointment, considerPriority)
 
-                travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y)
+                travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y) # type: ignore
                 
                 leaf = Node(id = workBlock.idWorker, cost = cost, travel_Time = travel_Time_Returning, start_Time = current_Time + timedelta(minutes=travel_Time_Returning), end_Time = activity_End_Time_Real, parent = current_Node)
                 leaf.state = 0
