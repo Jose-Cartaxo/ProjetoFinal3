@@ -65,8 +65,8 @@ def Belongs_to_Family(node, activity):
 def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict):
 
 
-    for act in worker_Activities_Cluster:
-        act.printActivity()
+    # for act in worker_Activities_Cluster:
+        # act.printActivity()
 
     # print("Enter para continuar...")
     # input()
@@ -159,9 +159,15 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             if not Belongs_to_Family(current_Node, activity.idActivity):
 
                 time_Tolerance_For_Activity_Post = timedelta(minutes=tolerance_For_Activity_Post)
+                # max_Time_Activity = activity.appointment + time_Tolerance_For_Activity_Post
+                max_Time_Activity = datetime.combine(datetime.now().date(), activity.appointment) + time_Tolerance_For_Activity_Post
+
+
                 time_Tolerance_For_Activity_Pre = timedelta(minutes=tolerance_For_Activity_Pre)
-                max_Time_Activity = activity.appointment + time_Tolerance_For_Activity_Post
-                min_Time_Activity = activity.appointment - time_Tolerance_For_Activity_Pre
+                # min_Time_Activity = activity.appointment - time_Tolerance_For_Activity_Pre
+                min_Time_Activity = datetime.combine(datetime.now().date(), activity.appointment) - time_Tolerance_For_Activity_Pre
+                
+                
                 # print('\n\n\n')
                 # print(datetime_Arraival.time())
                 # print('<')
@@ -263,7 +269,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
 
 
-                elif activity.appointment.time() == time(0, 0, 0):
+                elif activity.appointment == time(0, 0):
                     # Tempo necessário para a Atividade em si
                     time_Required_for_Activity = skills_dict[activity.skill]
 

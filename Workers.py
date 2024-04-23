@@ -29,8 +29,8 @@ class WorkBlock:
         self.idBlock = idBlock
         self.x = x
         self.y = y
-        self.start = datetime.strptime(start, '%H:%M').time()
-        self.finish = datetime.strptime(finish, '%H:%M').time()
+        self.start = datetime.strptime(start.strip(), '%H:%M').time()
+        self.finish = datetime.strptime(finish.strip(), '%H:%M').time()
         # self.block_List = []
 
     def printWorkBlock(self):

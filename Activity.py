@@ -3,12 +3,13 @@ from datetime import datetime, time
 class Activity:
     activities_quantity = 0
 
-    def __init__(self, id, Central, codPostal, skill, x, y, appointment = None):
+    def __init__(self, id, skill, x, y, creation, appointment = None):
+    # def __init__(self, id, Central, codPostal, skill, x, y, appointment = None):
         today = datetime.today()
         self.idActivity = id
-        self.idCentral = Central
-        self.codPostal = codPostal
-        self.appointment = appointment if appointment is not None else datetime.combine(today, time(0, 0, 0))
+        # self.idCentral = Central
+        # self.codPostal = codPostal
+        self.appointment = appointment if appointment is not None else time(0, 0)
         self.skill = skill
         self.x = x
         self.y = y

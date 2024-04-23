@@ -41,7 +41,7 @@ def KNearest_Neighbors(list_activities, workblock, k):
     list_temp = []
     count = 0
     for tupla in distances:
-        if (tupla[1].state == 0) and (tupla[1].appointment.time() < workblock.finish) and (tupla[1].appointment.time() > workblock.start) and (count < k):
+        if (tupla[1].state == 0) and (tupla[1].appointment < workblock.finish) and (tupla[1].appointment > workblock.start) and (count < k):
             list_temp.append(tupla[1])
             tupla[1].state=2
             count += 1
@@ -65,7 +65,7 @@ def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, it
                 for activity in list_activities:
                     if activity.state == 0:
                         distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
-                        if distance < radius and (activity.appointment.time() < work_Block.finish and activity.appointment.time() > work_Block.start):
+                        if distance < radius and (activity.appointment < work_Block.finish and activity.appointment > work_Block.start):
                             # print('id: ', activity_clustered.idActivity, 'distance: ', distance, 'radius: ',radius)
                             temp_cluster.append(activity)
                             activity.state = 2
