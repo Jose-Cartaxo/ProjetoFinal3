@@ -80,7 +80,6 @@ def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, it
                             if activity.y  > max_y_value:
                                 max_y_value = activity.y
 
-
             if len( temp_cluster) == 0:
                 # print('Raio: ', radius, ' Não encontrou ninguém')
                 radius += 1
@@ -209,9 +208,11 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
     # Definir cores com base nos estados das tarefas
     colors = {0: 'black', 1: 'grey', 2: 'red', 3: 'green'}
     
+    plt.figure(figsize=(12, 6))
+
     for i in range(len(x_values)-1):
         plt.arrow(x_values[i], y_values[i], x_values[i+1] - x_values[i], y_values[i+1] - y_values[i],
-                color='blue', width=0.0005, head_width=0.01, length_includes_head=True)
+                color='blue', width=0.0005, head_width=0.007, length_includes_head=True)
 
 
     for activity in list_activities:
@@ -222,17 +223,25 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
 
 
     colors_order = [colors[color] for color in points_colors]
+    
 
     plt.scatter(x_values, y_values, c=colors_order)
     plt.title(str(work_Block.idWorker) + ' Start:' + str(work_Block.start)+ ' End:' + str(work_Block.finish))
     plt.xlabel('Coordenada X')
     plt.ylabel('Coordenada Y')
+
+    legend_elements = [
+        Line2D([], [], marker='o', color='green', label='Atribuídas', linestyle='None'),
+        Line2D([], [], marker='o', color='black', label='Ponto de Partida', linestyle='None'),
+        Line2D([], [], marker='o', color='red', label='Não Atribuídas', linestyle='None')
+    ]
+    '''
     plt.legend(handles=[Line2D([], [], marker='o', color='green', label='Atribuidas', linestyle='None'),
                         Line2D([], [], marker='o', color='black', label='Ponto Partida', linestyle='None'),
-                        Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')])#,
-                        #bbox_to_anchor=(1.05, 1), loc='upper left')
-    
-    
+                        Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')],
+                        bbox_to_anchor=(1.05, 1), loc='upper left')
+
+
     for node in nodes:
         activity = Find_Activity_By_Id(list_activities, node.id)
         if activity:
@@ -242,18 +251,31 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             id = '|Id: ' + str(activity.idActivity)
             string =  id + act + travel + start
             plt.text(activity.x, activity.y, string, fontsize=9, ha='right', va='top')
+    '''
+    
+    
+    for i, node in enumerate(nodes):
+        activity = Find_Activity_By_Id(list_activities, node.id)
+        if activity:
+            id = str(i) + ' |Id: ' + str(activity.idActivity)
+            ap = '|Ap: ' + str(activity.appointment.hour) + ':' + str(activity.appointment.minute).zfill(2)
+            travel = '|Tr: ' + str(int(node.travel_Time))
+            start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
+            end = '|End: ' + str(node.end_Time.hour) + ':' + str(node.end_Time.minute).zfill(2)
+            string =  id + ap + travel + start + end
+            legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
 
+    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     for activity in list_activities:
         if activity.idActivity not in activity_id_list:
-            minute = str(activity.appointment.minute)
+            minute = str(activity.appointment.minute).zfill(2)
             hour = str(activity.appointment.hour)
 
             string = str(activity.idActivity) + ' | ' + hour + ':' + minute
             plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
 
-    # plt.subplots_adjust(left=0.2, right=1.1, top=0.9, bottom=0.1)
-
+    plt.tight_layout()
     path = 'PNG_Graphics/' + str(work_Block.idWorker) + 'Block' + str(work_Block.idBlock) + '.png'
     
     plt.savefig(path)

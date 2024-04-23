@@ -98,6 +98,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         
         
 
+        '''
 
         # organizar as "extermidades" de cada "ramo" por custo
         
@@ -117,7 +118,6 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         while current_Node:
             current_Node.printNode()
             current_Node = current_Node.parent
-        '''
         
 
         
@@ -174,6 +174,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                     
                     # Ele aqui, se sair da Atividade anterior e vier diretamente para a atual está dentro do espaço de tempo de tolerância, ou seja, pode vir e começar a Trabalhar emidiatamente, sem tempos de espera para o inicio
                     if datetime_Arraival.time() > min_Time_Activity.time():
+                        
 
                         # Tempo necessário para a Atividade em si
                         time_Required_for_Activity = skills_dict[activity.skill]
@@ -199,7 +200,6 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         # print(workBlock.finish)
 
                         if activity_End_Time_Home.time() < workBlock.finish:
-
                             foundActivity = True
 
                             # o appointment da Atividade agora em date time, com a data de dia de "hoje", a hora seria a correta.
@@ -220,8 +220,9 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                             minutesDayStart = datetime_Arraival.time().hour * 60 + datetime_Arraival.time().minute
 
-                            print('minutesDayCurrent', minutesDayStart + minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
+                            # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
                             cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
+                            # print('Entrei no inicio da Atividade: ',activity.idActivity, ', Cost: ', cost)
 
                             heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real, current_Node))
 
@@ -252,10 +253,12 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                             #print('Ação demorada')
                             
-                            print('minutesDayCurrent', minutesDayStart + minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
+                            # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
 
-                            cost = CostCalculator(minutesDayStart + minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
-
+                            cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
+                            
+                            # print('Entrei a meio da Atividade: ',activity.idActivity, ', Cost: ', cost)
+                            
                             heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, min_Time_Activity, activity_End_Time_Real , current_Node))
 
 
@@ -283,9 +286,13 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                         # print('Brincadeira sem hora limite')
                         
-                        print('minutesDayCurrent', minutesDayStart + minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
+                        # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
                         
                         cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
+
+                        # print('Entrei ATOA: ',activity.idActivity, ', Cost: ', cost)
+
+
                         heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real , current_Node))
 
 
@@ -306,7 +313,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             current_Node.cost += CostCalculatorBackHome(abs(minutesBlock - minutesNode), travel_Time_Returning, values_dict)
             current_Node.state = 0
         else:
-            print('!_!_!_REMOVEU_!_!_!')
+            # print('!_!_!_REMOVEU_!_!_!')
             frontier.remove(current_Node)
            
       
