@@ -8,10 +8,21 @@ from matplotlib.lines import Line2D
 from numpy import block, double
 from Activity import *
 
+
+def Travel_Time( x1, y1, x2, y2, gmaps):
+    origem = (x1, y1)  # San Francisco, CA
+    destino = (x2, y2)  # Los Angeles, CA
+    result = gmaps.distance_matrix(origem, destino, mode="driving")
+    minutes = result['rows'][0]['elements'][0]['duration']['value'] / 60
+
+    return minutes
+'''
+
 # devolve a quantidade de Minutos necessários para relizar o trajeto
 def Travel_Time( travel_mult, x1, y1, x2, y2):
     return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
 
+'''
 # devolve a distancia em KM entre 2 pontos
 def Distance_Calculator( x1, y1, x2, y2):
     R = 6373.0

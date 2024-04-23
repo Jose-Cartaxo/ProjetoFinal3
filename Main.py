@@ -5,6 +5,7 @@ Created on Fri Apr  5 14:43:14 2024
 @author: jgac0
 """
 
+import googlemaps
 import datetime
 from Activity import Activity
 from Activity import Find_Activity_By_Id
@@ -38,6 +39,10 @@ while True:
             considerPriority = False
         break
             
+api_key = 'AIzaSyB_brs6KxO_ZbAzviY4L2pzlE1wgY0VaQg'
+
+# Inicialize o cliente da API do Google Maps
+gmaps = googlemaps.Client(key=api_key)
 
 start_time = datetime.now()
 
@@ -138,7 +143,7 @@ for work_Block in list_work_blocks:
             if activity:
                 activity.state = 1
 
-    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority) 
+    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps) 
     activitiesToState1(nodes)
 
     # activity_id_list = [node.id for node in nodes]
