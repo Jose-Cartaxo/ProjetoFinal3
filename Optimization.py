@@ -224,7 +224,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                             minutesDayCurrent = current_Node.end_Time.time().hour * 60 + current_Node.end_Time.time().minute
 
-                            minutesDayStart = datetime_Arraival.time().hour * 60 + datetime_Arraival.time().minute
+                            minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
 
                             # print('minutesDayCurrent', minutesDayStart - minutesDayCurrent, ', travel_Time_Going:', travel_Time_Going, ', time_Required_for_Activity:', time_Required_for_Activity)
                             cost = CostCalculator(minutesDayStart - minutesDayCurrent, travel_Time_Going, time_Required_for_Activity, values_dict)
@@ -255,7 +255,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             
                             minutesDayCurrent = current_Node.end_Time.time().hour * 60 + current_Node.end_Time.time().minute
 
-                            minutesDayStart = min_Time_Activity.time().hour * 60 + min_Time_Activity.time().minute
+                            minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
 
                             #print('Ação demorada')
                             
@@ -288,7 +288,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                         minutesDayCurrent = current_Node.end_Time.time().hour * 60 + current_Node.end_Time.time().minute
 
-                        minutesDayStart = datetime_Arraival.time().hour * 60 + datetime_Arraival.time().minute
+                        minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
 
                         # print('Brincadeira sem hora limite')
                         
@@ -304,6 +304,8 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
 
         if not foundActivity:
+
+
             if(current_Node.state == 0):
                 path = []
                 while current_Node:
@@ -312,6 +314,17 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                     # path.append(current_Node.id)
                     current_Node = current_Node.parent
                 return path[::-1]
+            else:
+                minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
+                minutesDayEnd = workBlock.finish.hour * 60 + workBlock.finish.minute
+
+                cost = CostCalculator(minutesDayStart - minutesDayEnd, travel_Time_Returning, 0, values_dict)
+
+                travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y)
+                
+                leaf = Node(id = workBlock.idWorker, cost = cost, travel_Time = travel_Time_Returning, start_Time = current_Time + timedelta(minutes=travel_Time_Returning), end_Time = activity_End_Time_Real, parent = current_Node)
+                leaf.state = 0
+                heapq.heappush(frontier, leaf)
 
             #print(current_Node.end_Time.time().hour)
             minutesNode = current_Node.end_Time.time().hour * 60 + current_Node.end_Time.time().minute

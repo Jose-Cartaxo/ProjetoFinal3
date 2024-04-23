@@ -264,6 +264,22 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             end = '|End: ' + str(node.end_Time.hour) + ':' + str(node.end_Time.minute).zfill(2)
             string =  id + ap + travel + start + end
             legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
+        else:
+            # worker = Find_Worker_By_Id(list_activities, node.id)
+            if(i == 0):
+                id = str(i) + ' |Id: ' + str(work_Block.idWorker)
+                start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
+                travel = '|Tr: ' + str(int(node.travel_Time))
+                string =  id + start + travel
+                legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
+            else:
+                id = str(i) + ' |Id: ' + str(work_Block.idWorker)
+                travel = '|Tr: ' + str(int(node.travel_Time))
+                start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
+                string =  id + start + travel
+                legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
+
+        
 
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc='upper left')
 
