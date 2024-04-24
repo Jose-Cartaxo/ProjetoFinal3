@@ -50,6 +50,7 @@ def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
 
     # print('Total: ', (total_time_spend * labor_Price_Min), ' Viagem: ', ((travel_time * travel_Consumption_By_Min) * gas_Price), ' Atividade: ', (activity_time * labor_Gainz_Min))
 
+    # print('tempo total: ', total_time_spend, ' travel time: ', travel_time)
     cost = (total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price)
 
     # cost = cost - (activity_time * labor_Gainz_Min)
@@ -107,11 +108,26 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         
         
 
-        '''
+        
 
         # organizar as "extermidades" de cada "ramo" por custo
         
         # pegar no ramo com menor custo
+
+        
+        current_Node = frontier[0]
+        print('\n\n\n RAMOS Extermidades')
+        for node in frontier:
+            print('Extermidade - ' + str(node.id))
+            current_Node = node
+            while current_Node:
+                current_Node.printNode()
+                current_Node = current_Node.parent
+
+        
+        print('\n Escolhido \n' + str(frontier[0].id))
+            
+        '''
         current_Node = frontier[0]
         print('\n\n\n RAMOS Extermidades')
         for node in frontier:
@@ -132,8 +148,8 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         
         print("Enter para continuar...")
         input()
-        
         '''
+        
 
 
         current_Node = frontier[0]
@@ -142,6 +158,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
         current_Time = current_Node.end_Time
         foundActivity = False
+        print('Atual: ', current_Time)
 
         '''
         print("Enter para continuar...")
@@ -309,7 +326,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                         # print('Entrei ATOA: ',activity.idActivity, ', Cost: ', cost)
 
-
+                        # print('Cost no retorno')
                         heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real , current_Node))
 
 
@@ -329,19 +346,15 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 minutesDayStart = current_Time.time().hour * 60 + current_Time.time().minute
                 minutesDayEnd = workBlock.finish.hour * 60 + workBlock.finish.minute
 
-                cost = CostCalculator(minutesDayStart - minutesDayEnd, travel_Time_Returning, False, activity.creation, values_dict, considerAppointment, considerPriority)
+                cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, travel_Time_Returning, values_dict)
 
-                travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y) # type: ignore
-                
+                travel_Time_Returning = Travel_Time(current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
+                #travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
+                # print('\n\nCost no Worker-1 foi: ',cost,'\n\n')
                 leaf = Node(id = workBlock.idWorker, cost = cost, travel_Time = travel_Time_Returning, start_Time = current_Time + timedelta(minutes=travel_Time_Returning), end_Time = activity_End_Time_Real, parent = current_Node)
                 leaf.state = 0
                 heapq.heappush(frontier, leaf)
-
-            #print(current_Node.end_Time.time().hour)
-            minutesNode = current_Node.end_Time.time().hour * 60 + current_Node.end_Time.time().minute
-            minutesBlock = workBlock.finish.hour * 60 + workBlock.finish.minute 
-            current_Node.cost += CostCalculatorBackHome(abs(minutesBlock - minutesNode), travel_Time_Returning, values_dict)
-            current_Node.state = 0
+                frontier.remove(current_Node)
         else:
             # print('!_!_!_REMOVEU_!_!_!')
             frontier.remove(current_Node)

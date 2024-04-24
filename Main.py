@@ -47,7 +47,7 @@ gmaps = googlemaps.Client(key=api_key)
 start_time = datetime.now()
 
 # Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
 
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 

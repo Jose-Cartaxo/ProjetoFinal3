@@ -1,7 +1,99 @@
+import googlemaps
+import gmplot
+from datetime import datetime
 
-from Optimization import *
+api_key = 'AIzaSyB_brs6KxO_ZbAzviY4L2pzlE1wgY0VaQg'
+
+# Inicialize o cliente da API do Google Maps
+def generate_google_maps_link(start, waypoints, destination):
+    base_url = "https://www.google.com/maps/dir/?api=1"
+    start_str = f"origin={start[0]},{start[1]}"
+    destination_str = f"destination={destination[0]},{destination[1]}"
+    waypoints_str = "&waypoints=".join([f"{coord[0]},{coord[1]}" for coord in waypoints])
+    return f"{base_url}&{start_str}&{waypoints_str}&{destination_str}"
+
+# Exemplo de coordenadas (latitude, longitude)
+ponto_partida = (40.05298780198781, -7.54346237602345)  # São Paulo, Brasil
+destino = (42.75578749461006, 1.6430955325487684)           # Paris, França
+pontos_intermediarios = [
+    (37.71520740124046, -4.766190413644785)  # Rio de Janeiro, Brasil
+]
+
+link = generate_google_maps_link(ponto_partida, pontos_intermediarios, destino)
+print(link)
+
+# https://www.google.com/maps/dir/40.0529878,-7.5434624/37.71520740124046,4.766190413644785/42.7557875,1.6430955/
+
+# https://www.google.com/maps/dir/40.0529878,-7.5434624/37.71520740124046,+-4.766190413644785/42.7557875,1.6430955/@40.076335,-8.1972655,6z/data=!3m1!4b1!4m8!4m7!1m0!1m3!2m2!1d-4.7661904!2d37.7152074!1m0!3e0?entry=ttu
+
+'''
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
+
+activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
+
+values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+
+skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
 
 
+
+
+# Exibir os primeiros registros dos dados importados
+# print(workers_xlsx.head())
+# print(activities_xlsx.head())
+
+
+
+# tempo_list_work_blocks = Create_List_Work_Blocks()
+
+list_workers = []
+list_activities = []
+
+for indice, element in activities_xlsx.iterrows():
+
+    if element['ComprirAgendamento'] == 0:
+
+        list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
+        # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
+    else:
+
+        list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
+        # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
+
+
+for indice, element in workers_xlsx.iterrows():
+    hours_str = element['HorarioTrabalho']
+    # print(hours_str)
+    hours_list = hours_str.split(',')
+    # print(hours_list)
+    # print(hours_list[0])
+    tempo_list_work_blocks = []
+    i = 0
+    for hours in hours_list:
+        # print(hours)
+        start_hour, end_hour = hours.split(';')
+        tempo_list_work_blocks.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
+        i += 1
+    
+    list_workers.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'], element['skills'], element['xCasa'], element['yCasa'], tempo_list_work_blocks))
+
+while True:
+    worker = input('Numero do Worker: ')
+    activity = input('Numero da Atividade: ')
+    # worker = 'id-' + worker
+    worker = 'Worker-' + worker
+    activity = 'id-' + activity
+
+    activityVar1 = Find_Activity_By_Id(list_activities, worker)
+    if not activityVar1:
+        activityVar1 = Find_Worker_By_Id(list_workers, worker)
+    activityVar2 = Find_Activity_By_Id(list_activities, activity)
+    print(Travel_Time( activityVar1.x, activityVar1.y, activityVar2.x, activityVar2.y, gmaps))
+'''
+
+'''
 # WORKER 1
 
 # travel_Time_Returning = Travel_Time(1.1, activity.x, activity.y, workBlock.x, workBlock.y)
@@ -23,6 +115,7 @@ frontier = sorted(frontier)
 for fr in frontier:
     print(fr.id)
 
+'''
 # cost = CostCalculator(travel_Time_Going, travel_Time_Going, 25, values_dict)
 
 """

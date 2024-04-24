@@ -14,7 +14,7 @@ def Travel_Time( x1, y1, x2, y2, gmaps):
     destino = (x2, y2)  # Los Angeles, CA
     result = gmaps.distance_matrix(origem, destino, mode="driving")
     minutes = result['rows'][0]['elements'][0]['duration']['value'] / 60
-
+    # print('De: ', origem, ' para: ',destino, ' demora: ', minutes, 'minutos.')
     return minutes
 '''
 
@@ -40,6 +40,22 @@ def Distance_Calculator( x1, y1, x2, y2):
 
     distance = R * c
     return distance
+
+'''def KNearest_Neighbors2(list_activities, cluster, workblock, k):
+    list_temp = []
+    for i in range(k):
+        nextIn = (float('inf'),None)
+        for clust in cluster:
+            for activity in list_activities:
+                if (activity.state == 0) and (activity.appointment < workblock.finish) and (activity.appointment > workblock.start):
+                    distanceTemp = Distance_Calculator(activity.x, activity.y, clust.x, clust.y)
+                    if distanceTemp < nextIn[0]:
+                        nextIn = (distanceTemp,activity)
+        list_temp.append(nextIn[1])
+    return  list_temp'''
+    
+    
+
 
 def KNearest_Neighbors(list_activities, workblock, k):
     distances = []
