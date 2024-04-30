@@ -11,6 +11,7 @@ from Activity import Activity
 from Activity import Find_Activity_By_Id
 from Clustering import *
 from Workers import *
+from Helper import *
 import pandas as pd
 from Optimization import Greedy
 
@@ -47,7 +48,7 @@ gmaps = googlemaps.Client(key=api_key)
 start_time = datetime.now()
 
 # Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
 
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 
@@ -117,6 +118,8 @@ for worker in list_workers:
     for workBlock in worker.work_Blocks:
         list_work_blocks.append(workBlock)
 
+list_worker_activityQuantity = []
+i = 0
 for work_Block in list_work_blocks:
 
     cluster = KNearest_Neighbors(list_activities, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
@@ -152,8 +155,16 @@ for work_Block in list_work_blocks:
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
     
-    # print("Enter para continuar...")
-    # input()
+    # print(work_Block.idWorker, 'WorkBlok', work_Block.idBlock,"TEM AS SEGUINTES TAREFAS: ", len(nodes) - 2)
+    activityQuantity = len(nodes) - 2
+    '''
+    if len(nodes) - 2 > 0:
+        activityQuantity = len(nodes) - 2
+    else:
+        activityQuantity = 0
+    '''
+    list_worker_activityQuantity.append((i,activityQuantity))
+    i = i + 1
 
 end_time = datetime.now() # type: ignore
 elapsed_time = end_time - start_time
@@ -164,5 +175,7 @@ plot_activities_graph_by_state(list_activities)
 
 plot_heatmap_activities_by_state(list_activities)
 
+data = DataAnalyticsByHour(list_activities)
 
+plot_line_graph(list_worker_activityQuantity)
 

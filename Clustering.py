@@ -8,7 +8,9 @@ from matplotlib.lines import Line2D
 from numpy import block, double
 from Activity import *
 
+# def Gra
 
+'''
 def Travel_Time( x1, y1, x2, y2, gmaps):
     origem = (x1, y1)  # San Francisco, CA
     destino = (x2, y2)  # Los Angeles, CA
@@ -22,7 +24,6 @@ def Travel_Time( x1, y1, x2, y2, gmaps):
 def Travel_Time( travel_mult, x1, y1, x2, y2):
     return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
 
-'''
 # devolve a distancia em KM entre 2 pontos
 def Distance_Calculator( x1, y1, x2, y2):
     R = 6373.0
@@ -354,3 +355,24 @@ def plot_activities_graph_by_state(list_activities):
     plt.savefig('PNG_Graphics/PlotMapState.png')
     plt.show(block = True)
     plt.close() 
+
+
+def plot_line_graph(dados):
+    # Separando os dados em listas separadas para o eixo x e y
+    x = [ponto[0] for ponto in dados]
+    y = [ponto[1] for ponto in dados]
+
+    # Criando o gráfico de linhas
+    plt.plot(x, y, marker='o', linestyle='-')
+
+    # Adicionando rótulos aos eixos
+    plt.xlabel('Eixo X')
+    plt.ylabel('Eixo Y')
+
+    # Adicionando título ao gráfico
+    plt.title('Gráfico de Linhas')
+
+    # Exibindo o gráfico
+    plt.savefig('PNG_Graphics/PlotLineGraphState.png')
+    plt.grid(True)
+    plt.show()

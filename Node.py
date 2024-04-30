@@ -35,9 +35,9 @@ class Node:
             return False
         if other.gen == 0:
             return True
-        return self.total_cost < other.total_cost
+        # return self.total_cost < other.total_cost
     
-        # return (self.total_cost / self.gen) < (other.total_cost / other.gen)
+        return (self.total_cost / self.gen) < (other.total_cost / other.gen)
 
         """
         if self.gen == 0:
