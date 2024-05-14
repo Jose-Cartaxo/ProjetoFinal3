@@ -42,58 +42,80 @@ def Distance_Calculator( x1, y1, x2, y2):
     distance = R * c
     return distance
 
-'''def KNearest_Neighbors2(list_activities, cluster, workblock, k):
-    list_temp = []
-    for i in range(k):
-        nextIn = (float('inf'),None)
-        for clust in cluster:
-            for activity in list_activities:
-                if (activity.state == 0) and (activity.appointment < workblock.finish) and (activity.appointment > workblock.start):
-                    distanceTemp = Distance_Calculator(activity.x, activity.y, clust.x, clust.y)
-                    if distanceTemp < nextIn[0]:
-                        nextIn = (distanceTemp,activity)
-        list_temp.append(nextIn[1])
-    return  list_temp'''
+# def KNearest_Neighbors2(list_activities, cluster, workblock, k):
+#     list_temp = []
+#     for i in range(k):
+#         nextIn = (float('inf'),None)
+#         for clust in cluster:
+#             for activity in list_activities:
+#                 if (activity.state == 0) and (activity.appointment < workblock.finish) and (activity.appointment > workblock.start):
+#                     distanceTemp = Distance_Calculator(activity.x, activity.y, clust.x, clust.y)
+#                     if distanceTemp < nextIn[0]:
+#                         nextIn = (distanceTemp,activity)
+#         list_temp.append(nextIn[1])
+#     return  list_temp
     
     
 
 
-def KNearest_Neighbors(list_activities, workblock, k):
+class KNearest_Nei:
+
+    def __init__(self, atividade, distancia):
+        self.atividade = atividade
+        self.distancia = distancia
+    # se for menor tem de retornar true
+    def __lt__(self, other):
+        return self.distancia < other.distancia
+
+
+
+def KNearest_Neighbors_Vote_in(kNearest_Nei, workblock, skills):
+    if (kNearest_Nei.atividade.state == 0) and (kNearest_Nei.atividade.appointment < workblock.finish) and (kNearest_Nei.atividade.appointment > workblock.start) and (kNearest_Nei.atividade.skill in skills):
+        return True
+
+
+def KNearest_Neighbors(list_activities, list_workers, workblock, k):
     distances = []
+    worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
     for activity in list_activities:
         distance = Distance_Calculator(activity.x, activity.y, workblock.x, workblock.y)
-        distances.append((distance, activity))
+        distances.append(KNearest_Nei(activity, distance))
 
-    distances = sorted(distances, key=lambda x: x[0])
+    distances = sorted(distances)
     
     list_temp = []
     count = 0
-    for tupla in distances:
-        if (tupla[1].state == 0) and (tupla[1].appointment < workblock.finish) and (tupla[1].appointment > workblock.start) and (count < k):
-            list_temp.append(tupla[1])
-            tupla[1].state=2
+    indi = 0
+    while count < k:
+        if KNearest_Neighbors_Vote_in(distances[indi], workblock, worker.skill): # type: ignore
+            list_temp.append(distances[indi].atividade)
             count += 1
+        indi += 1
     return  list_temp
     
 
-def DBSCANS(list_activities, work_Block, cluster, distance_Min, distance_Max, iterations_Max):
+def DBSCANS(list_activities, list_workers, work_Block, cluster, distance_Min, distance_Max, iterations_Max):
     
     min_x_value = float('inf')
     max_x_value = float('-inf')
     min_y_value = float('inf')
     max_y_value = float('-inf')
 
+    worker = Find_Worker_By_Id(list_workers, work_Block.idWorker)
+
     for i in range(iterations_Max): 
         # print(i)
         radius = distance_Min
         previous_size = len(cluster)
         temp_cluster = []
+
         while previous_size == len(cluster) and radius <= distance_Max:
+
             for activity_clustered in cluster:
                 for activity in list_activities:
                     if activity.state == 0:
                         distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
-                        if distance < radius and (activity.appointment < work_Block.finish and activity.appointment > work_Block.start):
+                        if distance < radius and (activity.appointment < work_Block.finish and activity.appointment > work_Block.start) and (activity.skill in worker.skill): # type: ignore
                             # print('id: ', activity_clustered.idActivity, 'distance: ', distance, 'radius: ',radius)
                             temp_cluster.append(activity)
                             activity.state = 2
@@ -356,23 +378,3 @@ def plot_activities_graph_by_state(list_activities):
     plt.show(block = True)
     plt.close() 
 
-
-def plot_line_graph(dados):
-    # Separando os dados em listas separadas para o eixo x e y
-    x = [ponto[0] for ponto in dados]
-    y = [ponto[1] for ponto in dados]
-
-    # Criando o gráfico de linhas
-    plt.plot(x, y, marker='o', linestyle='-')
-
-    # Adicionando rótulos aos eixos
-    plt.xlabel('Eixo X')
-    plt.ylabel('Eixo Y')
-
-    # Adicionando título ao gráfico
-    plt.title('Gráfico de Linhas')
-
-    # Exibindo o gráfico
-    plt.savefig('PNG_Graphics/PlotLineGraphState.png')
-    plt.grid(True)
-    plt.show()

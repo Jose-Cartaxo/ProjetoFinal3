@@ -98,7 +98,7 @@ for indice, element in workers_xlsx.iterrows():
         tempo_list_work_blocks.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
         i += 1
     
-    list_workers.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'], element['skills'], element['xCasa'], element['yCasa'], tempo_list_work_blocks))
+    list_workers.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'],  [item.strip() for item in  element['skills'].split(',')]  , element['xCasa'], element['yCasa'], tempo_list_work_blocks))
 
 print('\nPrimeiros 5 Trabalhadores: \n')
 for i in range(0, 5):
@@ -119,10 +119,9 @@ for worker in list_workers:
         list_work_blocks.append(workBlock)
 
 list_worker_activityQuantity = []
-i = 0
 for work_Block in list_work_blocks:
 
-    cluster = KNearest_Neighbors(list_activities, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
+    cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
 
 
     # print("As 5 activities mais próximas:")
@@ -130,18 +129,17 @@ for work_Block in list_work_blocks:
         # activity.printActivity()
 
 
-    DBSCANS(list_activities, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+    DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
 
     # print("\n\nNovo Cluster:\n")
     # print('Size: ', len(cluster))
     # for activity in cluster:
-        # activity.printActivity()
+    #     activity.printActivity()
 
 
 
     def activitiesToState1(nodes):
         for node in nodes:
-            # node.printNode()
             activity = Find_Activity_By_Id(list_activities, node.id)
             if activity:
                 activity.state = 1
@@ -149,26 +147,25 @@ for work_Block in list_work_blocks:
     nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps) 
     activitiesToState1(nodes)
 
-    # activity_id_list = [node.id for node in nodes]
     plot_activities_by_order(cluster, nodes, work_Block)
 
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
     
-    # print(work_Block.idWorker, 'WorkBlok', work_Block.idBlock,"TEM AS SEGUINTES TAREFAS: ", len(nodes) - 2)
     activityQuantity = len(nodes) - 2
-    '''
-    if len(nodes) - 2 > 0:
-        activityQuantity = len(nodes) - 2
+
+    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    if nodes[0].start_Time.time() < meio_dia:
+        list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
     else:
-        activityQuantity = 0
-    '''
-    list_worker_activityQuantity.append((i,activityQuantity))
-    i = i + 1
+        list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
 
 end_time = datetime.now() # type: ignore
 elapsed_time = end_time - start_time
 print("Tempo decorrido:", elapsed_time, "segundos")
+
+for skill in list_workers[0].skill:
+    print('Skil: ', skill,'\n')
 
 
 plot_activities_graph_by_state(list_activities)
@@ -176,6 +173,16 @@ plot_activities_graph_by_state(list_activities)
 plot_heatmap_activities_by_state(list_activities)
 
 data = DataAnalyticsByHour(list_activities)
+sorted_stats_list = sorted(data)
+for dat in sorted_stats_list:
+    dat.print()
 
+data = DataAnalyticsBySkill(list_activities)
+for dat in data:
+    dat.print()
+
+
+
+print(type(data[0].tipo))
 plot_line_graph(list_worker_activityQuantity)
 
