@@ -365,7 +365,10 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 # travel_Time_Returning = Travel_Time(current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
                 travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y) # type: ignore
                 # print('\n\nCost no Worker-1 foi: ',cost,'\n\n')
-                leaf = Node(id = workBlock.idWorker, cost = cost, travel_Time = travel_Time_Returning, start_Time = current_Time + timedelta(minutes=travel_Time_Returning), end_Time = activity_End_Time_Real, parent = current_Node)
+                activity_End_Time_Real = datetime_Arraival + timedelta(minutes=time_Required_for_Activity)
+                
+                
+                leaf = Node(workBlock.idWorker, cost, travel_Time_Returning, current_Time + timedelta(minutes=travel_Time_Returning), activity_End_Time_Real, current_Node)
                 leaf.state = 0
                 heapq.heappush(frontier, leaf)
                 frontier.remove(current_Node)
