@@ -11,67 +11,53 @@ from Activity import Activity
 from Activity import Find_Activity_By_Id
 from Clustering import *
 from Workers import *
+from Stats import *
 from Helper import *
 import pandas as pd
 from Optimization import Greedy
 
+'''
 
-considerAppointment = True
+Configuração inicial da execução do código, 
+definir as prioridades e o metodo de clustering
+
+'''
+
 
 print("Deseja que seja considerada a prioridade das Atividades com marcação?")
-while True:
-    inp = input('"s" para sim, "n" para não: ')
-    if inp != 's' and inp != 'n':
-        print('Input errado!')
-    else:
-        if inp == 'n':
-            considerAppointment = False
-        break
+considerAppointment = pedir_s_n()
 
-considerPriority = True
+print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
+considerPriority = pedir_s_n()
 
-print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")
-while True:
-    inp = input('"s" para sim, "n" para não: ')
-    if inp != 's' and inp != 'n':
-        print('Input errado!')
-    else:
-        if inp == 'n':
-            considerPriority = False
-        break
-            
+print("Qual metodo de clustering deseja utilizar? \n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida) \n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster) \n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS) \n 4 - DBCANS (normal) \n5 - CodPostal \n6 - Central")
+metodoCluster = solicitar_input(1, 6)
+
+'''
+
+Configurar o Google Maps
+
+'''
 api_key = 'AIzaSyB_brs6KxO_ZbAzviY4L2pzlE1wgY0VaQg'
-
 # Inicialize o cliente da API do Google Maps
 gmaps = googlemaps.Client(key=api_key)
 
+'''
+
+começar o "relógio" para o tempo de execução
+
+'''
 start_time = datetime.now()
 
-# Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
 
+
+'''
+
+ler dados do Excel
+
+'''
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
-
-values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
-values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
-
-skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
-skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
-
-
-
-
-# Exibir os primeiros registros dos dados importados
-# print(workers_xlsx.head())
-# print(activities_xlsx.head())
-
-
-
-# tempo_list_work_blocks = Create_List_Work_Blocks()
-
-list_workers = []
 list_activities = []
-
 for indice, element in activities_xlsx.iterrows():
 
     if element['ComprirAgendamento'] == 0:
@@ -79,11 +65,11 @@ for indice, element in activities_xlsx.iterrows():
         list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
         # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
     else:
-
         list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
         # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
 
-
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
+list_workers = []
 for indice, element in workers_xlsx.iterrows():
     hours_str = element['HorarioTrabalho']
     # print(hours_str)
@@ -100,6 +86,21 @@ for indice, element in workers_xlsx.iterrows():
     
     list_workers.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'],  [item.strip() for item in  element['skills'].split(',')]  , element['xCasa'], element['yCasa'], tempo_list_work_blocks))
 
+values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+
+skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
+
+
+
+'''
+
+a seguir seriam uns prints a mostrar que os valores foram bem importados
+
+'''
+
+'''
 print('\nPrimeiros 5 Trabalhadores: \n')
 for i in range(0, 5):
     if i < len(list_workers):
@@ -110,22 +111,41 @@ for i in range(0, 5):
     list_activities[i].printActivity() 
 
 print('\nDados Importados com Sucesso!!\n')
+'''
+
+'''
+
+heat map por hora de marcação, mais escuro, mais tarde a hora de marcação
+
+'''
+'''
+
 plot_heatmap_activities_by_hour(list_activities)
 
+'''
+
+'''
+
+Fazer uma lista só com os workblocks para se irem adicionamdo as atividades a estes
+
+'''
 
 list_work_blocks = []
 for worker in list_workers:
     for workBlock in worker.work_Blocks:
         list_work_blocks.append(workBlock)
 
-list_worker_activityQuantity = []
+
+list_worker_activityQuantity = [] # lista onde para cada workblock é colocada a quantidade de atividades realizadas nesse workblock
 for work_Block in list_work_blocks:
 
     cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+    '''
 
-    # cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
+    cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
+    DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
 
-    # DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+    '''
 
     def activitiesToState1(nodes):
         for node in nodes:

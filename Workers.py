@@ -1,3 +1,5 @@
+from datetime import datetime, time
+
 class Worker:
     workers_quantity = 0
 
@@ -31,13 +33,14 @@ class WorkBlock:
         self.y = y
         self.start = datetime.strptime(start.strip(), '%H:%M').time()
         self.finish = datetime.strptime(finish.strip(), '%H:%M').time()
+        self.quantidadeAtividades = 0
         # self.block_List = []
 
     def printWorkBlock(self):
         print('    idBlock: {}; Start: {}; Finish: {}'.format( self.idBlock, self.start, self.finish))
 
+'''
 
-from datetime import datetime, time
 class ActivityBlock:
 
     def __init__(self, idActivity, start, finish):
@@ -47,3 +50,5 @@ class ActivityBlock:
         
     def printActivityBlock(self):
         print('idWorker: {}; idBlock: {}; Start: {}; Finish: {}'.format(self.idActivity, self.start, self.finish))
+
+'''
