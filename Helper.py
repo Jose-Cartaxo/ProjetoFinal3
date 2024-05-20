@@ -13,7 +13,7 @@ class Stats:
         self.total = self.total + 1
 
     def print(self):
-        print('Hora de marcação:',self.tipo)
+        print('Tipo Atividade:',self.tipo)
         print('TOTAL: ', self.total, ' ATIVA: ', self.active,' PERCENT: ', (100/self.total * self.active),'\n')
 
     def __lt__(self, other):

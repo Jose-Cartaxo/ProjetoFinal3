@@ -1,4 +1,5 @@
 import math
+from re import L
 
 from matplotlib.pylab import f
 from Workers import *
@@ -59,8 +60,18 @@ def Distance_Calculator( x1, y1, x2, y2):
 
 
 class KNearest_Nei:
-
     def __init__(self, atividade, distancia):
+        """
+        Inicializa a MinhaClasse com um atividade e a distancia ao trabalhador.
+
+       
+        Parameters
+        ----------
+        atividade: (Atividade)
+            Atividade que esta a ser ponderada.
+        distancia: (Double) 
+            distancia em KM entre o local de partida do trabalhador e a atividade.
+        """
         self.atividade = atividade
         self.distancia = distancia
     # se for menor tem de retornar true
@@ -69,9 +80,34 @@ class KNearest_Nei:
 
 
 
-def KNearest_Neighbors_Vote_in(kNearest_Nei, workblock, skills):
-    if (kNearest_Nei.atividade.state == 0) and (kNearest_Nei.atividade.appointment < workblock.finish) and (kNearest_Nei.atividade.appointment > workblock.start) and (kNearest_Nei.atividade.skill in skills):
+def KNearest_Neighbors_Vote_in(atividade, workblock, skills):
+    """
+    Esta função verifica se a tarefa deve ser contada para o clustering do workblick ou não, verifica o estado da atividade, verifica o hora de marcação e se possiu as skills necessárias
+
+    Parameters
+    ----------
+    kNearest_Nei: (KNearest_Nei)
+        elemento a comparar com o bloco de trabalho para ver se entra.
+    workblock: (WorkBlock)
+        workblock que estamos a fazer o clustering das atividades para.
+    skills: (list of str)
+        lista das skills que o trabalhador possuiu.
+
+    Returns
+    -------
+    tipo
+        retorna True ou False, conforme se é para ser adicionada a lista ou não.
+    """
+
+    if atividade.appointment != time(0, 0):
+  
+        if (atividade.state != 1) and (atividade.appointment < workblock.finish) and (atividade.appointment > workblock.start) and (atividade.skill in skills):
+            return True
+   
+    elif (atividade.state != 1) and (atividade.skill in skills):
         return True
+
+    return False
 
 
 def KNearest_Neighbors(list_activities, list_workers, workblock, k):
@@ -87,11 +123,85 @@ def KNearest_Neighbors(list_activities, list_workers, workblock, k):
     count = 0
     indi = 0
     while count < k:
-        if KNearest_Neighbors_Vote_in(distances[indi], workblock, worker.skill): # type: ignore
+        if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, worker.skill): # type: ignore
             list_temp.append(distances[indi].atividade)
             count += 1
         indi += 1
     return  list_temp
+
+
+
+
+class Coordenada:
+    def __init__(self, x, y):
+        """
+        Inicializa a MinhaClasse com um x e um y, que são as coordenadas.
+
+       
+        Parameters
+        ----------
+        x: (Int)
+            coordenada do x.
+        y: (Int) 
+            coordendada do y.
+        """
+        self.x = x
+        self.y = y
+
+def KNearest_Neighbors2(list_activities, list_workers, workblock, k):
+    """
+    Esta função faz o clustering das atividades para o workblock.
+
+    Parameters
+    ----------
+    list_activities: (list of Activity)
+        lista de todas as atividades a ponderar para o clustering.
+    list_workers: (list of Workers)
+        lista de todos os trabalhadores a ponderar para o clustering.
+    workblock: (Workblock)
+        workblock a ponderar para o clustering.
+    k: (Int)
+        quantidade de Atividades a colocar no cluster.
+
+    Returns
+    -------
+    list of Activity
+        Retorna uma lista de atividades, que é o cluster final.
+    """
+
+    # lista com os Atividades com a respetiva distancia
+    distances = []
+
+    # lista com as coordenadas dos elementos que já pertencem ao cluster
+    list_coordenada_temp = []
+
+    # lista com os elementes que já pertencem
+    list_cluster = []
+
+    # trabalhador que vai realizar este workblock
+    worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
+
+    list_coordenada_temp.append(Coordenada(worker.x, worker.y)) # type: ignore
+    for count in range(k):
+
+        # colocar as atividades por ordem
+        for activity in list_activities:
+
+            # verificar se a atividade ainda não está a ser considerada.
+            if activity.state == 0:
+                for coord in list_coordenada_temp:
+                    distance = Distance_Calculator(activity.x, activity.y, coord.x, coord.y)
+                    if KNearest_Neighbors_Vote_in(activity, workblock, worker.skill): # type: ignore
+                        distances.append(KNearest_Nei(activity, distance))
+        
+        distances = sorted(distances)
+        atividade_in = distances[0].atividade
+        atividade_in.state = 2 
+        list_coordenada_temp.append(Coordenada(atividade_in.x, atividade_in.y)) # type: ignore
+        list_cluster.append(atividade_in)
+        distances.clear()
+
+    return  list_cluster
     
 
 def DBSCANS(list_activities, list_workers, work_Block, cluster, distance_Min, distance_Max, iterations_Max):

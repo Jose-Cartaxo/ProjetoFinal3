@@ -100,82 +100,24 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
     while frontier:
     
+        # atribuição das vars constantes que vêm do Excel
         travel_Time_By_1KM = values_dict['TRAVEL_TIME']
-
         tolerance_For_Activity_Post = values_dict['WINDOW_TIME_POST']
         tolerance_For_Activity_Pre = values_dict['WINDOW_TIME_PRE']
         
-
+        # oragnizar a lista da fronteira, copiar o primeiro elemento, o com o menor custo
         frontier = sorted(frontier)
-       
-        
-
-        
-        
-
-        
-
-        # organizar as "extermidades" de cada "ramo" por custo
-        
-        # pegar no ramo com menor custo
-
-        
         current_Node = frontier[0]
-        '''
-        print('\n\n\n RAMOS Extermidades')
-        for node in frontier:
-            print('Extermidade - ' + str(node.id))
-            current_Node = node
-            while current_Node:
-                current_Node.printNode()
-                current_Node = current_Node.parent
 
-        
-        print('\n Escolhido \n' + str(frontier[0].id))
-        '''
-        
-
-            
-        '''
-        current_Node = frontier[0]
-        print('\n\n\n RAMOS Extermidades')
-        for node in frontier:
-            print('Extermidade - ' + str(node.id))
-            current_Node = node
-            while current_Node:
-                current_Node.printNode()
-                current_Node = current_Node.parent
-
-        
-        print('\n Escolhido \n' + str(frontier[0].id))
-
-        while current_Node:
-            current_Node.printNode()
-            current_Node = current_Node.parent
-        
-
-        
-        print("Enter para continuar...")
-        input()
-        '''
-        
-
-
-        current_Node = frontier[0]
-        #remover o ramo como extermidade (depois adiciono as novas "extermidades" provenientes desta "extermidade", se não existirem novas extermidades, solução encontrada)
-        # frontier.remove(current_Node)
-
+        # o tempo do node
         current_Time = current_Node.end_Time
         foundActivity = False
-        print('Atual: ', current_Time)
 
-        '''
-        print("Enter para continuar...")
-        input()
-        '''
+
         travel_Time_Returning = 0
         for activity in worker_Activities_Cluster:
-
+            
+            # como só guardamos o id da tarefa no nó, vamos buscar a última atividade realizada pelo id
             current_Activity = Find_Activity_By_Id(worker_Activities_Cluster,current_Node.id)
 
             if not current_Activity:
@@ -192,25 +134,19 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             # Hora de Chegada a Atividade
             datetime_Arraival = current_Time + timedelta(minutes=travel_Time_Going)
 
-            # Verificar se consegue chegar a tempo a Atividade
+            # verificar se a atividade já foi usada antes neste ramo, basicamente anda para trás a ver as tarefas anteriores, se não estiver lá ele deixa, se estivar lá, não deixa
             if not Belongs_to_Family(current_Node, activity.idActivity):
 
+                # nesta parte verifica os limites do tempo, vai sair daqui
                 time_Tolerance_For_Activity_Post = timedelta(minutes=tolerance_For_Activity_Post)
-                # max_Time_Activity = activity.appointment + time_Tolerance_For_Activity_Post
                 max_Time_Activity = datetime.combine(datetime.now().date(), activity.appointment) + time_Tolerance_For_Activity_Post
 
 
                 time_Tolerance_For_Activity_Pre = timedelta(minutes=tolerance_For_Activity_Pre)
-                # min_Time_Activity = activity.appointment - time_Tolerance_For_Activity_Pre
                 min_Time_Activity = datetime.combine(datetime.now().date(), activity.appointment) - time_Tolerance_For_Activity_Pre
                 
                 
-                # print('\n\n\n')
-                # print(datetime_Arraival.time())
-                # print('<')
-                # print(max_Time_Activity.time())
-                # print('\n')
-                # Está antes do limite máximo para comparecer.
+                # Verificar se consegue chegar a tempo a Atividade
                 if datetime_Arraival.time() < max_Time_Activity.time():
                     # print('Passou')
 

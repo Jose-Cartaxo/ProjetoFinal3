@@ -48,7 +48,7 @@ gmaps = googlemaps.Client(key=api_key)
 start_time = datetime.now()
 
 # Carregar os dados do arquivo Excel
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
 
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 
@@ -121,22 +121,11 @@ for worker in list_workers:
 list_worker_activityQuantity = []
 for work_Block in list_work_blocks:
 
-    cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
+    cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
 
+    # cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
 
-    # print("As 5 activities mais próximas:")
-    # for activity in cluster:
-        # activity.printActivity()
-
-
-    DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
-
-    # print("\n\nNovo Cluster:\n")
-    # print('Size: ', len(cluster))
-    # for activity in cluster:
-    #     activity.printActivity()
-
-
+    # DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
 
     def activitiesToState1(nodes):
         for node in nodes:

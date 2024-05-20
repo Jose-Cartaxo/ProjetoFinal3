@@ -1,3 +1,50 @@
+
+class Atividade:
+    # Esta é uma classe de exemplo para representar a atividade
+    def __init__(self, nome):
+        self.nome = nome
+
+class KNearest_Nei:
+    def __init__(self, atividade, distancia):
+        """
+        Inicializa a MinhaClasse com uma atividade e a distancia ao trabalhador.
+
+        Parameters
+        ----------
+        atividade: (Atividade)
+            Atividade que está sendo ponderada.
+        distancia: (float)
+            Distância em KM entre o local de partida do trabalhador e a atividade.
+        """
+        self.atividade = atividade
+        self.distancia = distancia
+
+    # se for menor tem de retornar true
+    def __lt__(self, other):
+        return self.distancia < other.distancia
+
+# Criando uma lista de objetos KNearest_Nei para exemplo
+atividade1 = Atividade("Atividade 1")
+atividade2 = Atividade("Atividade 2")
+atividade3 = Atividade("Atividade 3")
+
+lista_de_atividades = [
+    KNearest_Nei(atividade1, 10.0),
+    KNearest_Nei(atividade2, 5.0),
+    KNearest_Nei(atividade3, 8.0)
+]
+
+# Encontre o menor elemento com base na distância
+menor_elemento = min(lista_de_atividades)
+
+# O menor_elemento agora é o objeto KNearest_Nei com a menor distância
+print(f"A atividade com a menor distância é: {menor_elemento.atividade.nome}")
+print(f"A distância é: {menor_elemento.distancia} km")
+
+
+
+
+'''
 import googlemaps
 import gmplot
 from datetime import datetime
@@ -22,6 +69,7 @@ pontos_intermediarios = [
 link = generate_google_maps_link(ponto_partida, pontos_intermediarios, destino)
 print(link)
 
+'''
 # https://www.google.com/maps/dir/40.0529878,-7.5434624/37.71520740124046,4.766190413644785/42.7557875,1.6430955/
 
 # https://www.google.com/maps/dir/40.0529878,-7.5434624/37.71520740124046,+-4.766190413644785/42.7557875,1.6430955/@40.076335,-8.1972655,6z/data=!3m1!4b1!4m8!4m7!1m0!1m3!2m2!1d-4.7661904!2d37.7152074!1m0!3e0?entry=ttu
