@@ -33,7 +33,7 @@ class WorkBlock:
         self.y = y
         self.start = datetime.strptime(start.strip(), '%H:%M').time()
         self.finish = datetime.strptime(finish.strip(), '%H:%M').time()
-        self.quantidadeAtividades = 0
+        # self.quantidadeAtividades = 0
         # self.block_List = []
 
     def printWorkBlock(self):

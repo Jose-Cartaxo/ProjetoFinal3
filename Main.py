@@ -5,6 +5,7 @@ Created on Fri Apr  5 14:43:14 2024
 @author: jgac0
 """
 
+from tkinter import N
 import googlemaps
 import datetime
 from Activity import Activity
@@ -30,7 +31,14 @@ considerAppointment = pedir_s_n()
 print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
 considerPriority = pedir_s_n()
 
-print("Qual metodo de clustering deseja utilizar? \n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida) \n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster) \n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS) \n 4 - DBCANS (normal) \n5 - CodPostal \n6 - Central")
+# 1 - K-NearestNeighbors 1.0
+# 2 - K-NearestNeighbors 2.0
+# 3 - K-NearestNeighbors com DBSCANS
+# 4 - DBSCANS
+# 5 - Cod Postal
+# 6 - Central
+
+print("Qual metodo de clustering deseja utilizar? \n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida) \n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster) \n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS) \n4 - DBCANS (normal) \n5 - CodPostal \n6 - Central")
 metodoCluster = solicitar_input(1, 6)
 
 '''
@@ -49,8 +57,6 @@ começar o "relógio" para o tempo de execução
 '''
 start_time = datetime.now()
 
-
-
 '''
 
 ler dados do Excel
@@ -68,7 +74,7 @@ for indice, element in activities_xlsx.iterrows():
         list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
         # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
 
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
 list_workers = []
 for indice, element in workers_xlsx.iterrows():
     hours_str = element['HorarioTrabalho']
@@ -91,8 +97,6 @@ values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
 
 skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
 skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
-
-
 
 '''
 
@@ -138,29 +142,75 @@ for worker in list_workers:
 
 list_worker_activityQuantity = [] # lista onde para cada workblock é colocada a quantidade de atividades realizadas nesse workblock
 for work_Block in list_work_blocks:
+    
 
-    cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
-    '''
-
-    cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
-    DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
 
     '''
+    
+    correr o programa com o método de clustering escolhido
 
-    def activitiesToState1(nodes):
-        for node in nodes:
-            activity = Find_Activity_By_Id(list_activities, node.id)
-            if activity:
-                activity.state = 1
+    '''
 
-    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps) 
-    activitiesToState1(nodes)
+    # 1 - K-NearestNeighbors 1.0
+    # 2 - K-NearestNeighbors 2.0
+    # 3 - K-NearestNeighbors com DBSCANS
+    # 4 - DBSCANS
+    # 5 - Cod Postal
+    # 6 - Central
 
+    if metodoCluster == 1:
+        print('Não funfa, ainda...')
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+    if metodoCluster == 2:
+        print('Fundas, Less go!!!')
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+    if metodoCluster == 3:
+        print('Fundas, Less go!!!')
+        cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
+        DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+    if metodoCluster == 4:
+        print('Não funfa, ainda...')
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+    if metodoCluster == 5:
+        print('Não funfa, ainda...')
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+    if metodoCluster == 6:
+        print('Não funfa, ainda...')
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+
+    nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps)
+
+    '''
+    
+    colocar as atividades que foram atribuidas com o state == 1
+    
+    '''
+    activitiesToState1(nodes, list_activities)
+
+
+    '''
+    
+    fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
+    
+    '''
     plot_activities_by_order(cluster, nodes, work_Block)
 
+
+    '''
+    
+    colocar todas as atividades que não têm o state igual a 1 a 0
+    
+    '''
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
     
+
+    '''
+    
+    fazer um gráfico com a evolução da atribuição das atividades
+
+    '''
     activityQuantity = len(nodes) - 2
 
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
@@ -169,14 +219,22 @@ for work_Block in list_work_blocks:
     else:
         list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
 
+
+'''
+
+printar o tempo de execução do programa
+
+'''
 end_time = datetime.now() # type: ignore
 elapsed_time = end_time - start_time
 print("Tempo decorrido:", elapsed_time, "segundos")
 
-for skill in list_workers[0].skill:
-    print('Skil: ', skill,'\n')
 
+'''
 
+Análises estatísticas
+
+'''
 plot_activities_graph_by_state(list_activities)
 
 plot_heatmap_activities_by_state(list_activities)

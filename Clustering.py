@@ -5,8 +5,8 @@ from matplotlib.pylab import f
 from Workers import *
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-
-from numpy import block, double
+import numpy as np
+# from numpy import block, double
 from Activity import *
 
 # def Gra
@@ -344,18 +344,44 @@ def plot_activities_by_state(list_activities, work_Block):
     return
 '''
 
+def distancia(x1, y1, x2, y2):
+    return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+
 def plot_activities_by_order(list_activities, nodes, work_Block):
-    
+    """
+    Esta função representa num gráfico de pontos as atividades pertencentes ao cluster pela suas coordenadas, identifica com cores diferentes o trabalhador, as atividades atribuidas, e as atividades não atribuidas.
+    Ainda coloca umas setas a mostrar o caminho percorrido pelo trabalhor.
+
+    Parameters
+    ----------
+    list_activities: (lsit of Activity)
+        atividades pertencentes ao cluster.
+    nodes: (list of Node)
+        lista de Node com as atividades que foram atribuidas pela ordem de atribuição.
+    work_Block: (WorkBlock)
+        lista das skills que o trabalhador possuiu.
+
+    Returns
+    -------
+    null
+        não retorna nada, só cria a imagem.
+    """
+
+
+    # lista só com os ids das atividades que vão ser realizadas, por ordem de realização
     activity_id_list = [node.id for node in nodes]
 
     x_values = []
     y_values = []
     points_colors = []
 
+    # adicionar o ponto de partido do workblock ao gráfico 
     x_values.append(work_Block.x)
     y_values.append(work_Block.y)
     points_colors.append(0)
 
+    # adicionar cada atividade ao gráfico 
     for num in activity_id_list:
         activity = Find_Activity_By_Id(list_activities, num)
         if activity:
@@ -363,30 +389,53 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             y_values.append(activity.y)
             points_colors.append(3)
 
+    # adicionar outra vez o workblock pois ao fim do dia ele volta
     x_values.append(work_Block.x)
     y_values.append(work_Block.y)
     points_colors.append(0)
 
     # Definir cores com base nos estados das tarefas
-    colors = {0: 'black', 1: 'grey', 2: 'red', 3: 'green'}
+    colors = {0: 'black', 1: 'grey', 2: 'red', 3: 'green'} # aqui o 1: 'grey' nem é usado mas deixai o estar
     
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(15, 8))
 
+    
+
+
+    # adicionar cada seta para o percurso
     for i in range(len(x_values)-1):
-        plt.arrow(x_values[i], y_values[i], x_values[i+1] - x_values[i], y_values[i+1] - y_values[i],
-                color='blue', width=0.0005, head_width=0.007, length_includes_head=True)
+
+        dx = x_values[i+1] - x_values[i]
+        dy = y_values[i+1] - y_values[i]
 
 
+        dist = distancia(x_values[i], y_values[i], x_values[i+1], y_values[i+1])
+
+        # Ajustar o tamanho da cabeça da seta proporcionalmente à distância
+        head_width = 0.08 * dist
+        head_length = 0.08 * dist
+
+        plt.arrow(x_values[i], y_values[i], dx, dy,
+                color='blue', width=0.0005 * dist, head_width=head_width, head_length=head_length,length_includes_head=True)
+
+
+    # adicionar as atividades que faltam ao gráfico
     for activity in list_activities:
         if activity.idActivity not in activity_id_list:
             x_values.append(activity.x)
             y_values.append(activity.y)
-            points_colors.append(activity.state)
+            points_colors.append(2)
 
 
+    # passa o numero do state para uma  cor
     colors_order = [colors[color] for color in points_colors]
     
 
+    '''
+
+    criar o gráfico
+
+    '''
     plt.scatter(x_values, y_values, c=colors_order)
     plt.title(str(work_Block.idWorker) + ' Start:' + str(work_Block.start)+ ' End:' + str(work_Block.finish))
     plt.xlabel('Coordenada X')
@@ -397,24 +446,6 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
         Line2D([], [], marker='o', color='black', label='Ponto de Partida', linestyle='None'),
         Line2D([], [], marker='o', color='red', label='Não Atribuídas', linestyle='None')
     ]
-    '''
-    plt.legend(handles=[Line2D([], [], marker='o', color='green', label='Atribuidas', linestyle='None'),
-                        Line2D([], [], marker='o', color='black', label='Ponto Partida', linestyle='None'),
-                        Line2D([], [], marker='o', color='red', label='Não Atribuidas', linestyle='None')],
-                        bbox_to_anchor=(1.05, 1), loc='upper left')
-
-
-    for node in nodes:
-        activity = Find_Activity_By_Id(list_activities, node.id)
-        if activity:
-            start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute)
-            travel = '|Tr: ' + str(int(node.travel_Time))
-            act = '|Ap: ' + str(activity.appointment.hour) + ':' + str(activity.appointment.minute)
-            id = '|Id: ' + str(activity.idActivity)
-            string =  id + act + travel + start
-            plt.text(activity.x, activity.y, string, fontsize=9, ha='right', va='top')
-    '''
-    
     
     for i, node in enumerate(nodes):
         activity = Find_Activity_By_Id(list_activities, node.id)
@@ -424,21 +455,21 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             travel = '|Tr: ' + str(int(node.travel_Time))
             start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
             end = '|End: ' + str(node.end_Time.hour) + ':' + str(node.end_Time.minute).zfill(2)
-            string =  id + ap + travel + start + end
+            skill = '|Sk: ' + activity.skill
+            string =  id + ap + travel + start + end + skill
             legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
+        
         else:
-            # worker = Find_Worker_By_Id(list_activities, node.id)
             if(i == 0):
                 id = str(i) + ' |Id: ' + str(work_Block.idWorker)
                 start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
-                travel = '|Tr: ' + str(int(node.travel_Time))
-                string =  id + start + travel
+                string =  id + start
                 legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
             else:
                 id = str(i) + ' |Id: ' + str(work_Block.idWorker)
+                end = '|End: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
                 travel = '|Tr: ' + str(int(node.travel_Time))
-                start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
-                string =  id + start + travel
+                string =  id + travel + end
                 legend_elements.append(Line2D([], [], marker='o', color='white', label=string))
 
         
@@ -450,7 +481,7 @@ def plot_activities_by_order(list_activities, nodes, work_Block):
             minute = str(activity.appointment.minute).zfill(2)
             hour = str(activity.appointment.hour)
 
-            string = str(activity.idActivity) + ' | ' + hour + ':' + minute
+            string = str(activity.idActivity) + ' | ' + hour + ':' + minute + ' | ' + activity.skill
             plt.text(activity.x, activity.y, string, fontsize=8, ha='right', va='bottom')
 
     plt.tight_layout()

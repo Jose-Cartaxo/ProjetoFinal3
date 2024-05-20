@@ -1,7 +1,9 @@
+from Activity import *
+
 def solicitar_input(min, max):
     while True:
         try:
-            valor = int(input('Por favor, insira um número entre ' + min + ' e ' + max +': '))
+            valor = int(input('Por favor, insira um número entre ' + str(min) + ' e ' + str(max) +': '))
             if min <= valor <= max:
                 return valor
             else:
@@ -19,3 +21,10 @@ def pedir_s_n():
             if inp == 'n':
                 return False
             return True
+        
+
+def activitiesToState1(nodes, list_activities):
+    for node in nodes:
+        activity = Find_Activity_By_Id(list_activities, node.id)
+        if activity:
+            activity.state = 1
