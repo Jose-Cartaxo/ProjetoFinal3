@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 class Stats:
     def __init__(self, tipo):
@@ -34,13 +35,13 @@ class WorkBlockStats:
             WorkBlockStats.workblockquantidadetarde += 1
             self.id = WorkBlockStats.workblockquantidadetarde
 
-            
-def plot_line_graph(dados):
+
+def plot_scatter_with_trendline(dados):
     # Separando os dados em listas separadas para o eixo x e y
-    x1=[]
-    x2=[]
-    y1=[]
-    y2=[]
+    x1 = []
+    x2 = []
+    y1 = []
+    y2 = []
     for stat in dados:
         if stat.tipo == 'manha':
             x1.append(stat.id)
@@ -49,35 +50,33 @@ def plot_line_graph(dados):
             x2.append(stat.id)
             y2.append(stat.quantidade)
 
-     # Criando o gráfico de linhas para a manhã
-    plt.plot(x1, y1, marker='o', linestyle='-')
+    # Função auxiliar para criar o gráfico de dispersão com linha de tendência
+    def create_scatter_plot_with_trendline(x, y, title, filename):
+        # Criando o gráfico de dispersão
+        plt.scatter(x, y)
 
-    # Adicionando rótulos aos eixos
-    plt.xlabel('Eixo X')
-    plt.ylabel('Eixo Y')
+        # Calculando a linha de tendência
+        z = np.polyfit(x, y, 1)
+        p = np.poly1d(z)
+        plt.plot(x, p(x), linestyle='-', color='r')
 
-    # Adicionando título ao gráfico
-    plt.title('Gráfico de Linhas - Manhã')
+        # Adicionando rótulos aos eixos
+        plt.xlabel('Eixo X')
+        plt.ylabel('Eixo Y')
 
-    # Exibindo o gráfico
-    plt.savefig('PNG_Graphics/PlotLineGraphState_Manha.png')
-    plt.grid(True)
-    plt.show()
+        # Adicionando título ao gráfico
+        plt.title(title)
 
-    # Criando o gráfico de linhas para a tarde
-    plt.plot(x2, y2, marker='o', linestyle='-')
+        # Exibindo e salvando o gráfico
+        plt.grid(True)
+        plt.savefig(filename)
+        plt.show()
 
-    # Adicionando rótulos aos eixos
-    plt.xlabel('Eixo X')
-    plt.ylabel('Eixo Y')
+    # Criando o gráfico de dispersão com linha de tendência para a manhã
+    create_scatter_plot_with_trendline(x1, y1, 'Gráfico de Dispersão com Linha de Tendência - Manhã', 'PNG_Graphics/PlotScatterTrendline_Manha.png')
 
-    # Adicionando título ao gráfico
-    plt.title('Gráfico de Linhas - Tarde')
-
-    # Exibindo o gráfico
-    plt.savefig('PNG_Graphics/PlotLineGraphState_Tarde.png')
-    plt.grid(True)
-    plt.show()
+    # Criando o gráfico de dispersão com linha de tendência para a tarde
+    create_scatter_plot_with_trendline(x2, y2, 'Gráfico de Dispersão com Linha de Tendência - Tarde', 'PNG_Graphics/PlotScatterTrendline_Tarde.png')
 
 def DataAnalyticsByHour(listActivities):
     statsList = []

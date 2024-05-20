@@ -3,7 +3,7 @@ from Activity import Find_Activity_By_Id
 from Node import Node
 from Workers import Worker
 from Workers import Find_Worker_By_Id
-from Clustering import Travel_Time
+from DBSCANS import Travel_Time
 from datetime import datetime, timedelta, time
 import pandas as pd
 
@@ -296,11 +296,14 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 minutesDayEnd = workBlock.finish.hour * 60 + workBlock.finish.minute
 
                 cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, travel_Time_Returning, values_dict)
-                print('\n\n\n\n NÃO CABE MAIS LOGO: COST = ', current_Time.time() , ' - ' , workBlock.finish,'\n\n que é: ', cost)
+                # print('\n\n\n\n NÃO CABE MAIS LOGO: COST = ', current_Time.time() , ' - ' , workBlock.finish,'\n\n que é: ', cost)
 
                 # travel_Time_Returning = Travel_Time(current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
                 travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y) # type: ignore
                 # print('\n\nCost no Worker-1 foi: ',cost,'\n\n')
+                
+                time_Required_for_Activity = skills_dict[activity.skill]
+                
                 activity_End_Time_Real = datetime_Arraival + timedelta(minutes=time_Required_for_Activity)
                 
                 

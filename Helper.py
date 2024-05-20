@@ -1,4 +1,5 @@
 from Activity import *
+import math
 
 def solicitar_input(min, max):
     while True:
@@ -28,3 +29,37 @@ def activitiesToState1(nodes, list_activities):
         activity = Find_Activity_By_Id(list_activities, node.id)
         if activity:
             activity.state = 1
+
+
+
+# devolve a quantidade de Minutos necessários para relizar o trajeto
+def Travel_Time( travel_mult, x1, y1, x2, y2):
+    return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
+
+'''
+def Travel_Time( x1, y1, x2, y2, gmaps):
+    origem = (x1, y1)  # San Francisco, CA
+    destino = (x2, y2)  # Los Angeles, CA
+    result = gmaps.distance_matrix(origem, destino, mode="driving")
+    minutes = result['rows'][0]['elements'][0]['duration']['value'] / 60
+    # print('De: ', origem, ' para: ',destino, ' demora: ', minutes, 'minutos.')
+    return minutes
+'''
+
+# devolve a distancia em KM entre 2 pontos
+def Distance_Calculator( x1, y1, x2, y2):
+    R = 6373.0
+
+    lat1 = math.radians(x1)
+    lon1 = math.radians(y1)
+    lat2 = math.radians(x2)
+    lon2 = math.radians(y2)
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    distance = R * c
+    return distance

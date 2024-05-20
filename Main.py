@@ -9,13 +9,14 @@ from tkinter import N
 import googlemaps
 import datetime
 from Activity import Activity
-from Activity import Find_Activity_By_Id
-from Clustering import *
+from DBSCANS import *
 from Workers import *
 from Stats import *
 from Helper import *
 import pandas as pd
 from Optimization import Greedy
+from Ploting import *
+from KNearest_Neighbors import *
 
 '''
 
@@ -162,10 +163,10 @@ for work_Block in list_work_blocks:
         print('Não funfa, ainda...')
         cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
     if metodoCluster == 2:
-        print('Fundas, Less go!!!')
+        # print('Fundas, Less go!!!')
         cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
     if metodoCluster == 3:
-        print('Fundas, Less go!!!')
+        # print('Fundas, Less go!!!')
         cluster = KNearest_Neighbors(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
         DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
     if metodoCluster == 4:
@@ -245,11 +246,12 @@ for dat in sorted_stats_list:
     dat.print()
 
 data = DataAnalyticsBySkill(list_activities)
+
 for dat in data:
     dat.print()
 
 
 
 print(type(data[0].tipo))
-plot_line_graph(list_worker_activityQuantity)
+plot_scatter_with_trendline(list_worker_activityQuantity)
 
