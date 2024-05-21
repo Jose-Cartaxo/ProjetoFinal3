@@ -70,7 +70,8 @@ def KNearest_Neighbors_Vote_in(atividade, workblock, skills):
     return False
 
 
-def KNearest_Neighbors(list_activities, list_workers, workblock, k):
+
+def KNearest_Neighbors1(list_activities, list_workers, workblock, k):
     """
     Esta função faz o K-NEAREST-NEIGHBORS para o workblock submetido e devolve uma lista com o atividades do cluster
 
@@ -108,6 +109,7 @@ def KNearest_Neighbors(list_activities, list_workers, workblock, k):
             count += 1
         indi += 1
     return  list_temp
+
 
 
 def KNearest_Neighbors2(list_activities, list_workers, workblock, k):

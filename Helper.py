@@ -33,11 +33,11 @@ def activitiesToState1(nodes, list_activities):
 
 
 # devolve a quantidade de Minutos necessários para relizar o trajeto
-def Travel_Time( travel_mult, x1, y1, x2, y2):
+def Travel_Time( travel_mult, x1, y1, x2, y2, gmaps):
     return Distance_Calculator( x1, y1, x2, y2) * travel_mult # values_dict['TRAVEL_TIME']
 
 '''
-def Travel_Time( x1, y1, x2, y2, gmaps):
+def Travel_Time( travel_mult, x1, y1, x2, y2, gmaps):
     origem = (x1, y1)  # San Francisco, CA
     destino = (x2, y2)  # Los Angeles, CA
     result = gmaps.distance_matrix(origem, destino, mode="driving")

@@ -35,6 +35,28 @@ class WorkBlockStats:
             WorkBlockStats.workblockquantidadetarde += 1
             self.id = WorkBlockStats.workblockquantidadetarde
 
+ # Função auxiliar para criar o gráfico de dispersão com linha de tendência
+def create_scatter_plot_with_trendline(x, y, title, filename):
+    # Criando o gráfico de dispersão
+    plt.scatter(x, y)
+
+    # Calculando a linha de tendência
+    z = np.polyfit(x, y, 1)
+    p = np.poly1d(z)
+    plt.plot(x, p(x), linestyle='-', color='r')
+
+    # Adicionando rótulos aos eixos
+    plt.xlabel('Eixo X')
+    plt.ylabel('Eixo Y')
+
+    # Adicionando título ao gráfico
+    plt.title(title)
+
+    # Exibindo e salvando o gráfico
+    plt.grid(True)
+    plt.savefig(filename)
+    plt.show()
+
 
 def plot_scatter_with_trendline(dados):
     # Separando os dados em listas separadas para o eixo x e y
@@ -49,28 +71,6 @@ def plot_scatter_with_trendline(dados):
         else:
             x2.append(stat.id)
             y2.append(stat.quantidade)
-
-    # Função auxiliar para criar o gráfico de dispersão com linha de tendência
-    def create_scatter_plot_with_trendline(x, y, title, filename):
-        # Criando o gráfico de dispersão
-        plt.scatter(x, y)
-
-        # Calculando a linha de tendência
-        z = np.polyfit(x, y, 1)
-        p = np.poly1d(z)
-        plt.plot(x, p(x), linestyle='-', color='r')
-
-        # Adicionando rótulos aos eixos
-        plt.xlabel('Eixo X')
-        plt.ylabel('Eixo Y')
-
-        # Adicionando título ao gráfico
-        plt.title(title)
-
-        # Exibindo e salvando o gráfico
-        plt.grid(True)
-        plt.savefig(filename)
-        plt.show()
 
     # Criando o gráfico de dispersão com linha de tendência para a manhã
     create_scatter_plot_with_trendline(x1, y1, 'Gráfico de Dispersão com Linha de Tendência - Manhã', 'PNG_Graphics/PlotScatterTrendline_Manha.png')

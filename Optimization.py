@@ -1,4 +1,6 @@
 import heapq
+
+from bson import _get_decimal128
 from Activity import Find_Activity_By_Id
 from Node import Node
 from Workers import Worker
@@ -8,6 +10,40 @@ from datetime import datetime, timedelta, time
 import pandas as pd
 
 def CostCalculator(total_time_spend, travel_time, appointment, creationDate, values_dict, considerAppointment, considerPriority):
+    """
+    Esta função calcula o custo, tem em conta se o utilizador pretende dar prioridade às atividade mais antigas ou às atividades com agendamento a cumprir ou não.
+
+    Parameters
+    ----------
+    total_time_spend: (int)
+        quantidade de tempo em minutos gasta.
+    travel_time: (float)
+        quantidade de tempo em minutos gasta em viagem.
+    appointment: (bool)
+        se tem agendamento ou não.
+    creationDate: (datetime.date)
+        data de criação da atividade pode ser usadao caso o utilizador queira dar prioridade as atividades agendadas a mais tempo
+    values_dict: (dict)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+    considerAppointment: (bool)
+        bool que se for true significa que o utilizador quer considerar as atividades com agendamento mais prioritárias do que as sem, false são todas iguais
+    considerPriority: (bool)
+        bool que se for true significa que o utilizador quer considerar as atividades com agendamento mais antigo mais prioritárias do que as com mais recente, false são todas iguais
+
+        
+    Returns
+    -------
+    list of Activity
+        Retorna uma lista de atividades, que é o cluster final.
+    """
+
+    # print('total_time_spend: ', type(total_time_spend))
+    # print('travel_time: ', type(travel_time))
+    # print('appointment: ', type(appointment))
+    # print('creationDate: ', type(creationDate))
+    # print('values_dict: ', type(values_dict))
+    # print('considerAppointment: ', type(considerAppointment))
+    # print('considerPriority: ', type(considerPriority))
 
     # print('Total: ', total_time_spend, ' Viagem: ', travel_time, ' Atividade: ', activity_time)
 
@@ -16,15 +52,7 @@ def CostCalculator(total_time_spend, travel_time, appointment, creationDate, val
     labor_Price_Hr = values_dict['LABOR_PRICE']
     labor_Price_Min = labor_Price_Hr / 60
 
-    # print('gas_Price: ', gas_Price, ' labor_Price_Min: ', labor_Gainz_Min, ' labor_Gainz_Min: ', labor_Price_Min)
-    # print('Total: ', (total_time_spend * labor_Price_Min), ' Viagem: ', ((travel_time * travel_Consumption_By_Min) * gas_Price), ' Atividade: ', (activity_time * labor_Gainz_Min))
-
     cost = ((total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price))
-
-    #print('Gasto Trabalho: ' + str(total_time_spend * labor_Price_Min) + ', Gasto Viagem: ' + str((travel_time * travel_Consumption_By_Min) * gas_Price) + ', Total: ' + str(cost))
-    # cost = cost - (activity_time * labor_Gainz_Min)
-    # print('Custo: ', cost)
-    # print('\n\n\n\n')
 
     if considerAppointment and appointment:
         cost = cost * values_dict['PRIORITY_APPOINTMENT']
@@ -36,66 +64,42 @@ def CostCalculator(total_time_spend, travel_time, appointment, creationDate, val
         cost = cost * mult
 
 
-    # print('O que se passou aqui: \n', total_time_spend, ' tempo total x', labor_Price_Min, ' = ',(total_time_spend * labor_Price_Min))
-    # print( travel_time, ' tempo viagem x', travel_Consumption_By_Min)
-    # print( travel_time * travel_Consumption_By_Min, ' cunsumo viagem x', gas_Price, ' = ', ((travel_time * travel_Consumption_By_Min) * gas_Price))
-
-
     return cost
 
 
 def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
 
-    # print('Total: ', total_time_spend, ' Viagem: ', travel_time, ' Atividade: ', activity_time)
     travel_Consumption_By_Min = values_dict['GAS_CONSUMPTION']
     gas_Price = values_dict['GAS_PRICE']
     labor_Price_Hr = values_dict['LABOR_PRICE']
     labor_Price_Min = labor_Price_Hr / 60
-    # print('gas_Price: ', gas_Price, ' labor_Price_Min: ', labor_Gainz_Min, ' labor_Gainz_Min: ', labor_Price_Min)
 
-    # print('Total: ', (total_time_spend * labor_Price_Min), ' Viagem: ', ((travel_time * travel_Consumption_By_Min) * gas_Price), ' Atividade: ', (activity_time * labor_Gainz_Min))
 
-    # print('tempo total: ', total_time_spend, ' travel time: ', travel_time)
     cost = (total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price)
 
-    # cost = cost - (activity_time * labor_Gainz_Min)
-    # print('Custo: ', cost)
-    # print('\n\n\n\n')
-    # print(cost)
     return cost
 
 
 def Belongs_to_Family(node, activity):
     while node:
         if node.id == activity:
-            # print('Já pertence')
             return True
         node = node.parent
-    # print('Não pertence')
     return False
 
 
 
 def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
 
-
-    # for act in worker_Activities_Cluster:
-        # act.printActivity()
-
-    # print("Enter para continuar...")
-    # input()
-
-    # random.shuffle(worker_Activities_Cluster)
-    # dia de "hoje"
-
     current_DateTime = datetime.now()
 
-    # "extermidades" de cada "ramo"
     frontier = []
     
     time_starting = datetime.combine(current_DateTime.date(), workBlock.start)
+
+
     # inicio é o WorkBlock
-    heapq.heappush(frontier, Node(workBlock.idWorker, 0, 0,time_starting, time_starting, None))
+    frontier.append(Node(workBlock.idWorker, 0, 0,time_starting, time_starting, None))
 
 
     while frontier:
@@ -125,11 +129,11 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             
             # Tempo necessário para se deslocar até a Atividade
             # travel_Time_Going = Travel_Time(current_Activity.x, current_Activity.y, activity.x, activity.y, gmaps) # type: ignore
-            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, activity.x, activity.y) # type: ignore
+            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, activity.x, activity.y, gmaps) # type: ignore
 
             # Tempo necessário para se deslocar da Atividade até Casa
             # travel_Time_Returning = Travel_Time( activity.x, activity.y, workBlock.x, workBlock.y, gmaps)
-            travel_Time_Returning = Travel_Time(travel_Time_By_1KM, activity.x, activity.y, workBlock.x, workBlock.y)
+            travel_Time_Returning = Travel_Time(travel_Time_By_1KM, activity.x, activity.y, workBlock.x, workBlock.y, gmaps)
 
             # Hora de Chegada a Atividade
             datetime_Arraival = current_Time + timedelta(minutes=travel_Time_Going)
@@ -205,7 +209,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             cost = CostCalculator(minutesDayCurrent - minutesDayStart, travel_Time_Going, True, activity.creation, values_dict, considerAppointment, considerPriority)
                             # print('Entrei no inicio da Atividade: ',activity.idActivity, ', Cost: ', cost)
 
-                            heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real, current_Node))
+                            frontier.append(Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real, current_Node))
 
                             
 
@@ -241,7 +245,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             
                             # print('Entrei a meio da Atividade: ',activity.idActivity, ', Cost: ', cost)
                             
-                            heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, min_Time_Activity, activity_End_Time_Real , current_Node))
+                            frontier.append(Node(activity.idActivity, cost, travel_Time_Going, min_Time_Activity, activity_End_Time_Real , current_Node))
 
 
 
@@ -276,7 +280,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         # print('Entrei ATOA: ',activity.idActivity, ', Cost: ', cost)
 
                         # print('Cost no retorno')
-                        heapq.heappush(frontier, Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real , current_Node))
+                        frontier.append(Node(activity.idActivity, cost, travel_Time_Going, datetime_Arraival, activity_End_Time_Real , current_Node))
 
 
 
@@ -299,7 +303,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 # print('\n\n\n\n NÃO CABE MAIS LOGO: COST = ', current_Time.time() , ' - ' , workBlock.finish,'\n\n que é: ', cost)
 
                 # travel_Time_Returning = Travel_Time(current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
-                travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y) # type: ignore
+                travel_Time_Returning = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
                 # print('\n\nCost no Worker-1 foi: ',cost,'\n\n')
                 
                 time_Required_for_Activity = skills_dict[activity.skill]
@@ -309,7 +313,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 
                 leaf = Node(workBlock.idWorker, cost, travel_Time_Returning, current_Time + timedelta(minutes=travel_Time_Returning), activity_End_Time_Real, current_Node)
                 leaf.state = 0
-                heapq.heappush(frontier, leaf)
+                frontier.append(leaf)
                 frontier.remove(current_Node)
         else:
             # print('!_!_!_REMOVEU_!_!_!')
