@@ -33,19 +33,9 @@ def CostCalculator(total_time_spend, travel_time, appointment, creationDate, val
         
     Returns
     -------
-    list of Activity
-        Retorna uma lista de atividades, que é o cluster final.
+    int
+        Retorna o custo da viagem até a atividade.
     """
-
-    # print('total_time_spend: ', type(total_time_spend))
-    # print('travel_time: ', type(travel_time))
-    # print('appointment: ', type(appointment))
-    # print('creationDate: ', type(creationDate))
-    # print('values_dict: ', type(values_dict))
-    # print('considerAppointment: ', type(considerAppointment))
-    # print('considerPriority: ', type(considerPriority))
-
-    # print('Total: ', total_time_spend, ' Viagem: ', travel_time, ' Atividade: ', activity_time)
 
     travel_Consumption_By_Min = values_dict['GAS_CONSUMPTION'] # 
     gas_Price = values_dict['GAS_PRICE']
@@ -69,6 +59,25 @@ def CostCalculator(total_time_spend, travel_time, appointment, creationDate, val
 
 def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
 
+    """
+    Esta função calcula o custo de viagem de volta a casa.
+
+    Parameters
+    ----------
+    total_time_spend: (int)
+        quantidade de tempo em minutos gasta.
+    travel_time: (float)
+        quantidade de tempo em minutos gasta em viagem.
+    values_dict: (dict)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        
+    Returns
+    -------
+    Int
+        Retorna o custo da viagem de volta a casa.
+    """
+
+
     travel_Consumption_By_Min = values_dict['GAS_CONSUMPTION']
     gas_Price = values_dict['GAS_PRICE']
     labor_Price_Hr = values_dict['LABOR_PRICE']
@@ -80,16 +89,41 @@ def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
     return cost
 
 
-def Belongs_to_Family(node, activity):
-    while node:
-        if node.id == activity:
-            return True
-        node = node.parent
-    return False
-
-
 
 def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
+
+    """
+    Esta função verifica qual a melhor combinação de atividades para o trabalhador, faz lhe a rota e devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades.
+
+    Parameters
+    ----------
+    worker_Activities_Cluster: (list of Activity.Activity)
+        quantidade de tempo em minutos gasta.
+    workBlock: (Workers.WorkBlock)
+        quantidade de tempo em minutos gasta em viagem.
+    skills_dict: (dict)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        quantidade de tempo em minutos gasta em viagem.
+    list_workers: (list of Workers.Worker)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        quantidade de tempo em minutos gasta em viagem.
+    values_dict: (dict)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        quantidade de tempo em minutos gasta em viagem.
+    considerAppointment: (bool)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        quantidade de tempo em minutos gasta em viagem.
+    considerPriority: (bool)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        quantidade de tempo em minutos gasta em viagem.
+    gmaps: (googlemaps.client.Client)
+        dicionário com os valores importados do Excel para ser utilizados nos calculos
+        
+    Returns
+    -------
+    list of Node
+        devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades
+    """
 
     current_DateTime = datetime.now()
 
@@ -113,11 +147,13 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         frontier = sorted(frontier)
         current_Node = frontier[0]
 
+        '''
         print('\n\n\n')
         for nozinho in frontier:
             nozinho.printNodeGen()
             print('\n')
         print('\n\n\n')
+        '''
 
         # o tempo do node
         current_Time = current_Node.end_Time
@@ -145,7 +181,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             datetime_Arraival = current_Time + timedelta(minutes=travel_Time_Going)
 
             # verificar se a atividade já foi usada antes neste ramo, basicamente anda para trás a ver as tarefas anteriores, se não estiver lá ele deixa, se estivar lá, não deixa
-            if not Belongs_to_Family(current_Node, activity.idActivity):
+            if not activity.idActivity in current_Node.family :
 
                 # nesta parte verifica os limites do tempo, vai sair daqui
                 time_Tolerance_For_Activity_Post = timedelta(minutes=tolerance_For_Activity_Post)
