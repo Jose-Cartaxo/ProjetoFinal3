@@ -24,8 +24,10 @@ class Node:
         self.family.append(id) # adicionar o proprio id a lista de atividades
         
 
-    def printNode(self):
-        print('ID: ', self.id, ' Cost: ', self.cost,' TotalCost: ', self.total_cost, ' start_Time: ', self.start_Time, ' Gen: ', self.gen)
+    def printNodeGen(self):
+        print('ID: ', self.id, ' Cost: ', self.cost,' TotalCost: ', self.total_cost)
+        if self.parent:
+            self.parent.printNodeGen()
 
     # se for menor tem de retornar true
     def __lt__(self, other):
@@ -35,16 +37,5 @@ class Node:
             return False
         if other.gen == 0:
             return True
-        # return self.total_cost < other.total_cost
-    
-        return (self.total_cost / self.gen) < (other.total_cost / other.gen)
-
-        """
-        if self.gen == 0:
-            return True
-        if other.gen == 0:
-            return False
-        
-        return self.total_cost > other.total_cost
+        return self.total_cost < other.total_cost
         # return (self.total_cost / self.gen) < (other.total_cost / other.gen)
-        """

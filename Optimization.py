@@ -113,6 +113,12 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         frontier = sorted(frontier)
         current_Node = frontier[0]
 
+        print('\n\n\n')
+        for nozinho in frontier:
+            nozinho.printNodeGen()
+            print('\n')
+        print('\n\n\n')
+
         # o tempo do node
         current_Time = current_Node.end_Time
         foundActivity = False
