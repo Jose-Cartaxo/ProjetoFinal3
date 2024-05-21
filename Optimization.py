@@ -53,12 +53,10 @@ def CostCalculator(total_time_spend, travel_time, appointment, creationDate, val
         mult = values_dict['PRIORITY_CREATION'] ** weeksDiference
         cost = cost * mult
 
-
     return cost
 
 
 def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
-
     """
     Esta função calcula o custo de viagem de volta a casa.
 
@@ -77,16 +75,15 @@ def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
         Retorna o custo da viagem de volta a casa.
     """
 
-
     travel_Consumption_By_Min = values_dict['GAS_CONSUMPTION']
     gas_Price = values_dict['GAS_PRICE']
     labor_Price_Hr = values_dict['LABOR_PRICE']
     labor_Price_Min = labor_Price_Hr / 60
 
-
     cost = (total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price)
 
     return cost
+
 
 def DateTimeTimeParaMinutosDoDia(tim):
     """
@@ -106,6 +103,21 @@ def DateTimeTimeParaMinutosDoDia(tim):
 
 
 def adicionarMinutosADatetimeTime(tim, min):
+    """
+    Esta função faz a conta, adicionando à hora fornecida os minutos fornecidos, e devolve o resultado
+
+    Parameters
+    ----------
+    tim: (datetime.time)
+        hora sujeita a subração.
+    min: (Int)
+        quantidade de minutos a adicionar.
+        
+    Returns
+    -------
+    datetime.time
+        devolve a hora após a conta
+    """
 
     minutosTotais = tim.minute + min
 
@@ -119,6 +131,22 @@ def adicionarMinutosADatetimeTime(tim, min):
     return time(horas, minutos)
 
 def subtrairMinutosADatetimeTime(tim, min):
+    """
+    Esta função faz a conta, subtraindo a hora fornecida os minutos fornecidos, e devolve o resultado
+
+    Parameters
+    ----------
+    tim: (datetime.time)
+        hora sujeita a subração.
+    min: (Int)
+        quantidade de minutos a subtrair.
+        
+    Returns
+    -------
+    datetime.time
+        devolve a hora após a conta
+    """
+
     # quantidade de horas dentro dos minutos
     quantidadeDeHoras = min // 60
     min = min % 60
@@ -423,7 +451,9 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                 # adicionar o custo de volta a casa ao custo pois este ainda não estava a ser considerado, uma vez que ainda não se sabia se a seguir a esta atividade seria colocada outra
                 current_Node.cost += cost
+                print('\nANTES: ', current_Node.total_cost)
                 current_Node.total_cost += cost
+                print('ANTES: ', current_Node.total_cost)
 
                 # tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
                 
