@@ -130,6 +130,7 @@ def adicionarMinutosADatetimeTime(tim, min):
 
     return time(horas, minutos)
 
+
 def subtrairMinutosADatetimeTime(tim, min):
     """
     Esta função faz a conta, subtraindo a hora fornecida os minutos fornecidos, e devolve o resultado

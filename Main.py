@@ -83,12 +83,9 @@ for indice, element in workers_xlsx.iterrows():
     hours_str = element['HorarioTrabalho']
     print(hours_str)
     hours_list = hours_str.split(',')
-    # print(hours_list)
-    # print(hours_list[0])
     tempo_list_work_blocks = []
     i = 0
     for hours in hours_list:
-        # print(hours)
         start_hour, end_hour = hours.split(';')
         tempo_list_work_blocks.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
         i += 1
@@ -103,33 +100,11 @@ skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
 
 '''
 
-a seguir seriam uns prints a mostrar que os valores foram bem importados
-
-'''
-
-'''
-print('\nPrimeiros 5 Trabalhadores: \n')
-for i in range(0, 5):
-    if i < len(list_workers):
-        list_workers[i].printWorker()
-
-print('\nPrimeiras 5 Atividades: \n')
-for i in range(0, 5):
-    list_activities[i].printActivity() 
-
-print('\nDados Importados com Sucesso!!\n')
-'''
-
-'''
-
 heat map por hora de marcação, mais escuro, mais tarde a hora de marcação
 
 '''
-'''
 
 plot_heatmap_activities_by_hour(list_activities)
-
-'''
 
 '''
 
@@ -156,49 +131,46 @@ for work_Block in list_work_blocks:
     # 2 - K-NearestNeighbors 2.0
     # 3 - K-NearestNeighbors com DBSCANS
     # 4 - DBSCANS
-    # 6 - Central
+    # 5 - Central
 
     if metodoCluster == 1:
-        # print('Fundas, Less go!!!')
-        cluster = KNearest_Neighbors1(list_activities, list_workers, work_Block, 10)
-    if metodoCluster == 2:
-        # print('Fundas, Less go!!!')
-        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
-    if metodoCluster == 3:
-        # print('Fundas, Less go!!!')
+        cluster = KNearest_Neighbors1(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
+
+    elif metodoCluster == 2:
+        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
+    
+    elif metodoCluster == 3:
         cluster = KNearest_Neighbors1(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
         cluster = DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
-    if metodoCluster == 4:
-        # print('Fundas, Less go!!!')
+    
+    elif metodoCluster == 4:
         cluster = DBSCANS2(list_activities, list_workers, work_Block, values_dict['MIN_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
-    if metodoCluster == 5:
+    
+    elif metodoCluster == 5:
         print('Não funfa, ainda...')
-        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
-        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+        cluster = []
+        # cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
+        # cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
 
     if len(cluster) != 0:
         nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps)
 
+
     '''
     
     colocar as atividades que foram atribuidas com o state == 1
-    
     '''
     activitiesToState1(nodes, list_activities)
-
 
     '''
     
     fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-    
     '''
     plot_activities_by_order(cluster, nodes, work_Block)
-
 
     '''
     
     colocar todas as atividades que não têm o state igual a 1 a 0
-    
     '''
     for activity in list_activities:
         activity.resetStateToZeroIfNotOne()
@@ -207,26 +179,20 @@ for work_Block in list_work_blocks:
     '''
     
     fazer um gráfico com a evolução da atribuição das atividades
-
     '''
-
     activityQuantity = len(nodes) - 2
 
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
     if work_Block.start < meio_dia:
-        # print('manha')
         list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
     else:
-        # print('tarde')
         list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
 
 
 '''
 
 printar o tempo de execução do programa
-
 '''
-
 end_time = datetime.now() # type: ignore
 elapsed_time = end_time - start_time
 print("Tempo decorrido:", elapsed_time, "segundos")
@@ -235,9 +201,7 @@ print("Tempo decorrido:", elapsed_time, "segundos")
 '''
 
 Análises estatísticas
-
 '''
-
 plot_activities_graph_by_state(list_activities)
 
 plot_heatmap_activities_by_state(list_activities)
