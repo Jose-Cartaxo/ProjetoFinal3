@@ -77,11 +77,11 @@ for indice, element in activities_xlsx.iterrows():
         listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
         # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
 
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
 listaTrabalhadores = []
 for indice, element in workers_xlsx.iterrows():
     hours_str = element['HorarioTrabalho']
-    print(hours_str)
+    # print(hours_str)
     hours_list = hours_str.split(',')
     tempo_listaBlocoTrabalho = []
     i = 0
@@ -118,32 +118,6 @@ for worker in listaTrabalhadores:
         listaBlocoTrabalho.append(workBlock)
 
 
-list_worker_activityQuantity = [] # lista onde para cada workblock é colocada a quantidade de atividades realizadas nesse workblock
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 '''
 
 correr o programa com o método de clustering escolhido
@@ -177,76 +151,10 @@ elif metodoCluster == 4:
 
 elif metodoCluster == 5:
     # print('Não funfa, ainda...')
-    cluster = Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(values_dict['K_NEAREST_NEIGHBORS']))
+    cluster = Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(values_dict['K_NEAREST_NEIGHBORS']), skills_dict, values_dict, considerAppointment, considerPriority, gmaps)
     # cluster = []
     # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
     # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
-
-
-
-# if len(cluster) != 0:
-#     nodes = Greedy(cluster, work_Block, skills_dict, listaTrabalhadores, values_dict, considerAppointment, considerPriority, gmaps)
-
-
-
-
-
-
-
-
-
-
-
-
-# '''
-
-# colocar as atividades que foram atribuidas com o state == 1
-# '''
-# activitiesToState1(nodes, listaAtividades)
-
-# '''
-
-# fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-# '''
-# plot_activities_by_order(cluster, nodes, work_Block)
-
-# '''
-
-# colocar todas as atividades que não têm o state igual a 1 a 0
-# '''
-# for activity in listaAtividades:
-#     activity.resetStateToZeroIfNotOne()
-
-
-# '''
-
-# fazer um gráfico com a evolução da atribuição das atividades
-# '''
-# activityQuantity = len(nodes) - 2
-
-# meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-# if work_Block.start < meio_dia:
-#     list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
-# else:
-#     list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -280,5 +188,4 @@ for dat in data:
 
 
 print(type(data[0].tipo))
-plot_scatter_with_trendline(list_worker_activityQuantity)
 

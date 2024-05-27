@@ -97,17 +97,24 @@ def KNearest_Neighbors1(list_activities, skills, workblock, k):
     for activity in list_activities:
         distance = Distance_Calculator(activity.x, activity.y, workblock.x, workblock.y)
         distances.append(KNearest_Nei(activity, distance))
-
+    
+    print('Fez as distancias todas')
+    
     distances = sorted(distances)
     
     list_temp = []
     count = 0
     indi = 0
     while count < k:
-        if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, skills):
-            list_temp.append(distances[indi].atividade)
-            count += 1
-        indi += 1
+        if indi < len(distances):
+            if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, skills):
+                list_temp.append(distances[indi].atividade)
+                count += 1
+            indi += 1
+        else:
+            break
+    
+    print('Já tem a lista')
     return  list_temp
 
 

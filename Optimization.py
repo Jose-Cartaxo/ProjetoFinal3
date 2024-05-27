@@ -126,7 +126,9 @@ def adicionarMinutosADatetimeTime(tim, min):
     minutos = minutosTotais % 60
 
     horas = tim.hour + quantidadeDeHoras 
-    horas = horas % 24
+    horas = horas
+    if horas > 23:
+        return time(23,59)
 
     return time(horas, minutos)
 
@@ -206,8 +208,6 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
     # Aqui cria uma lista "frontier", para guardar os nós que estão na fronteira
     frontier = []
     
-    # current_DateTime = datetime.now()
-    # time_starting = datetime.combine(current_DateTime.date(), workBlock.start)
 
     # atribuição das vars constantes que vêm do dicionário, que veio do Excel
     travel_Time_By_1KM = values_dict['TRAVEL_TIME']
@@ -225,30 +225,24 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         frontier = sorted(frontier)
         current_Node = frontier[0]
 
-        '''
-        print('\n\n\n')
-        for nozinho in frontier:
-            nozinho.printNodeGen()
-            print('\n')
-        print('\n\n\n')
-        '''
-
         # a hora em que o node atual acabou, a hora a partir da qual vamos começar
         current_Time = current_Node.end_Time
 
         # se encontrar atividade passa a true, isto para ser usado mais a frente, pois se não conseguir encontrar mais atividades, volta para casa
         foundActivity = False
 
+        # aqui temos um problema pois se no futuro se for possivel um trabalhador e uma atividade terem o mesmo id, isto começa a dar raia
+        # como só guardamos o id da tarefa no nó, vamos buscar a última atividade realizada pelo id
+        current_Activity = Find_Activity_By_Id(worker_Activities_Cluster,current_Node.id)
+
+        # se não existir uma atividade com o id é por que é porque é um trabalhador, por exemplo o primeiro nó da lista
+        if not current_Activity:
+            current_Activity = Find_Worker_By_Id(list_workers, current_Node.id)
+
+
         # aqui percorre todas as atividades do cluster, isto para as tentar adicionar a rota
         for activity in worker_Activities_Cluster:
             
-            # aqui temos um problema pois se no futuro se for possivel um trabalhador e uma atividade terem o mesmo id, isto começa a dar raia
-            # como só guardamos o id da tarefa no nó, vamos buscar a última atividade realizada pelo id
-            current_Activity = Find_Activity_By_Id(worker_Activities_Cluster,current_Node.id)
-
-            # se não existir uma atividade com o id é por que é porque é um trabalhador, por exemplo o primeiro nó da lista
-            if not current_Activity:
-                current_Activity = Find_Worker_By_Id(list_workers, current_Node.id)
             
             # Tempo necessário para se deslocar até a Atividade
             travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, activity.x, activity.y, gmaps) # type: ignore
@@ -383,7 +377,6 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 else:
                     # Tempo necessário para a Atividade em si
                     tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
-                    
                     # Tempo em que acaba a Tarefa
                     activity_End_Time_Real = adicionarMinutosADatetimeTime( horaDeChegadaAAtividade, tempoNecessarioParaRealizarAtividade)
 
@@ -452,9 +445,9 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
 
                 # adicionar o custo de volta a casa ao custo pois este ainda não estava a ser considerado, uma vez que ainda não se sabia se a seguir a esta atividade seria colocada outra
                 current_Node.cost += cost
-                print('\nANTES: ', current_Node.total_cost)
+                # print('\nANTES: ', current_Node.total_cost)
                 current_Node.total_cost += cost
-                print('ANTES: ', current_Node.total_cost)
+                # print('ANTES: ', current_Node.total_cost)
 
                 # tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
                 
