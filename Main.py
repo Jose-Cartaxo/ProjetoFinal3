@@ -17,6 +17,7 @@ import pandas as pd
 from Optimization import Greedy
 from Ploting import *
 from KNearest_Neighbors import *
+from Central import *
 
 '''
 
@@ -38,12 +39,11 @@ considerPriority = False
 # 2 - K-NearestNeighbors 2.0
 # 3 - K-NearestNeighbors com DBSCANS
 # 4 - DBSCANS
-# 5 - Cod Postal
-# 6 - Central
+# 5 - Central
 
-print("Qual metodo de clustering deseja utilizar? \n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida) \n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster) \n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS) \n4 - DBCANS (normal) \n5 - CodPostal \n6 - Central")
-# metodoCluster = solicitar_input(1, 6)
-metodoCluster = 2
+print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
+# metodoCluster = solicitar_input(1, 5)
+metodoCluster = 5
 '''
 
 Configurar o Google Maps
@@ -66,31 +66,31 @@ ler dados do Excel
 
 '''
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
-list_activities = []
+listaAtividades = []
 for indice, element in activities_xlsx.iterrows():
 
     if element['ComprirAgendamento'] == 0:
 
-        list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
-        # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
+        listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
+        # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
     else:
-        list_activities.append(Activity(id = element['NUMINT'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
-        # list_activities.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
+        listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
+        # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
 
 workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKER') # type: ignore
-list_workers = []
+listaTrabalhadores = []
 for indice, element in workers_xlsx.iterrows():
     hours_str = element['HorarioTrabalho']
     print(hours_str)
     hours_list = hours_str.split(',')
-    tempo_list_work_blocks = []
+    tempo_listaBlocoTrabalho = []
     i = 0
     for hours in hours_list:
         start_hour, end_hour = hours.split(';')
-        tempo_list_work_blocks.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
+        tempo_listaBlocoTrabalho.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
         i += 1
     
-    list_workers.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'],  [item.strip() for item in  element['skills'].split(',')]  , element['xCasa'], element['yCasa'], tempo_list_work_blocks))
+    listaTrabalhadores.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'],  [item.strip() for item in  element['skills'].split(',')]  , element['xCasa'], element['yCasa'], tempo_listaBlocoTrabalho))
 
 values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
 values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
@@ -104,7 +104,7 @@ heat map por hora de marcação, mais escuro, mais tarde a hora de marcação
 
 '''
 
-plot_heatmap_activities_by_hour(list_activities)
+plot_heatmap_activities_by_hour(listaAtividades)
 
 '''
 
@@ -112,81 +112,142 @@ Fazer uma lista só com os workblocks para se irem adicionamdo as atividades a e
 
 '''
 
-list_work_blocks = []
-for worker in list_workers:
+listaBlocoTrabalho = []
+for worker in listaTrabalhadores:
     for workBlock in worker.work_Blocks:
-        list_work_blocks.append(workBlock)
+        listaBlocoTrabalho.append(workBlock)
 
 
 list_worker_activityQuantity = [] # lista onde para cada workblock é colocada a quantidade de atividades realizadas nesse workblock
 
-for work_Block in list_work_blocks:
-    '''
-    
-    correr o programa com o método de clustering escolhido
-
-    '''
-
-    # 1 - K-NearestNeighbors 1.0
-    # 2 - K-NearestNeighbors 2.0
-    # 3 - K-NearestNeighbors com DBSCANS
-    # 4 - DBSCANS
-    # 5 - Central
-
-    if metodoCluster == 1:
-        cluster = KNearest_Neighbors1(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
-
-    elif metodoCluster == 2:
-        cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
-    
-    elif metodoCluster == 3:
-        cluster = KNearest_Neighbors1(list_activities, list_workers, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
-        cluster = DBSCANS(list_activities, list_workers, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
-    
-    elif metodoCluster == 4:
-        cluster = DBSCANS2(list_activities, list_workers, work_Block, values_dict['MIN_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
-    
-    elif metodoCluster == 5:
-        print('Não funfa, ainda...')
-        cluster = []
-        # cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
-        # cluster = KNearest_Neighbors2(list_activities, list_workers, work_Block, 10)
-
-    if len(cluster) != 0:
-        nodes = Greedy(cluster, work_Block, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps)
 
 
-    '''
-    
-    colocar as atividades que foram atribuidas com o state == 1
-    '''
-    activitiesToState1(nodes, list_activities)
 
-    '''
-    
-    fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-    '''
-    plot_activities_by_order(cluster, nodes, work_Block)
 
-    '''
-    
-    colocar todas as atividades que não têm o state igual a 1 a 0
-    '''
-    for activity in list_activities:
-        activity.resetStateToZeroIfNotOne()
-    
 
-    '''
-    
-    fazer um gráfico com a evolução da atribuição das atividades
-    '''
-    activityQuantity = len(nodes) - 2
 
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-    if work_Block.start < meio_dia:
-        list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
-    else:
-        list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+
+correr o programa com o método de clustering escolhido
+
+'''
+
+# 1 - K-NearestNeighbors 1.0
+# 2 - K-NearestNeighbors 2.0
+# 3 - K-NearestNeighbors com DBSCANS
+# 4 - DBSCANS
+# 5 - Central
+
+cluster = []
+
+if metodoCluster == 1:
+    print('Não funfa, ainda...')
+    # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
+
+elif metodoCluster == 2:
+    print('Não funfa, ainda...')
+    # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
+
+elif metodoCluster == 3:
+    print('Não funfa, ainda...')
+    # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
+    # cluster = DBSCANS(listaAtividades, listaTrabalhadores, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+
+elif metodoCluster == 4:
+    print('Não funfa, ainda...')
+    # cluster = DBSCANS2(listaAtividades, listaTrabalhadores, work_Block, values_dict['MIN_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+
+elif metodoCluster == 5:
+    # print('Não funfa, ainda...')
+    cluster = Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(values_dict['K_NEAREST_NEIGHBORS']))
+    # cluster = []
+    # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
+    # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
+
+
+
+# if len(cluster) != 0:
+#     nodes = Greedy(cluster, work_Block, skills_dict, listaTrabalhadores, values_dict, considerAppointment, considerPriority, gmaps)
+
+
+
+
+
+
+
+
+
+
+
+
+# '''
+
+# colocar as atividades que foram atribuidas com o state == 1
+# '''
+# activitiesToState1(nodes, listaAtividades)
+
+# '''
+
+# fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
+# '''
+# plot_activities_by_order(cluster, nodes, work_Block)
+
+# '''
+
+# colocar todas as atividades que não têm o state igual a 1 a 0
+# '''
+# for activity in listaAtividades:
+#     activity.resetStateToZeroIfNotOne()
+
+
+# '''
+
+# fazer um gráfico com a evolução da atribuição das atividades
+# '''
+# activityQuantity = len(nodes) - 2
+
+# meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+# if work_Block.start < meio_dia:
+#     list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
+# else:
+#     list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 '''
@@ -202,16 +263,16 @@ print("Tempo decorrido:", elapsed_time, "segundos")
 
 Análises estatísticas
 '''
-plot_activities_graph_by_state(list_activities)
+plot_activities_graph_by_state(listaAtividades)
 
-plot_heatmap_activities_by_state(list_activities)
+plot_heatmap_activities_by_state(listaAtividades)
 
-data = DataAnalyticsByHour(list_activities)
+data = DataAnalyticsByHour(listaAtividades)
 sorted_stats_list = sorted(data)
 for dat in sorted_stats_list:
     dat.print()
 
-data = DataAnalyticsBySkill(list_activities)
+data = DataAnalyticsBySkill(listaAtividades)
 
 for dat in data:
     dat.print()

@@ -1,3 +1,4 @@
+from traitlets import Float
 from Activity import *
 import math
 
@@ -47,7 +48,7 @@ def Travel_Time( travel_mult, x1, y1, x2, y2, gmaps):
 '''
 
 # devolve a distancia em KM entre 2 pontos
-def Distance_Calculator( x1, y1, x2, y2):
+def Distance_Calculator( x1, y1, x2, y2) -> float:
     R = 6373.0
 
     lat1 = math.radians(x1)
