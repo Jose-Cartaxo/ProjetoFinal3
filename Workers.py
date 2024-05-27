@@ -1,4 +1,5 @@
 from datetime import datetime, time
+from typing import Optional
 
 class Worker:
     workers_quantity = 0
@@ -18,11 +19,11 @@ class Worker:
         for work_block in self.work_Blocks:
             work_block.printWorkBlock()
 
-def Find_Worker_By_Id(list_workers, id):
+def Find_Worker_By_Id(list_workers, id) -> Worker:
     for worker in list_workers:
         if(worker.idWorker == id):
             return worker
-    return None
+    raise ValueError(f"ID {id} não encontrado na lista de trabalhadores")
 
 class WorkBlock:
      
@@ -33,6 +34,7 @@ class WorkBlock:
         self.y = y
         self.start = datetime.strptime(start.strip(), '%H:%M').time()
         self.finish = datetime.strptime(finish.strip(), '%H:%M').time()
+
         # self.quantidadeAtividades = 0
         # self.block_List = []
 

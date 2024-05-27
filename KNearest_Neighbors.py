@@ -71,7 +71,7 @@ def KNearest_Neighbors_Vote_in(atividade, workblock, skills):
 
 
 
-def KNearest_Neighbors1(list_activities, list_workers, workblock, k):
+def KNearest_Neighbors1(list_activities, skills, workblock, k):
     """
     Esta função faz o K-NEAREST-NEIGHBORS para o workblock submetido e devolve uma lista com o atividades do cluster
 
@@ -93,7 +93,7 @@ def KNearest_Neighbors1(list_activities, list_workers, workblock, k):
     """
         
     distances = []
-    worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
+    # worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
     for activity in list_activities:
         distance = Distance_Calculator(activity.x, activity.y, workblock.x, workblock.y)
         distances.append(KNearest_Nei(activity, distance))
@@ -104,7 +104,7 @@ def KNearest_Neighbors1(list_activities, list_workers, workblock, k):
     count = 0
     indi = 0
     while count < k:
-        if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, worker.skill): # type: ignore
+        if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, skills):
             list_temp.append(distances[indi].atividade)
             count += 1
         indi += 1
