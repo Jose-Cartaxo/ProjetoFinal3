@@ -9,6 +9,9 @@ import numpy as np
 from Helper import *
 # from numpy import block, double
 from Activity import *
+from Stats import *
+from Ploting import *
+from Optimization import *
 
 
 def DBSCANS(list_activities, list_workers, work_Block, cluster, distance_Min, distance_Max, iterations_Max):
@@ -80,9 +83,10 @@ def DBSCANS2(list_activities, list_workers, work_Block, distance_Min, iterations
         if activity.state == 0:
             distance = Distance_Calculator(activity.x, activity.y, work_Block.x, work_Block.y)
             # print('distancia = ', distance, ' Raio = ' , radius)
-            if (distance < radius) and (activity.appointment < work_Block.finish) and (activity.appointment > work_Block.start) and (activity.skill in worker.skill): # type: ignore
+            if (distance < radius) and (activity.appointment < work_Block.finish) and (activity.appointment > work_Block.start or activity.appointment == time(0,0)) and (activity.skill in worker.skill):
                 temp_cluster.append(activity)
                 activity.state = 2
+
 
     cluster.extend(temp_cluster)
     print('Tamanho do cluster: ', len(cluster), end=', ')
@@ -99,17 +103,70 @@ def DBSCANS2(list_activities, list_workers, work_Block, distance_Min, iterations
                 if activity.state == 0:
                     distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
                     # print('distancia = ', distance, ' Raio = ' , radius)
-                    if distance < radius and (activity.appointment < work_Block.finish and activity.appointment > work_Block.start) and (activity.skill in worker.skill): # type: ignore
+                    if distance < radius and (activity.appointment < work_Block.finish) and (activity.appointment > work_Block.start or activity.appointment == time(0,0)) and (activity.skill in worker.skill):
                         temp_cluster.append(activity)
                         activity.state = 2
 
-        
         # print('temp_cluster Size = ', len(temp_cluster))
         cluster.extend(temp_cluster)
         print(len(cluster), end=', ')
 
-
-
     # plot_activities_by_state(list_activities, work_Block)
     # print('Cluster Size = ', len(cluster) )
     return cluster
+
+
+
+def DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+    
+    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    list_worker_activityQuantity = []
+
+    print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS: ', int(valores_dict['K_NEAREST_NEIGHBORS']))
+
+    for blocoTrabalho in listaBlocoTrabalho:
+        trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
+        skills = trabalhador.skill
+        
+        cluster = DBSCANS2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
+
+        print('Size: ', len(cluster))
+        nodes = Greedy(cluster, blocoTrabalho, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+
+        '''
+
+        colocar as atividades que foram atribuidas com o state == 1
+        '''
+        activitiesToState1(nodes, listaAtividades)
+
+        '''
+
+        fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
+        '''
+
+        plot_activities_by_order(cluster, nodes, blocoTrabalho)
+
+        '''
+
+        colocar todas as atividades que não têm o state igual a 1 a 0
+        '''
+        for activity in listaAtividades:
+            activity.resetStateToZeroIfNotOne()
+
+
+        '''
+
+        fazer um gráfico com a evolução da atribuição das atividades
+        '''
+        activityQuantity = len(nodes) - 1
+        # activityQuantity = len(nodes) - 2
+
+        if blocoTrabalho.start < meio_dia:
+            list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
+        else:
+            list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
+
+
+    
+    plot_scatter_with_trendline(list_worker_activityQuantity)
+    return

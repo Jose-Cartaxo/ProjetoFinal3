@@ -18,6 +18,9 @@ from Optimization import Greedy
 from Ploting import *
 from KNearest_Neighbors import *
 from Central import *
+from K_N_DBSCANS import *
+from K_NearestNeighbors1 import *
+from K_NearestNeighbors2 import *
 
 '''
 
@@ -28,12 +31,12 @@ definir as prioridades e o metodo de clustering
 
 
 print("Deseja que seja considerada a prioridade das Atividades com marcação?")
-# considerAppointment = pedir_s_n()
-considerAppointment = False
+# considerarAgendamento = pedir_s_n()
+considerarAgendamento = False
 
 print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
-# considerPriority = pedir_s_n()
-considerPriority = False
+# considerarPrioridade = pedir_s_n()
+considerarPrioridade = False
 
 # 1 - K-NearestNeighbors 1.0
 # 2 - K-NearestNeighbors 2.0
@@ -43,7 +46,7 @@ considerPriority = False
 
 print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
 # metodoCluster = solicitar_input(1, 5)
-metodoCluster = 5
+metodoCluster = 4
 '''
 
 Configurar o Google Maps
@@ -93,7 +96,7 @@ for indice, element in workers_xlsx.iterrows():
     listaTrabalhadores.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'],  [item.strip() for item in  element['skills'].split(',')]  , element['xCasa'], element['yCasa'], tempo_listaBlocoTrabalho))
 
 values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
-values_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+valores_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
 
 skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
 skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
@@ -133,28 +136,33 @@ correr o programa com o método de clustering escolhido
 cluster = []
 
 if metodoCluster == 1:
-    print('Não funfa, ainda...')
-    # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
+    K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+    # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS1']))
 
 elif metodoCluster == 2:
-    print('Não funfa, ainda...')
-    # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, int(values_dict['K_NEAREST_NEIGHBORS1']))
+    K_NearestNeighbors2(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+    # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS1']))
 
 elif metodoCluster == 3:
-    print('Não funfa, ainda...')
-    # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(values_dict['K_NEAREST_NEIGHBORS']))
-    # cluster = DBSCANS(listaAtividades, listaTrabalhadores, work_Block, cluster, values_dict['MIN_BDSCANS_DISTANCE'], values_dict['MAX_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+    K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+    # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS']))
+    # cluster = DBSCANS(listaAtividades, listaTrabalhadores, work_Block, cluster, valores_dict['MIN_BDSCANS_DISTANCE'], valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
 
 elif metodoCluster == 4:
     print('Não funfa, ainda...')
-    # cluster = DBSCANS2(listaAtividades, listaTrabalhadores, work_Block, values_dict['MIN_BDSCANS_DISTANCE'], int(values_dict['DBSCANS_IT_NUM']))
+    DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
 elif metodoCluster == 5:
     # print('Não funfa, ainda...')
-    cluster = Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(values_dict['K_NEAREST_NEIGHBORS']), skills_dict, values_dict, considerAppointment, considerPriority, gmaps)
+    Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
     # cluster = []
     # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
     # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
+
+
+
+
+
 
 
 
@@ -184,8 +192,3 @@ data = DataAnalyticsBySkill(listaAtividades)
 
 for dat in data:
     dat.print()
-
-
-
-print(type(data[0].tipo))
-
