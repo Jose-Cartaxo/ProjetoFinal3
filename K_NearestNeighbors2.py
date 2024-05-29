@@ -4,9 +4,9 @@ from Optimization import *
 from Ploting import *
 from Stats import *
 
-def K_NearestNeighbors2(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def K_NearestNeighbors2(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], skills_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
 
     print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS: ', int(valores_dict['K_NEAREST_NEIGHBORS']))
@@ -46,7 +46,7 @@ def K_NearestNeighbors2(listaAtividades, listaTrabalhadores, listaBlocoTrabalho,
         activityQuantity = len(nodes) - 1
         # activityQuantity = len(nodes) - 2
 
-        if blocoTrabalho.start < meio_dia:
+        if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
             list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))

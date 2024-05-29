@@ -1,19 +1,17 @@
-from datetime import datetime, time
+import datetime
+from datetime import time
 
 class Activity:
     activities_quantity = 0
 
-    def __init__(self, id, Central, skill, x, y, creation, appointment = None):
-    # def __init__(self, id, Central, codPostal, skill, x, y, appointment = None):
-        today = datetime.today()
+    def __init__(self, id: str, Central: str, competencia: str, longitude: float, latitude: float, data_criacao: datetime.date, appointment = None):
         self.idActivity = id
         self.idCentral = Central
-        # self.codPostal = codPostal
         self.appointment = appointment if appointment is not None else time(0, 0)
-        self.skill = skill
-        self.creation = creation
-        self.x = x
-        self.y = y
+        self.competencia = competencia
+        self.data_criacao = data_criacao
+        self.longitude = longitude
+        self.latitude = latitude
         # 0 -> por marcar, 1 -> marcado, 2 -> a ser avaliada
         self.state = 0
         Activity.activities_quantity += 1
@@ -23,7 +21,7 @@ class Activity:
             self.state = 0
 
     def printActivity(self):
-        print('  ID: {}; State: {}; X: {}; Y: {}'.format(self.idActivity, self.state, self.x, self.y))
+        print('  ID: {}; State: {}; X: {}; Y: {}'.format(self.idActivity, self.state, self.longitude, self.latitude))
 
 
 def Find_Activity_By_Id(list_activities, id):

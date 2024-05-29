@@ -14,7 +14,7 @@ from Ploting import *
 from Optimization import *
 
 
-def DBSCANS(list_activities, list_workers, work_Block, cluster, distance_Min, distance_Max, iterations_Max):
+def DBSCANS(list_activities: list [Activity], list_workers: list[Worker], work_Block: WorkBlock, cluster: list [Activity], distance_Min , distance_Max , iterations_Max):
 
     worker = Find_Worker_By_Id(list_workers, work_Block.idWorker)
 
@@ -29,23 +29,20 @@ def DBSCANS(list_activities, list_workers, work_Block, cluster, distance_Min, di
             for activity_clustered in cluster:
                 for activity in list_activities:
                     if activity.state == 0:
-                        distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
-                        if distance < radius and (activity.appointment < work_Block.finish and activity.appointment > work_Block.start) and (activity.skill in worker.skill): # type: ignore
-                            # print('id: ', activity_clustered.idActivity, 'distance: ', distance, 'radius: ',radius)
-                            temp_cluster.append(activity)
-                            activity.state = 2
+                        distance = Distance_Calculator(activity.latitude, activity.longitude, activity_clustered.latitude, activity_clustered.longitude)
+                        if distance < radius:
+                            if (activity.appointment < work_Block.fim and activity.appointment > work_Block.inicio) and (activity.competencia in worker.competencia):
+                                temp_cluster.append(activity)
+                                activity.state = 2
 
             if len( temp_cluster) == 0:
-                # print('Raio: ', radius, ' Não encontrou ninguém')
                 radius += 1
             else:
-                # print('Raio: ', radius, ' Encontrou: ', len( temp_cluster))
                 cluster.extend(temp_cluster)
 
-    # plot_activities_by_state(list_activities, work_Block)
     return cluster
 
-def DBSCANS2(list_activities, list_workers, work_Block, distance_Min, iterations_Max):
+def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_Block: WorkBlock, distance_Min, iterations_Max):
     """
     Esta função faz o clustering das atividades para o workblock.
 
@@ -81,9 +78,9 @@ def DBSCANS2(list_activities, list_workers, work_Block, distance_Min, iterations
 
     for activity in list_activities:
         if activity.state == 0:
-            distance = Distance_Calculator(activity.x, activity.y, work_Block.x, work_Block.y)
+            distance = Distance_Calculator(activity.latitude, activity.longitude, work_Block.latitude, work_Block.longitude)
             # print('distancia = ', distance, ' Raio = ' , radius)
-            if (distance < radius) and (activity.appointment < work_Block.finish) and (activity.appointment > work_Block.start or activity.appointment == time(0,0)) and (activity.skill in worker.skill):
+            if (distance < radius) and (activity.appointment < work_Block.fim) and (activity.appointment > work_Block.inicio or activity.appointment == time(0,0)) and (activity.competencia in worker.competencia):
                 temp_cluster.append(activity)
                 activity.state = 2
 
@@ -101,9 +98,9 @@ def DBSCANS2(list_activities, list_workers, work_Block, distance_Min, iterations
         for activity_clustered in cluster:
             for activity in list_activities:
                 if activity.state == 0:
-                    distance = Distance_Calculator(activity.x, activity.y, activity_clustered.x, activity_clustered.y)
+                    distance = Distance_Calculator(activity.longitude, activity.latitude, activity_clustered.longitude, activity_clustered.latitude)
                     # print('distancia = ', distance, ' Raio = ' , radius)
-                    if distance < radius and (activity.appointment < work_Block.finish) and (activity.appointment > work_Block.start or activity.appointment == time(0,0)) and (activity.skill in worker.skill):
+                    if distance < radius and (activity.appointment < work_Block.fim) and (activity.appointment > work_Block.inicio or activity.appointment == time(0,0)) and (activity.competencia in worker.competencia):
                         temp_cluster.append(activity)
                         activity.state = 2
 
@@ -117,7 +114,7 @@ def DBSCANS2(list_activities, list_workers, work_Block, distance_Min, iterations
 
 
 
-def DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def DBSCANS3(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
     
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
@@ -126,12 +123,12 @@ def DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dic
 
     for blocoTrabalho in listaBlocoTrabalho:
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
-        skills = trabalhador.skill
+        competencias = trabalhador.competencia
         
         cluster = DBSCANS2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
 
         print('Size: ', len(cluster))
-        nodes = Greedy(cluster, blocoTrabalho, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
 
@@ -161,7 +158,7 @@ def DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dic
         activityQuantity = len(nodes) - 1
         # activityQuantity = len(nodes) - 2
 
-        if blocoTrabalho.start < meio_dia:
+        if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
             list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))

@@ -48,13 +48,13 @@ def Travel_Time( travel_mult, x1, y1, x2, y2, gmaps):
 '''
 
 # devolve a distancia em KM entre 2 pontos
-def Distance_Calculator( x1, y1, x2, y2) -> float:
+def Distance_Calculator( lat1, lon1, lat2, lon2) -> float:
     R = 6373.0
 
-    lat1 = math.radians(x1)
-    lon1 = math.radians(y1)
-    lat2 = math.radians(x2)
-    lon2 = math.radians(y2)
+    lat1 = math.radians(lat1)
+    lon1 = math.radians(lon1)
+    lat2 = math.radians(lat2)
+    lon2 = math.radians(lon2)
 
     dlon = lon2 - lon1
     dlat = lat2 - lat1

@@ -36,7 +36,7 @@ class Lista_Grupos_Central:
 
         Lista_Grupos_Central.quantidadeGrupos += 1
 
-    def PesquisarPorId(self, id)-> List[Activity]:
+    def PesquisarPorId(self, id)-> list[Activity]:
         return self.lista_grupos_atividades.get(id, None).lista_atividades
     
     def AdicionarGrupoId(self, id, atividade):
@@ -51,7 +51,7 @@ class Lista_Grupos_Central:
 
 
 
-def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> List[Activity]:
+def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> list[Activity]:
     if len(central) < 5:
         # lista de distancias vazia
         lista_distancias = []
@@ -80,10 +80,10 @@ def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> List[Activity]:
     return []
 
 
-def Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, k_nearest_neighbors, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
 
     listaGruposCentral = Lista_Grupos_Central()
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
     
     for atividade in listaAtividades:
@@ -93,12 +93,12 @@ def Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTraba
 
         # print('\n\n')
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
-        skills = trabalhador.skill
+        competencias = trabalhador.competencia
         central = trabalhador.idCentral
         # print('Central do trabalhador: ', central)
         listaAtividadesGrupoCentral = listaGruposCentral.PesquisarPorId(central)
 
-        atividades_estado_zero = [atividade for atividade in listaAtividadesGrupoCentral if atividade.state == 0 and atividade.skill in skills]
+        atividades_estado_zero = [atividade for atividade in listaAtividadesGrupoCentral if atividade.state == 0 and atividade.competencia in competencias]
 
 
         '''
@@ -106,7 +106,7 @@ def Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTraba
         '''
         if len(atividades_estado_zero) > k_nearest_neighbors:
             print(trabalhador.idWorker, 'A zona dele chega para ele!')
-            cluster = KNearest_Neighbors1(atividades_estado_zero, skills, blocoTrabalho, k_nearest_neighbors)
+            cluster = KNearest_Neighbors1(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
             print('Ficou com ', len(cluster), ' atividades para fazer\n\n' )
 
 
@@ -118,13 +118,13 @@ def Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTraba
             print(trabalhador.idWorker, 'A zona dele NÃO dá ele!')
 
             # print('k_nearest_neighbors = ', k_nearest_neighbors,' len = ',len(atividades_estado_zero),' "K" = ', k)
-            lista_extend = CentralMaisProxima(listaGruposCentral, blocoTrabalho.x, blocoTrabalho.y, [central], k)
+            lista_extend = CentralMaisProxima(listaGruposCentral, blocoTrabalho.longitude, blocoTrabalho.latitude, [central], k)
             atividades_estado_zero.extend(lista_extend)
             # print('Valor final: ', len(atividades_estado_zero))
-            cluster = KNearest_Neighbors1(atividades_estado_zero, skills, blocoTrabalho, k_nearest_neighbors)
+            cluster = KNearest_Neighbors1(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
             print('Ficou com ', len(cluster), ' atividades para fazer\n\n' )
 
-        nodes = Greedy(cluster, blocoTrabalho, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
 
         '''
@@ -155,7 +155,7 @@ def Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTraba
         '''
         activityQuantity = len(nodes) - 2
 
-        if blocoTrabalho.start < meio_dia:
+        if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
             list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))

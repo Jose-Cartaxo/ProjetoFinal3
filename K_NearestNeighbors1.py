@@ -4,19 +4,19 @@ from Optimization import *
 from Ploting import *
 from Stats import *
 
-def K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def K_NearestNeighbors1(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
 
     print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS: ', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
     for blocoTrabalho in listaBlocoTrabalho:
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
-        skills = trabalhador.skill
+        competencias = trabalhador.competencia
 
-        cluster = KNearest_Neighbors1(listaAtividades, skills, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
-        nodes = Greedy(cluster, blocoTrabalho, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        cluster = KNearest_Neighbors1(listaAtividades, competencias, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
+        nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
 
@@ -47,7 +47,7 @@ def K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho,
         activityQuantity = len(nodes) - 1
         # activityQuantity = len(nodes) - 2
 
-        if blocoTrabalho.start < meio_dia:
+        if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
             list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))

@@ -5,7 +5,7 @@ Created on Fri Apr  5 14:43:14 2024
 @author: jgac0
 """
 
-from tkinter import N
+# from tkinter import N
 import googlemaps
 import datetime
 from Activity import Activity
@@ -49,7 +49,8 @@ def main():
 
     print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
     # metodoCluster = solicitar_input(1, 5)
-    metodoCluster = 1
+    metodoCluster = 5
+
     '''
 
     Configurar o Google Maps
@@ -70,10 +71,10 @@ def main():
 
         if element['ComprirAgendamento'] == 0:
 
-            listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
+            listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
             # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
         else:
-            listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], skill = element['Skill'], x = element['Latitude'], y = element['Longitude'], creation = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
+            listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(),appointment = datetime.datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
             # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
 
     workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
@@ -86,16 +87,16 @@ def main():
         i = 0
         for hours in hours_list:
             start_hour, end_hour = hours.split(';')
-            tempo_listaBlocoTrabalho.append(WorkBlock(element['idTrabalhador'], element['xCasa'], element['yCasa'], i,start_hour, end_hour))
+            tempo_listaBlocoTrabalho.append(WorkBlock(element['idTrabalhador'], element['Longitude'], element['Latitude'], i,start_hour, end_hour))
             i += 1
         
-        listaTrabalhadores.append(Worker(element['idTrabalhador'], element['idCentral'], element['codPostal'],  [item.strip() for item in  element['skills'].split(',')]  , element['xCasa'], element['yCasa'], tempo_listaBlocoTrabalho))
+        listaTrabalhadores.append(Worker(element['idTrabalhador'], element['idCentral'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
 
     values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
     valores_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
 
-    skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
-    skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
+    competencias_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+    competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
 
     '''
 
@@ -132,25 +133,25 @@ def main():
     cluster = []
 
     if metodoCluster == 1:
-        K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
         # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS1']))
 
     elif metodoCluster == 2:
-        K_NearestNeighbors2(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        K_NearestNeighbors2(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
         # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS1']))
 
     elif metodoCluster == 3:
-        K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
         # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS']))
         # cluster = DBSCANS(listaAtividades, listaTrabalhadores, work_Block, cluster, valores_dict['MIN_BDSCANS_DISTANCE'], valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
 
     elif metodoCluster == 4:
         print('Não funfa, ainda...')
-        DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 5:
         # print('Não funfa, ainda...')
-        Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
         # cluster = []
         # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
         # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
@@ -185,7 +186,7 @@ def main():
 começar o "relógio" para o tempo de execução
 
 '''
-start_time = datetime.now()
+start_time = datetime.datetime.now()
 
 # Início da medição do tempo de CPU
 start_time_cpu = time.process_time()

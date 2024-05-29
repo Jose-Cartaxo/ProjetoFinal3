@@ -4,22 +4,23 @@ from Optimization import *
 from Ploting import *
 from Stats import *
 
-def K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def K_N_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
 
     print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS: ', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
     for blocoTrabalho in listaBlocoTrabalho:
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
-        skills = trabalhador.skill
+        competencias = trabalhador.competencia
         
-        cluster = KNearest_Neighbors1(listaAtividades, skills, blocoTrabalho, 4)
+        cluster = KNearest_Neighbors1(listaAtividades, competencias, blocoTrabalho, 4)
+        print('Size A: ', len(cluster))
         cluster = DBSCANS(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_BDSCANS_DISTANCE'], valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
 
-        print('Size: ', len(cluster))
-        nodes = Greedy(cluster, blocoTrabalho, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        print('Size D: ', len(cluster))
+        nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
 
@@ -50,7 +51,7 @@ def K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, skills_
         activityQuantity = len(nodes) - 1
         # activityQuantity = len(nodes) - 2
 
-        if blocoTrabalho.start < meio_dia:
+        if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
             list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))

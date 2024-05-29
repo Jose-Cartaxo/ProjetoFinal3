@@ -1,4 +1,42 @@
+import datetime
+import pandas as pd
+from Helper import *
+print(Distance_Calculator(1.228178, 42.986197, 1.873725, 43.088226))
 
+'''
+workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')  # type: ignore
+first_row = workers_xlsx.iloc[0]
+
+
+id = first_row['NUMINT']
+print(type(id))
+
+central = first_row['Central']
+print(type(central))
+
+longitude = first_row['Longitude']
+print(type(longitude))
+
+lorena = datetime.datetime.strptime(first_row['DataCriacao'], '%d/%m/%y').date()
+print(type(lorena))
+
+
+values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+valores_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+
+print('Valores dicionário valores_dict:')
+pprint(valores_dict)
+
+'''
+'''
+skills_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+skills_dict = skills_xlsx.set_index('Skill').to_dict()['TimeActivity']
+
+print('Valores dicionário skills_dict:')
+pprint(skills_dict)
+
+'''
+'''
 class Atividade:
     # Esta é uma classe de exemplo para representar a atividade
     def __init__(self, nome):
@@ -44,7 +82,6 @@ print(f"A distância é: {menor_elemento.distancia} km")
 
 
 
-'''
 import googlemaps
 import gmplot
 from datetime import datetime

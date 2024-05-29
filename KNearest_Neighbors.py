@@ -24,7 +24,7 @@ class KNearest_Nei:
 
 
 class Coordenada:
-    def __init__(self, x, y):
+    def __init__(self, longitude, latitude):
         """
         Inicializa a MinhaClasse com um x e um y, que são as coordenadas.
 
@@ -36,11 +36,11 @@ class Coordenada:
         y: (Int) 
             coordendada do y.
         """
-        self.x = x
-        self.y = y
+        self.longitude = longitude
+        self.latitude = latitude
 
 
-def KNearest_Neighbors_Vote_in(atividade, workblock, skills):
+def KNearest_Neighbors_Vote_in(atividade, workblock: WorkBlock, competencias):
     """
     Esta função verifica se a tarefa deve ser contada para o clustering do workblick ou não, verifica o estado da atividade, verifica o hora de marcação e se possiu as skills necessárias
 
@@ -61,17 +61,17 @@ def KNearest_Neighbors_Vote_in(atividade, workblock, skills):
 
     if atividade.appointment != time(0, 0):
   
-        if (atividade.state != 1) and (atividade.appointment < workblock.finish) and (atividade.appointment > workblock.start) and (atividade.skill in skills):
+        if (atividade.state != 1) and (atividade.appointment < workblock.fim) and (atividade.appointment > workblock.inicio) and (atividade.competencia in competencias):
             return True
    
-    elif (atividade.state != 1) and (atividade.skill in skills):
+    elif (atividade.state != 1) and (atividade.competencia in competencias):
         return True
 
     return False
 
 
 
-def KNearest_Neighbors1(list_activities, skills, workblock, k):
+def KNearest_Neighbors1(list_activities, competencias, workblock, k):
     """
     Esta função faz o K-NEAREST-NEIGHBORS para o workblock submetido e devolve uma lista com o atividades do cluster
 
@@ -95,7 +95,7 @@ def KNearest_Neighbors1(list_activities, skills, workblock, k):
     distances = []
     # worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
     for activity in list_activities:
-        distance = Distance_Calculator(activity.x, activity.y, workblock.x, workblock.y)
+        distance = Distance_Calculator(activity.longitude, activity.latitude, workblock.longitude, workblock.latitude)
         distances.append(KNearest_Nei(activity, distance))
     
     distances = sorted(distances)
@@ -105,7 +105,8 @@ def KNearest_Neighbors1(list_activities, skills, workblock, k):
     indi = 0
     while count < k:
         if indi < len(distances):
-            if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, skills):
+            if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, competencias):
+                distances[indi].atividade.state = 2
                 list_temp.append(distances[indi].atividade)
                 count += 1
             indi += 1
@@ -149,7 +150,7 @@ def KNearest_Neighbors2(list_activities, list_workers, workblock, k):
     # trabalhador que vai realizar este workblock
     worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
 
-    list_coordenada_temp.append(Coordenada(worker.x, worker.y)) # type: ignore
+    list_coordenada_temp.append(Coordenada(worker.longitude, worker.latitude)) # type: ignore
     for count in range(k):
 
         # colocar as atividades por ordem
@@ -158,15 +159,15 @@ def KNearest_Neighbors2(list_activities, list_workers, workblock, k):
             # verificar se a atividade ainda não está a ser considerada.
             if activity.state == 0:
                 for coord in list_coordenada_temp:
-                    distance = Distance_Calculator(activity.x, activity.y, coord.x, coord.y)
-                    if KNearest_Neighbors_Vote_in(activity, workblock, worker.skill): # type: ignore
+                    distance = Distance_Calculator(activity.longitude, activity.latitude, coord.longitude, coord.latitude)
+                    if KNearest_Neighbors_Vote_in(activity, workblock, worker.competencia): # type: ignore
                         distances.append(KNearest_Nei(activity, distance))
         
         distances = sorted(distances)
         if len(distances) != 0:
             atividade_in = distances[0].atividade
             atividade_in.state = 2 
-            list_coordenada_temp.append(Coordenada(atividade_in.x, atividade_in.y)) # type: ignore
+            list_coordenada_temp.append(Coordenada(atividade_in.longitude, atividade_in.latitude)) # type: ignore
             list_cluster.append(atividade_in)
             distances.clear()
             

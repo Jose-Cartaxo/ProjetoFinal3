@@ -1,9 +1,10 @@
+from ast import List
 import heapq
 
 from bson import _get_decimal128
-from Activity import Find_Activity_By_Id
+from Activity import Activity, Find_Activity_By_Id
 from Node import Node
-from Workers import Worker
+from Workers import WorkBlock, Worker
 from Workers import Find_Worker_By_Id
 from DBSCANS import Travel_Time
 from datetime import datetime, timedelta, time
@@ -170,7 +171,7 @@ def subtrairMinutosADatetimeTime(tim, min):
     return saida
 
 
-def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
+def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, competencias_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
 
     """
     Esta função verifica qual a melhor combinação de atividades para o trabalhador, faz lhe a rota e devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades.
@@ -181,7 +182,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
         quantidade de tempo em minutos gasta.
     workBlock: (Workers.WorkBlock)
         quantidade de tempo em minutos gasta em viagem.
-    skills_dict: (dict)
+    competencias_dict: (dict)
         dicionário com os valores importados do Excel para ser utilizados nos calculos
         quantidade de tempo em minutos gasta em viagem.
     list_workers: (list of Workers.Worker)
@@ -215,7 +216,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
     tolerance_For_Activity_Pre = int (values_dict['WINDOW_TIME_PRE'])
 
     # inicio é o WorkBlock
-    frontier.append(Node(workBlock.idWorker, 0, 0,workBlock.start, workBlock.start, None))
+    frontier.append(Node(workBlock.idWorker, 0, 0,workBlock.inicio, workBlock.inicio, None))
 
     # enquanto existirem elementos na lista "frontier", ou então quando um ramo finalizado voltar a ser escolhido ele dá o gosht
 
@@ -245,10 +246,10 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
             
             
             # Tempo necessário para se deslocar até a Atividade
-            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, activity.x, activity.y, gmaps) # type: ignore
+            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.longitude, current_Activity.latitude, activity.longitude, activity.latitude, gmaps) # type: ignore
 
             # Tempo necessário para se deslocar da Atividade até Casa
-            tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, activity.x, activity.y, workBlock.x, workBlock.y, gmaps)
+            tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, activity.longitude, activity.latitude, workBlock.longitude, workBlock.latitude, gmaps)
 
             # Hora de Chegada a Atividade
             horaDeChegadaAAtividade = adicionarMinutosADatetimeTime(current_Time, travel_Time_Going)
@@ -292,7 +293,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         if horaDeChegadaAAtividade > horaMinimaParaAdiantamento:
                             
                             # Tempo em minutos necessárioa para realizar a Atividade em si
-                            tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
+                            tempoNecessarioParaRealizarAtividade = competencias_dict[activity.competencia]
                             
                             # Hora a que acaba a Tarefa
                             activity_End_Time_Real =  adicionarMinutosADatetimeTime(horaDeChegadaAAtividade, tempoNecessarioParaRealizarAtividade)
@@ -309,7 +310,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             Ou seja:
                                  - pode ser adicionada a atividade pois tem tempo de a realizar e voltar a casa a tempo
                             '''
-                            if activity_End_Time_Home < workBlock.finish:
+                            if activity_End_Time_Home < workBlock.fim:
                                 # Encontrou uma atividade entao passa isso a true para não entrar no if lá em baixo
                                 foundActivity = True
 
@@ -320,7 +321,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                                 MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(current_Time)
 
                                 # Calcular o Custo de Realização desta Atividade
-                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, True, activity.creation, values_dict, considerAppointment, considerPriority)
+                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
                                 
                                 # Adicionar nova Atividade a lista da Fronteira 
                                 frontier.append(Node(activity.idActivity, cost, travel_Time_Going, horaDeChegadaAAtividade, activity_End_Time_Real, current_Node))
@@ -336,7 +337,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         '''
                         else:
                             # Tempo necessário para a Atividade em si
-                            tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
+                            tempoNecessarioParaRealizarAtividade = competencias_dict[activity.competencia]
                             
                             # Tempo em que acaba a Tarefa
                             activity_End_Time_Real = adicionarMinutosADatetimeTime(horaMinimaParaAdiantamento, tempoNecessarioParaRealizarAtividade)
@@ -353,7 +354,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                             Ou seja:
                                  - pode ser adicionada a atividade pois tem tempo de a realizar e voltar a casa a tempo, mas antes de começar a atividade tem de ficar a espera
                             '''
-                            if activity_End_Time_Home < workBlock.finish:
+                            if activity_End_Time_Home < workBlock.fim:
                                 # Encontrou uma atividade entao passa isso a true para não entrar no if lá em baixo
                                 foundActivity = True
                                 
@@ -364,7 +365,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                                 MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(current_Time)
 
                                 # Calcular o Custo de Realização desta Atividade
-                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, True, activity.creation, values_dict, considerAppointment, considerPriority)
+                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
                                 
                                 # Adicionar nova Atividade a lista da Fronteira
                                 frontier.append(Node(activity.idActivity, cost, travel_Time_Going, horaMinimaParaAdiantamento, activity_End_Time_Real , current_Node))
@@ -376,14 +377,14 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 '''
                 else:
                     # Tempo necessário para a Atividade em si
-                    tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
+                    tempoNecessarioParaRealizarAtividade = competencias_dict[activity.competencia]
                     # Tempo em que acaba a Tarefa
                     activity_End_Time_Real = adicionarMinutosADatetimeTime( horaDeChegadaAAtividade, tempoNecessarioParaRealizarAtividade)
 
                     # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
                     activity_End_Time_Home = adicionarMinutosADatetimeTime( activity_End_Time_Real, tempoEmMinParaVoltarACasa)
 
-                    if activity_End_Time_Home < workBlock.finish:
+                    if activity_End_Time_Home < workBlock.fim:
                         # Encontrou uma atividade entao passa isso a true para não entrar no if lá em baixo
                         foundActivity = True
 
@@ -394,7 +395,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                         MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(current_Time)
                         
                         # Calcular o Custo de Realização desta Atividade
-                        cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, False, activity.creation, values_dict, considerAppointment, considerPriority)
+                        cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, False, activity.data_criacao, values_dict, considerAppointment, considerPriority)
 
                         # Adicionar nova Atividade a lista da Fronteira
                         frontier.append(Node(activity.idActivity, cost, travel_Time_Going, horaDeChegadaAAtividade, activity_End_Time_Real , current_Node))
@@ -433,9 +434,9 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 minutesDayStart = DateTimeTimeParaMinutosDoDia(current_Time)
 
                 # Minuto do dia em que Acaba o dia
-                minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.finish)
+                minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.fim)
 
-                tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, current_Activity.x, current_Activity.y, workBlock.x, workBlock.y, gmaps) # type: ignore
+                tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, current_Activity.longitude, current_Activity.latitude, workBlock.longitude, workBlock.latitude, gmaps) # type: ignore
 
                 # Calcular o Custo de volta a casa
                 cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, tempoEmMinParaVoltarACasa, values_dict)
@@ -449,7 +450,7 @@ def Greedy(worker_Activities_Cluster, workBlock, skills_dict, list_workers, valu
                 current_Node.total_cost += cost
                 # print('ANTES: ', current_Node.total_cost)
 
-                # tempoNecessarioParaRealizarAtividade = skills_dict[activity.skill]
+                # tempoNecessarioParaRealizarAtividade = competencias_dict[activity.competencia]
                 
                 # activity_End_Time_Real = adicionarMinutosADatetimeTime( horaDeChegadaAAtividade, tempoNecessarioParaRealizarAtividade)
                 
