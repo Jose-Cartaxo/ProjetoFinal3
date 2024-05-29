@@ -264,10 +264,10 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
                 Para entrar aqui:
                      - tem de cumprir o agendamento
                 '''
-                if not activity.appointment == time(0, 0):
+                if not activity.agendamento == time(0, 0):
 
                     # aqui adiciona o tolerance_For_Activity_Post retirado do Excel, que é o tempo que pode chegar atrasado, 
-                    max_Time_Activity = adicionarMinutosADatetimeTime(activity.appointment, tolerance_For_Activity_Post)
+                    max_Time_Activity = adicionarMinutosADatetimeTime(activity.agendamento, tolerance_For_Activity_Post)
                 
                     
                     ''' 
@@ -280,7 +280,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
                     if horaDeChegadaAAtividade < max_Time_Activity:
 
                         # aqui adiciona o tolerance_For_Activity_Post retirado do Excel, que é o tempo que pode chegar atrasado, 
-                        horaMinimaParaAdiantamento = subtrairMinutosADatetimeTime(activity.appointment, tolerance_For_Activity_Pre)
+                        horaMinimaParaAdiantamento = subtrairMinutosADatetimeTime(activity.agendamento, tolerance_For_Activity_Pre)
                         
                         ''' 
                         Para entrar aqui:

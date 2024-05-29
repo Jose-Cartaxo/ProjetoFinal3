@@ -31,7 +31,7 @@ def DBSCANS(list_activities: list [Activity], list_workers: list[Worker], work_B
                     if activity.state == 0:
                         distance = Distance_Calculator(activity.latitude, activity.longitude, activity_clustered.latitude, activity_clustered.longitude)
                         if distance < radius:
-                            if (activity.appointment < work_Block.fim and activity.appointment > work_Block.inicio) and (activity.competencia in worker.competencia):
+                            if (activity.agendamento < work_Block.fim and activity.agendamento > work_Block.inicio) and (activity.competencia in worker.competencia):
                                 temp_cluster.append(activity)
                                 activity.state = 2
 
@@ -80,7 +80,7 @@ def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_B
         if activity.state == 0:
             distance = Distance_Calculator(activity.latitude, activity.longitude, work_Block.latitude, work_Block.longitude)
             # print('distancia = ', distance, ' Raio = ' , radius)
-            if (distance < radius) and (activity.appointment < work_Block.fim) and (activity.appointment > work_Block.inicio or activity.appointment == time(0,0)) and (activity.competencia in worker.competencia):
+            if (distance < radius) and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
                 temp_cluster.append(activity)
                 activity.state = 2
 
@@ -100,7 +100,7 @@ def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_B
                 if activity.state == 0:
                     distance = Distance_Calculator(activity.longitude, activity.latitude, activity_clustered.longitude, activity_clustered.latitude)
                     # print('distancia = ', distance, ' Raio = ' , radius)
-                    if distance < radius and (activity.appointment < work_Block.fim) and (activity.appointment > work_Block.inicio or activity.appointment == time(0,0)) and (activity.competencia in worker.competencia):
+                    if distance < radius and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
                         temp_cluster.append(activity)
                         activity.state = 2
 

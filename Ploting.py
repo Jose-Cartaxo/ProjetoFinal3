@@ -13,7 +13,7 @@ def distancia(x1, y1, x2, y2):
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
-def plot_activities_by_order(list_activities, nodes, work_Block: WorkBlock):
+def plot_activities_by_order(list_activities: list[Activity], nodes, work_Block: WorkBlock):
     """
     Esta função representa num gráfico de pontos as atividades pertencentes ao cluster pela suas coordenadas, identifica com cores diferentes o trabalhador, as atividades atribuidas, e as atividades não atribuidas.
     Ainda coloca umas setas a mostrar o caminho percorrido pelo trabalhor.
@@ -116,7 +116,7 @@ def plot_activities_by_order(list_activities, nodes, work_Block: WorkBlock):
         activity = Find_Activity_By_Id(list_activities, node.id)
         if activity:
             id = str(i) + ' |Id: ' + str(activity.idActivity)
-            ap = '|Ap: ' + str(activity.appointment.hour) + ':' + str(activity.appointment.minute).zfill(2)
+            ap = '|Ap: ' + str(activity.agendamento.hour) + ':' + str(activity.agendamento.minute).zfill(2)
             travel = '|Tr: ' + str(int(node.travel_Time))
             start = '|St: ' + str(node.start_Time.hour) + ':' + str(node.start_Time.minute).zfill(2)
             end = '|End: ' + str(node.end_Time.hour) + ':' + str(node.end_Time.minute).zfill(2)
@@ -143,8 +143,8 @@ def plot_activities_by_order(list_activities, nodes, work_Block: WorkBlock):
 
     for activity in list_activities:
         if activity.idActivity not in activity_id_list:
-            minute = str(activity.appointment.minute).zfill(2)
-            hour = str(activity.appointment.hour)
+            minute = str(activity.agendamento.minute).zfill(2)
+            hour = str(activity.agendamento.hour)
 
             string = str(activity.idActivity) + ' | ' + hour + ':' + minute + ' | ' + activity.competencia
             plt.text(activity.longitude, activity.latitude, string, fontsize=8, ha='right', va='bottom')
@@ -160,7 +160,7 @@ def plot_activities_by_order(list_activities, nodes, work_Block: WorkBlock):
 
 
 
-def plot_activities_graph_by_state(list_activities):
+def plot_activities_graph_by_state(list_activities: list[Activity]):
     list_states = [0,0]
     for activity in list_activities:
         list_states[activity.state] = list_states[activity.state] + 1 
@@ -188,7 +188,7 @@ def plot_activities_graph_by_state(list_activities):
 
 
 
-def plot_heatmap_activities_by_state(list_activities):
+def plot_heatmap_activities_by_state(list_activities: list[Activity]):
     # Extrair coordenadas x, y e timestamps
     x_values = [task.longitude for task in list_activities]
     y_values = [task.latitude for task in list_activities]
@@ -212,11 +212,11 @@ def plot_heatmap_activities_by_state(list_activities):
 
 
 
-def plot_heatmap_activities_by_hour(list_activities):
+def plot_heatmap_activities_by_hour(list_activities: list[Activity]):
     # Extrair coordenadas x, y e timestamps
     x_values = [task.longitude for task in list_activities]
     y_values = [task.latitude for task in list_activities]
-    timestamps = [task.appointment.hour for task in list_activities]
+    timestamps = [task.agendamento.hour for task in list_activities]
 
     # Converter timestamps para valores numéricos para representar as cores
     # Por exemplo, você pode usar a hora do timestamp como o valor da cor

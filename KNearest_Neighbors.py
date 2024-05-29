@@ -40,7 +40,7 @@ class Coordenada:
         self.latitude = latitude
 
 
-def KNearest_Neighbors_Vote_in(atividade, workblock: WorkBlock, competencias):
+def KNearest_Neighbors_Vote_in(atividade: Activity, workblock: WorkBlock, competencias):
     """
     Esta função verifica se a tarefa deve ser contada para o clustering do workblick ou não, verifica o estado da atividade, verifica o hora de marcação e se possiu as skills necessárias
 
@@ -59,9 +59,9 @@ def KNearest_Neighbors_Vote_in(atividade, workblock: WorkBlock, competencias):
         retorna True ou False, conforme se é para ser adicionada a lista ou não.
     """
 
-    if atividade.appointment != time(0, 0):
+    if atividade.agendamento != time(0, 0):
   
-        if (atividade.state != 1) and (atividade.appointment < workblock.fim) and (atividade.appointment > workblock.inicio) and (atividade.competencia in competencias):
+        if (atividade.state != 1) and (atividade.agendamento < workblock.fim) and (atividade.agendamento > workblock.inicio) and (atividade.competencia in competencias):
             return True
    
     elif (atividade.state != 1) and (atividade.competencia in competencias):

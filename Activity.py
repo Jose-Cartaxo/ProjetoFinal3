@@ -4,10 +4,10 @@ from datetime import time
 class Activity:
     activities_quantity = 0
 
-    def __init__(self, id: str, Central: str, competencia: str, longitude: float, latitude: float, data_criacao: datetime.date, appointment = None):
+    def __init__(self, id: str, Central: str, competencia: str, longitude: float, latitude: float, data_criacao: datetime.date, agendamento = None):
         self.idActivity = id
         self.idCentral = Central
-        self.appointment = appointment if appointment is not None else time(0, 0)
+        self.agendamento = agendamento if agendamento is not None else time(0, 0)
         self.competencia = competencia
         self.data_criacao = data_criacao
         self.longitude = longitude
