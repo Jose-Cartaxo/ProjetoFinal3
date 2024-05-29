@@ -16,7 +16,6 @@ def K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho,
         skills = trabalhador.skill
 
         cluster = KNearest_Neighbors1(listaAtividades, skills, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
-        print('Size: ', len(cluster))
         nodes = Greedy(cluster, blocoTrabalho, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
@@ -56,4 +55,15 @@ def K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho,
 
     
     plot_scatter_with_trendline(list_worker_activityQuantity)
+
+
+    print('\n Manha \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'manha':
+            print(stat.quantidade, end=", ")
+    print('\n Tarde \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'tarde':
+            print(stat.quantidade, end=", ")
+            
     return

@@ -98,8 +98,6 @@ def KNearest_Neighbors1(list_activities, skills, workblock, k):
         distance = Distance_Calculator(activity.x, activity.y, workblock.x, workblock.y)
         distances.append(KNearest_Nei(activity, distance))
     
-    print('Fez as distancias todas')
-    
     distances = sorted(distances)
     
     list_temp = []
@@ -114,7 +112,6 @@ def KNearest_Neighbors1(list_activities, skills, workblock, k):
         else:
             break
     
-    print('Já tem a lista')
     return  list_temp
 
 
