@@ -34,8 +34,6 @@ class Lista_Grupos_Central:
     def __init__(self):
         self.lista_grupos_atividades = {}
 
-        Lista_Grupos_Central.quantidadeGrupos += 1
-
     def PesquisarPorId(self, id)-> list[Activity]:
         return self.lista_grupos_atividades.get(id, None).lista_atividades
     
@@ -44,6 +42,7 @@ class Lista_Grupos_Central:
             self.lista_grupos_atividades[id].AdicionarAtividade(atividade)
         else:
             self.lista_grupos_atividades[id] = Elemento_Lista_Grupos_Central(atividade)
+            Lista_Grupos_Central.quantidadeGrupos += 1
         
     def CalcularTodosCentros(self):
         for elemento in self.lista_grupos_atividades.values():
@@ -51,7 +50,7 @@ class Lista_Grupos_Central:
 
 
 
-def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> list[Activity]:
+def CentralMaisProxima(listaGruposCentral, lat, lon, central, k) -> list[Activity]:
     if len(central) < 5:
         # lista de distancias vazia
         lista_distancias = []
@@ -62,7 +61,7 @@ def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> list[Activity]:
             # se o id não estiver na lista
             if id not in central: 
 
-                distancia = Distance_Calculator(elemento.centro[0], elemento.centro[1], x, y)
+                distancia = Distance_Calculator(elemento.centro[0], elemento.centro[1], lat, lon)
                 lista_distancias.append([id, distancia])
         
         lista_distancias = sorted(lista_distancias, key=lambda x: x[1])
@@ -73,7 +72,7 @@ def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> list[Activity]:
         primeiro_elemento_atividades_estado_zero = [atividade for atividade in lista if atividade.state == 0]
 
         if len(primeiro_elemento_atividades_estado_zero) < k:
-            primeiro_elemento_atividades_estado_zero.extend(CentralMaisProxima(listaGruposCentral, x, y, central.append(primeiro_elemento[0]), k - len(primeiro_elemento_atividades_estado_zero)))
+            primeiro_elemento_atividades_estado_zero.extend(CentralMaisProxima(listaGruposCentral, lat, lon, central.append(primeiro_elemento[0]), k - len(primeiro_elemento_atividades_estado_zero)))
         
         # print(len(primeiro_elemento_atividades_estado_zero))
         return primeiro_elemento_atividades_estado_zero
@@ -82,20 +81,27 @@ def CentralMaisProxima(listaGruposCentral, x, y, central, k) -> list[Activity]:
 
 def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
 
+
     listaGruposCentral = Lista_Grupos_Central()
     meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
     
+    '''
+    Criar um grupo para cada atividade
+    '''
     for atividade in listaAtividades:
         listaGruposCentral.AdicionarGrupoId(atividade.idCentral, atividade)
 
+
+    '''
+    Fazer a atribuição para casa um dos blocos de trabalho
+    '''
     for blocoTrabalho in listaBlocoTrabalho:
 
-        # print('\n\n')
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
         competencias = trabalhador.competencia
         central = trabalhador.idCentral
-        # print('Central do trabalhador: ', central)
+
         listaAtividadesGrupoCentral = listaGruposCentral.PesquisarPorId(central)
 
         atividades_estado_zero = [atividade for atividade in listaAtividadesGrupoCentral if atividade.state == 0 and atividade.competencia in competencias]
@@ -118,7 +124,7 @@ def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores:
             print(trabalhador.idWorker, 'A zona dele NÃO dá ele!')
 
             # print('k_nearest_neighbors = ', k_nearest_neighbors,' len = ',len(atividades_estado_zero),' "K" = ', k)
-            lista_extend = CentralMaisProxima(listaGruposCentral, blocoTrabalho.longitude, blocoTrabalho.latitude, [central], k)
+            lista_extend = CentralMaisProxima(listaGruposCentral, blocoTrabalho.latitude, blocoTrabalho.longitude, [central], k)
             atividades_estado_zero.extend(lista_extend)
             # print('Valor final: ', len(atividades_estado_zero))
             cluster = KNearest_Neighbors1(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)

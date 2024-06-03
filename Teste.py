@@ -1,7 +1,11 @@
 import datetime
 import pandas as pd
 from Helper import *
-print(Distance_Calculator(1.228178, 42.986197, 1.873725, 43.088226))
+
+gmaps = 0
+print(Travel_Time(1.1, 43.83, 2.99, 44.38, 2.82, gmaps))
+
+
 
 '''
 workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')  # type: ignore
@@ -288,7 +292,7 @@ plt.show()
 """
 
 
-"""
+'''
 
 import heapq
 
@@ -310,4 +314,5 @@ current_Node = heapq.heappop(lista)
 
 print(current_Node.value)  
 
-"""
+'''
+

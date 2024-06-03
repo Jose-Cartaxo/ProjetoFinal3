@@ -246,10 +246,10 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
             
             
             # Tempo necessário para se deslocar até a Atividade
-            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.longitude, current_Activity.latitude, activity.longitude, activity.latitude, gmaps) # type: ignore
+            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, activity.latitude, activity.longitude, gmaps) # type: ignore
 
             # Tempo necessário para se deslocar da Atividade até Casa
-            tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, activity.longitude, activity.latitude, workBlock.longitude, workBlock.latitude, gmaps)
+            tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, activity.latitude, activity.longitude, workBlock.latitude, workBlock.longitude, gmaps)
 
             # Hora de Chegada a Atividade
             horaDeChegadaAAtividade = adicionarMinutosADatetimeTime(current_Time, travel_Time_Going)
@@ -436,7 +436,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
                 # Minuto do dia em que Acaba o dia
                 minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.fim)
 
-                tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, current_Activity.longitude, current_Activity.latitude, workBlock.longitude, workBlock.latitude, gmaps) # type: ignore
+                tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps) # type: ignore
 
                 # Calcular o Custo de volta a casa
                 cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, tempoEmMinParaVoltarACasa, values_dict)

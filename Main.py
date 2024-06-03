@@ -49,7 +49,7 @@ def main():
 
     print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
     # metodoCluster = solicitar_input(1, 5)
-    metodoCluster = 5
+    metodoCluster = 1
 
     '''
 
@@ -201,7 +201,7 @@ cpu_time_used = timeit.timeit(main, number=1)
 print(f"Tempo timeit de CPU usado: {cpu_time_used} segundos")
 
 
-end_time = datetime.now() # type: ignore
+end_time = datetime.datetime.now() # type: ignore
 elapsed_time = end_time - start_time
 print("Tempo decorrido:", elapsed_time, "segundos")
 

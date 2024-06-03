@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from Activity import Activity
+
 class Stats:
     def __init__(self, tipo):
         self.tipo = tipo
@@ -78,19 +80,19 @@ def plot_scatter_with_trendline(dados):
     # Criando o gráfico de dispersão com linha de tendência para a tarde
     create_scatter_plot_with_trendline(x2, y2, 'Gráfico de Dispersão com Linha de Tendência - Tarde', 'PNG_Graphics/PlotScatterTrendline_Tarde.png')
 
-def DataAnalyticsByHour(listActivities):
+def DataAnalyticsByHour(listActivities: list[Activity]):
     statsList = []
     for activity in listActivities:
         found = False
         for stat in statsList:
-            if stat.tipo == activity.appointment:
+            if stat.tipo == activity.agendamento:
                 found = True
                 stat.plusOne()
                 if activity.state == 1:
                     stat.plusOneActive()
                 break
         if not found:
-            new = Stats(activity.appointment)
+            new = Stats(activity.agendamento)
             if activity.state == 1:
                 new.plusOneActive()
             statsList.append(new)
@@ -98,19 +100,19 @@ def DataAnalyticsByHour(listActivities):
     return statsList
 
 
-def DataAnalyticsBySkill(listActivities):
+def DataAnalyticsBySkill(listActivities: list[Activity]):
     statsList = []
     for activity in listActivities:
         found = False
         for stat in statsList:
-            if stat.tipo == activity.skill:
+            if stat.tipo == activity.competencia:
                 found = True
                 stat.plusOne()
                 if activity.state == 1:
                     stat.plusOneActive()
                 break
         if not found:
-            new = Stats(activity.skill)
+            new = Stats(activity.competencia)
             if activity.state == 1:
                 new.plusOneActive()
             statsList.append(new)

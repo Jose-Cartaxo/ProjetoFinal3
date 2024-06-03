@@ -95,7 +95,7 @@ def KNearest_Neighbors1(list_activities, competencias, workblock, k):
     distances = []
     # worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
     for activity in list_activities:
-        distance = Distance_Calculator(activity.longitude, activity.latitude, workblock.longitude, workblock.latitude)
+        distance = Distance_Calculator(activity.latitude, activity.longitude, workblock.latitude, workblock.longitude)
         distances.append(KNearest_Nei(activity, distance))
     
     distances = sorted(distances)
@@ -159,7 +159,7 @@ def KNearest_Neighbors2(list_activities, list_workers, workblock, k):
             # verificar se a atividade ainda não está a ser considerada.
             if activity.state == 0:
                 for coord in list_coordenada_temp:
-                    distance = Distance_Calculator(activity.longitude, activity.latitude, coord.longitude, coord.latitude)
+                    distance = Distance_Calculator(activity.latitude, activity.longitude, coord.latitude, coord.longitude)
                     if KNearest_Neighbors_Vote_in(activity, workblock, worker.competencia): # type: ignore
                         distances.append(KNearest_Nei(activity, distance))
         

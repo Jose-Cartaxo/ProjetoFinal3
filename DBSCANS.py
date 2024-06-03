@@ -98,7 +98,7 @@ def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_B
         for activity_clustered in cluster:
             for activity in list_activities:
                 if activity.state == 0:
-                    distance = Distance_Calculator(activity.longitude, activity.latitude, activity_clustered.longitude, activity_clustered.latitude)
+                    distance = Distance_Calculator(activity.latitude, activity.longitude, activity_clustered.latitude, activity_clustered.longitude)
                     # print('distancia = ', distance, ' Raio = ' , radius)
                     if distance < radius and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
                         temp_cluster.append(activity)

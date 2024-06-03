@@ -37,26 +37,26 @@ def plot_activities_by_order(list_activities: list[Activity], nodes, work_Block:
     # lista só com os ids das atividades que vão ser realizadas, por ordem de realização
     activity_id_list = [node.id for node in nodes]
 
-    x_values = []
-    y_values = []
+    longitude_values = []
+    latitude_values = []
     points_colors = []
 
     # adicionar o ponto de partido do workblock ao gráfico 
-    x_values.append(work_Block.longitude)
-    y_values.append(work_Block.latitude)
+    longitude_values.append(work_Block.longitude)
+    latitude_values.append(work_Block.latitude)
     points_colors.append(0)
 
     # adicionar cada atividade ao gráfico 
     for num in activity_id_list:
         activity = Find_Activity_By_Id(list_activities, num)
         if activity:
-            x_values.append(activity.longitude)
-            y_values.append(activity.latitude)
+            longitude_values.append(activity.longitude)
+            latitude_values.append(activity.latitude)
             points_colors.append(3)
 
     # adicionar outra vez o workblock pois ao fim do dia ele volta
-    x_values.append(work_Block.longitude)
-    y_values.append(work_Block.latitude)
+    longitude_values.append(work_Block.longitude)
+    latitude_values.append(work_Block.latitude)
     points_colors.append(0)
 
     # Definir cores com base nos estados das tarefas
@@ -68,27 +68,27 @@ def plot_activities_by_order(list_activities: list[Activity], nodes, work_Block:
 
 
     # adicionar cada seta para o percurso
-    for i in range(len(x_values)-1):
+    for i in range(len(longitude_values)-1):
 
-        dx = x_values[i+1] - x_values[i]
-        dy = y_values[i+1] - y_values[i]
+        dx = longitude_values[i+1] - longitude_values[i]
+        dy = latitude_values[i+1] - latitude_values[i]
 
 
-        dist = distancia(x_values[i], y_values[i], x_values[i+1], y_values[i+1])
+        dist = distancia(longitude_values[i], latitude_values[i], longitude_values[i+1], latitude_values[i+1])
 
         # Ajustar o tamanho da cabeça da seta proporcionalmente à distância
         head_width = 0.08 * dist
         head_length = 0.08 * dist
 
-        plt.arrow(x_values[i], y_values[i], dx, dy,
+        plt.arrow(longitude_values[i], latitude_values[i], dx, dy,
                 color='blue', width=0.0005 * dist, head_width=head_width, head_length=head_length,length_includes_head=True)
 
 
     # adicionar as atividades que faltam ao gráfico
     for activity in list_activities:
         if activity.idActivity not in activity_id_list:
-            x_values.append(activity.longitude)
-            y_values.append(activity.latitude)
+            longitude_values.append(activity.longitude)
+            latitude_values.append(activity.latitude)
             points_colors.append(2)
 
 
@@ -101,10 +101,10 @@ def plot_activities_by_order(list_activities: list[Activity], nodes, work_Block:
     criar o gráfico
 
     '''
-    plt.scatter(x_values, y_values, c=colors_order)
+    plt.scatter(longitude_values, latitude_values, c=colors_order)
     plt.title(str(work_Block.idWorker) + ' Start:' + str(work_Block.inicio)+ ' End:' + str(work_Block.fim))
-    plt.xlabel('Coordenada X')
-    plt.ylabel('Coordenada Y')
+    plt.xlabel('Longitude ')
+    plt.ylabel('Latitude')
 
     legend_elements = [
         Line2D([], [], marker='o', color='green', label='Atribuídas', linestyle='None'),
@@ -190,8 +190,8 @@ def plot_activities_graph_by_state(list_activities: list[Activity]):
 
 def plot_heatmap_activities_by_state(list_activities: list[Activity]):
     # Extrair coordenadas x, y e timestamps
-    x_values = [task.longitude for task in list_activities]
-    y_values = [task.latitude for task in list_activities]
+    longitude_values = [task.longitude for task in list_activities]
+    latitude_values = [task.latitude for task in list_activities]
     timestamps = [task.state for task in list_activities]
 
     # Converter timestamps para valores numéricos para representar as cores
@@ -200,11 +200,11 @@ def plot_heatmap_activities_by_state(list_activities: list[Activity]):
 
     # Criar heatmap
     plt.figure(figsize=(8, 6))
-    heatmap = plt.scatter(x_values, y_values, c=color_values, cmap='viridis', s=100, alpha=0.7)
+    heatmap = plt.scatter(longitude_values, latitude_values, c=color_values, cmap='viridis', s=100, alpha=0.7)
     plt.colorbar(heatmap, label='State')
     plt.title('Heatmap das Atividades por State')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMapState.png')
@@ -214,8 +214,8 @@ def plot_heatmap_activities_by_state(list_activities: list[Activity]):
 
 def plot_heatmap_activities_by_hour(list_activities: list[Activity]):
     # Extrair coordenadas x, y e timestamps
-    x_values = [task.longitude for task in list_activities]
-    y_values = [task.latitude for task in list_activities]
+    longitude_values = [task.longitude for task in list_activities]
+    latitude_values = [task.latitude for task in list_activities]
     timestamps = [task.agendamento.hour for task in list_activities]
 
     # Converter timestamps para valores numéricos para representar as cores
@@ -224,11 +224,11 @@ def plot_heatmap_activities_by_hour(list_activities: list[Activity]):
 
     # Criar heatmap
     plt.figure(figsize=(8, 6))
-    heatmap = plt.scatter(x_values, y_values, c=color_values, cmap='viridis', s=100, alpha=0.7)
+    heatmap = plt.scatter(longitude_values, latitude_values, c=color_values, cmap='viridis', s=100, alpha=0.7)
     plt.colorbar(heatmap, label='Hora da Marcação')
     plt.title('Heatmap das Atividades')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMapHours.png')
