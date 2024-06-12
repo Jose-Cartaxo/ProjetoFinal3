@@ -23,6 +23,8 @@ from K_NearestNeighbors1 import *
 from K_NearestNeighbors2 import *
 import time
 import timeit
+from dotenv import load_dotenv
+import os
 
 '''
 
@@ -55,11 +57,12 @@ def main():
 
     Configurar o Google Maps
 
-    '''
-    api_key = 'AIzaSyB_brs6KxO_ZbAzviY4L2pzlE1wgY0VaQg'
-    # Inicialize o cliente da API do Google Maps
+    api_key = os.getenv("api_key")
+    print(api_key)
     gmaps = googlemaps.Client(key=api_key)
 
+    '''
+    gmaps = ''
     '''
 
     ler dados do Excel

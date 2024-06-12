@@ -58,6 +58,7 @@ def create_scatter_plot_with_trendline(x, y, title, filename):
     plt.grid(True)
     plt.savefig(filename)
     # plt.show()
+    plt.close() 
 
 
 def plot_scatter_with_trendline(dados):
