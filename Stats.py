@@ -16,7 +16,7 @@ class Stats:
         self.total = self.total + 1
 
     def print(self):
-        print('Tipo Atividade:',self.tipo)
+        print('\nTipo Atividade:',self.tipo)
         print('TOTAL: ', self.total, ' ATIVA: ', self.active,' PERCENT: ', (100/self.total * self.active),'\n')
 
     def __lt__(self, other):
@@ -57,7 +57,7 @@ def create_scatter_plot_with_trendline(x, y, title, filename):
     # Exibindo e salvando o gráfico
     plt.grid(True)
     plt.savefig(filename)
-    plt.show()
+    # plt.show()
 
 
 def plot_scatter_with_trendline(dados):
@@ -85,14 +85,14 @@ def DataAnalyticsByHour(listActivities: list[Activity]):
     for activity in listActivities:
         found = False
         for stat in statsList:
-            if stat.tipo == activity.agendamento:
+            if stat.tipo == activity.agendamento.hour:
                 found = True
                 stat.plusOne()
                 if activity.state == 1:
                     stat.plusOneActive()
                 break
         if not found:
-            new = Stats(activity.agendamento)
+            new = Stats(activity.agendamento.hour)
             if activity.state == 1:
                 new.plusOneActive()
             statsList.append(new)

@@ -3,7 +3,7 @@ import pandas as pd
 from Helper import *
 
 gmaps = 0
-print(Travel_Time(1.1, 43.83, 2.99, 44.38, 2.82, gmaps))
+print(Travel_Time(1.1, 43.83, 2.99, 44.29, 2.57, gmaps))
 
 
 

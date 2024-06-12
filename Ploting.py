@@ -183,7 +183,7 @@ def plot_activities_graph_by_state(list_activities: list[Activity]):
         plt.text(i, valor, str(valor), ha='center', va='bottom')
     
     plt.savefig('PNG_Graphics/PlotMapState.png')
-    plt.show(block = True)
+    # plt.show(block = False)
     plt.close() 
 
 
@@ -208,7 +208,7 @@ def plot_heatmap_activities_by_state(list_activities: list[Activity]):
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMapState.png')
-    plt.show()
+    # plt.show()
 
 
 
@@ -232,7 +232,7 @@ def plot_heatmap_activities_by_hour(list_activities: list[Activity]):
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMapHours.png')
-    plt.show(block = False)
+    # plt.show(block = False)
     plt.close() 
 
 

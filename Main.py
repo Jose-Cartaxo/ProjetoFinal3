@@ -12,7 +12,7 @@ from Activity import Activity
 from DBSCANS import *
 from Workers import *
 from Stats import *
-from Helper import *
+from Helper import Travel_Time
 import pandas as pd
 from Optimization import Greedy
 from Ploting import *
@@ -197,16 +197,19 @@ print('Começou')
 printar o tempo de execução do programa
 '''
 # Medir o tempo de CPU usando timeit
+
 cpu_time_used = timeit.timeit(main, number=1)
 print(f"Tempo timeit de CPU usado: {cpu_time_used} segundos")
 
 
 end_time = datetime.datetime.now() # type: ignore
-elapsed_time = end_time - start_time
+elapsed_time = (end_time - start_time).total_seconds()
 print("Tempo decorrido:", elapsed_time, "segundos")
 
 # Fim da medição do tempo de CPU
 end_time_cpu = time.process_time()
 # Tempo de CPU gasto
-cpu_time_used = end_time_cpu - start_time_cpu
-print(f"Tempo de CPU usado: {cpu_time_used} segundos")
+time_used = end_time_cpu - start_time_cpu
+print(f"Tempo de CPU usado: {time_used} segundos")
+
+print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes")
