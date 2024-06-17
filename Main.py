@@ -36,12 +36,12 @@ definir as prioridades e o metodo de clustering
 def main():
 
     print("Deseja que seja considerada a prioridade das Atividades com marcação?")
-    # considerarAgendamento = pedir_s_n()
-    considerarAgendamento = False
+    considerarAgendamento = pedir_s_n()
+    # considerarAgendamento = False
 
     print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
-    # considerarPrioridade = pedir_s_n()
-    considerarPrioridade = False
+    considerarPrioridade = pedir_s_n()
+    # considerarPrioridade = False
 
     # 1 - K-NearestNeighbors 1.0
     # 2 - K-NearestNeighbors 2.0
@@ -50,8 +50,8 @@ def main():
     # 5 - Central
 
     print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
-    # metodoCluster = solicitar_input(1, 5)
-    metodoCluster = 1
+    metodoCluster = solicitar_input(1, 5)
+    # metodoCluster = 1
 
     '''
 
@@ -133,7 +133,7 @@ def main():
     # 4 - DBSCANS
     # 5 - Central
 
-    cluster = []
+    # cluster = []
 
     if metodoCluster == 1:
         K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
