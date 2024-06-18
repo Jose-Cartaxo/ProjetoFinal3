@@ -71,7 +71,7 @@ def KNearest_Neighbors_Vote_in(atividade: Activity, workblock: WorkBlock, compet
 
 
 
-def KNearest_Neighbors1(list_activities, competencias, workblock, k):
+def KNearest_Neighbors_Normal(list_activities, competencias, workblock, k):
     """
     Esta função faz o K-NEAREST-NEIGHBORS para o workblock submetido e devolve uma lista com o atividades do cluster
 
@@ -94,6 +94,7 @@ def KNearest_Neighbors1(list_activities, competencias, workblock, k):
         
     distances = []
     # worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
+
     for activity in list_activities:
         distance = Distance_Calculator(activity.latitude, activity.longitude, workblock.latitude, workblock.longitude)
         distances.append(KNearest_Nei(activity, distance))
@@ -117,7 +118,7 @@ def KNearest_Neighbors1(list_activities, competencias, workblock, k):
 
 
 
-def KNearest_Neighbors2(list_activities, list_workers, workblock, k):
+def KNearest_Neighbors_Adaptado(list_activities, list_workers, workblock, k):
     """
     Esta função faz o clustering das atividades para o workblock.
 

@@ -4,7 +4,7 @@ from Optimization import *
 from Ploting import *
 from Stats import *
 
-def K_N_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
+def Opcao_K_N_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
     meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
@@ -15,11 +15,9 @@ def K_N_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
         competencias = trabalhador.competencia
         
-        cluster = KNearest_Neighbors1(listaAtividades, competencias, blocoTrabalho, 4)
-        print('Size A: ', len(cluster))
-        cluster = DBSCANS(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_BDSCANS_DISTANCE'], valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
+        cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, 4)
+        cluster = DBSCANS1(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
-        print('Size D: ', len(cluster))
         nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
@@ -59,4 +57,15 @@ def K_N_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker
 
     
     plot_scatter_with_trendline(list_worker_activityQuantity)
+
+    print('\nManha \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'manha':
+            print(stat.quantidade, end=", ")
+    print('\n\nTarde \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'tarde':
+            print(stat.quantidade, end=", ")
+    print('\n')
+
     return

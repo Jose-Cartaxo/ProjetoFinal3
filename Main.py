@@ -6,15 +6,14 @@ Created on Fri Apr  5 14:43:14 2024
 """
 
 # from tkinter import N
+from tkinter import N
 import googlemaps
 import datetime
 from Activity import Activity
 from DBSCANS import *
 from Workers import *
 from Stats import *
-from Helper import Travel_Time
 import pandas as pd
-from Optimization import Greedy
 from Ploting import *
 from KNearest_Neighbors import *
 from Central import *
@@ -26,22 +25,13 @@ import timeit
 from dotenv import load_dotenv
 import os
 
-'''
-
-Configuração inicial da execução do código, 
-definir as prioridades e o metodo de clustering
-
-'''
-
 def main():
 
     print("Deseja que seja considerada a prioridade das Atividades com marcação?")
     considerarAgendamento = pedir_s_n()
-    # considerarAgendamento = False
 
     print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
     considerarPrioridade = pedir_s_n()
-    # considerarPrioridade = False
 
     # 1 - K-NearestNeighbors 1.0
     # 2 - K-NearestNeighbors 2.0
@@ -51,22 +41,19 @@ def main():
 
     print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
     metodoCluster = solicitar_input(1, 5)
-    # metodoCluster = 1
 
     '''
+        Configurar o Google Maps
 
-    Configurar o Google Maps
-
-    api_key = os.getenv("api_key")
+    api_key = os.getenv("api_key") 
     print(api_key)
     gmaps = googlemaps.Client(key=api_key)
-
     '''
+    
     gmaps = ''
+    
     '''
-
-    ler dados do Excel
-
+        ler dados do Excel
     '''
     activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
     listaAtividades = []
@@ -78,13 +65,12 @@ def main():
             # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
         else:
             listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(), agendamento = datetime.datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
-            # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude'], element['DataAgendamento'].to_pydatetime()))
+
 
     workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
     listaTrabalhadores = []
     for indice, element in workers_xlsx.iterrows():
         hours_str = element['HorarioTrabalho']
-        # print(hours_str)
         hours_list = hours_str.split(',')
         tempo_listaBlocoTrabalho = []
         i = 0
@@ -102,17 +88,13 @@ def main():
     competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
 
     '''
-
-    heat map por hora de marcação, mais escuro, mais tarde a hora de marcação
-
+        heat map por hora de marcação, mais escuro, mais tarde a hora de marcação
     '''
 
     plot_heatmap_activities_by_hour(listaAtividades)
 
     '''
-
-    Fazer uma lista só com os workblocks para se irem adicionamdo as atividades a estes
-
+        Fazer uma lista só com os workblocks para se irem adicionamdo as atividades a estes
     '''
 
     listaBlocoTrabalho = []
@@ -122,9 +104,7 @@ def main():
 
 
     '''
-
-    correr o programa com o método de clustering escolhido
-
+        correr o programa com o método de clustering escolhido
     '''
 
     # 1 - K-NearestNeighbors 1.0
@@ -133,71 +113,54 @@ def main():
     # 4 - DBSCANS
     # 5 - Central
 
-    # cluster = []
-
     if metodoCluster == 1:
-        K_NearestNeighbors1(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-        # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS1']))
+        Opcao_K_NearestNeighbors_Normal(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 2:
-        K_NearestNeighbors2(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-        # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS1']))
+        Opcao_K_NearestNeighbors_Adaptado(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 3:
-        K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-        # cluster = KNearest_Neighbors1(listaAtividades, listaTrabalhadores, work_Block, int(valores_dict['K_NEAREST_NEIGHBORS']))
-        # cluster = DBSCANS(listaAtividades, listaTrabalhadores, work_Block, cluster, valores_dict['MIN_BDSCANS_DISTANCE'], valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
+        Opcao_K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 4:
-        print('Não funfa, ainda...')
-        DBSCANS3(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 5:
-        # print('Não funfa, ainda...')
-        Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-        # cluster = []
-        # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
-        # cluster = KNearest_Neighbors2(listaAtividades, listaTrabalhadores, work_Block, 10)
-
-
-
-
-
-
-
+        Opcao_Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     '''
-
-    Análises estatísticas
+        Análises estatísticas
     '''
+
     plot_activities_graph_by_state(listaAtividades)
 
     plot_heatmap_activities_by_state(listaAtividades)
 
     data = DataAnalyticsByHour(listaAtividades)
     sorted_stats_list = sorted(data)
+    print('Atividades por hora agendamento (0 é sem agendamento):')
     for dat in sorted_stats_list:
         dat.print()
 
     data = DataAnalyticsBySkill(listaAtividades)
-
+    print('\nAtividades por tipo de competencia:')
     for dat in data:
         dat.print()
 
-'''
-
-começar o "relógio" para o tempo de execução
+    print('')
 
 '''
+    começar o "relógio" para o tempo de execução
+'''
+
+# Início da medição dos tempos
 start_time = datetime.datetime.now()
-
-# Início da medição do tempo de CPU
 start_time_cpu = time.process_time()
 
-print('Começou')
-'''
+os.system("cls")
 
-printar o tempo de execução do programa
+'''
+    printar o tempo de execução do programa
 '''
 # Medir o tempo de CPU usando timeit
 
@@ -211,6 +174,7 @@ print("Tempo decorrido:", elapsed_time, "segundos")
 
 # Fim da medição do tempo de CPU
 end_time_cpu = time.process_time()
+
 # Tempo de CPU gasto
 time_used = end_time_cpu - start_time_cpu
 print(f"Tempo de CPU usado: {time_used} segundos")

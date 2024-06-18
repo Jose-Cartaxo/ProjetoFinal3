@@ -79,13 +79,15 @@ def CentralMaisProxima(listaGruposCentral, lat, lon, central, k) -> list[Activit
     return []
 
 
-def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
 
 
     listaGruposCentral = Lista_Grupos_Central()
     meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
-    
+
+    print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS: ', int(valores_dict['K_NEAREST_NEIGHBORS']))
+
     '''
     Criar um grupo para cada atividade
     '''
@@ -94,7 +96,7 @@ def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores:
 
 
     '''
-    Fazer a atribuição para casa um dos blocos de trabalho
+        Fazer a atribuição para casa um dos blocos de trabalho
     '''
     for blocoTrabalho in listaBlocoTrabalho:
 
@@ -111,24 +113,21 @@ def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores:
             Se entrou aqui é porque na Central dele existem mais atividades do que as defenidas pelo utilizador para fazer a atribuição, ou seja não precisa de ir a outra central buscar mais atividades para complementar
         '''
         if len(atividades_estado_zero) > k_nearest_neighbors:
-            print(trabalhador.idWorker, 'A zona dele chega para ele!')
-            cluster = KNearest_Neighbors1(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
-            print('Ficou com ', len(cluster), ' atividades para fazer\n\n' )
+
+            cluster = KNearest_Neighbors_Normal(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
+
 
 
             '''
-            Se entrou aqui é porque na Central dele não existem mais atividades do que as defenidas pelo utilizador para fazer a atribuição, ou seja precisa de ir a outra central buscar mais atividades para complementar
-        '''
+                Se entrou aqui é porque na Central dele não existem mais atividades do que as defenidas pelo utilizador para fazer a atribuição, ou seja precisa de ir a outra central buscar mais atividades para complementar
+            '''
         else:
             k = k_nearest_neighbors - len(atividades_estado_zero)
-            print(trabalhador.idWorker, 'A zona dele NÃO dá ele!')
 
-            # print('k_nearest_neighbors = ', k_nearest_neighbors,' len = ',len(atividades_estado_zero),' "K" = ', k)
             lista_extend = CentralMaisProxima(listaGruposCentral, blocoTrabalho.latitude, blocoTrabalho.longitude, [central], k)
             atividades_estado_zero.extend(lista_extend)
-            # print('Valor final: ', len(atividades_estado_zero))
-            cluster = KNearest_Neighbors1(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
-            print('Ficou com ', len(cluster), ' atividades para fazer\n\n' )
+            
+            cluster = KNearest_Neighbors_Normal(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
 
         nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
@@ -169,4 +168,15 @@ def Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores:
 
     
     plot_scatter_with_trendline(list_worker_activityQuantity)
+    
+    print('\nManha \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'manha':
+            print(stat.quantidade, end=", ")
+    print('\n\nTarde \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'tarde':
+            print(stat.quantidade, end=", ")
+    print('\n')
+
     return

@@ -16,8 +16,7 @@ class Stats:
         self.total = self.total + 1
 
     def print(self):
-        print('\nTipo Atividade:',self.tipo)
-        print('TOTAL: ', self.total, ' ATIVA: ', self.active,' PERCENT: ', (100/self.total * self.active),'\n')
+        print('Tipo Atividade:',self.tipo, ' ATIVA: ', self.active,' TOTAL: ', self.total, ' PERCENT: ', (100/self.total * self.active))
 
     def __lt__(self, other):
         return self.tipo < other.tipo

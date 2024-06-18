@@ -14,7 +14,7 @@ from Ploting import *
 from Optimization import *
 
 
-def DBSCANS(list_activities: list [Activity], list_workers: list[Worker], work_Block: WorkBlock, cluster: list [Activity], distance_Min , distance_Max , iterations_Max):
+def DBSCANS1(list_activities: list [Activity], list_workers: list[Worker], work_Block: WorkBlock, cluster: list [Activity], distance_Min , distance_Max , iterations_Max):
 
     worker = Find_Worker_By_Id(list_workers, work_Block.idWorker)
 
@@ -42,7 +42,12 @@ def DBSCANS(list_activities: list [Activity], list_workers: list[Worker], work_B
 
     return cluster
 
-def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_Block: WorkBlock, distance_Min, iterations_Max):
+
+
+
+
+
+def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_Block: WorkBlock, distance_Min: int, distance_Max: int, iterations_Max: int):
     """
     Esta função faz o clustering das atividades para o workblock.
 
@@ -76,58 +81,56 @@ def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_B
     temp_cluster = []
 
 
-    for activity in list_activities:
-        if activity.state == 0:
-            distance = Distance_Calculator(activity.latitude, activity.longitude, work_Block.latitude, work_Block.longitude)
-            # print('distancia = ', distance, ' Raio = ' , radius)
-            if (distance < radius) and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
-                temp_cluster.append(activity)
-                activity.state = 2
 
+    while len(temp_cluster) == 0 and radius <= distance_Max:
+        for activity in list_activities:
+            if activity.state == 0:
+                distance = Distance_Calculator(activity.latitude, activity.longitude, work_Block.latitude, work_Block.longitude)
+                if (distance < radius) and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
+                    temp_cluster.append(activity)
+                    activity.state = 2
+        radius += 1
 
     cluster.extend(temp_cluster)
-    print('Tamanho do cluster: ', len(cluster), end=', ')
-    # print('temp_cluster Size = ', len(temp_cluster))
 
 
-    for i in range(iterations_Max - 1):
-        # print(i)
-        temp_cluster.clear
+    for i in range(0, iterations_Max - 1):
+        temp_cluster.clear()
 
+        radius = distance_Min
 
-        for activity_clustered in cluster:
-            for activity in list_activities:
-                if activity.state == 0:
-                    distance = Distance_Calculator(activity.latitude, activity.longitude, activity_clustered.latitude, activity_clustered.longitude)
-                    # print('distancia = ', distance, ' Raio = ' , radius)
-                    if distance < radius and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
-                        temp_cluster.append(activity)
-                        activity.state = 2
-
-        # print('temp_cluster Size = ', len(temp_cluster))
+        while len(temp_cluster) == 0 and radius <= distance_Max:
+            for activity_clustered in cluster:
+                for activity in list_activities:
+                    if activity.state == 0:
+                        distance = Distance_Calculator(activity.latitude, activity.longitude, activity_clustered.latitude, activity_clustered.longitude)
+                        if distance < radius and (activity.agendamento < work_Block.fim) and (activity.agendamento > work_Block.inicio or activity.agendamento == time(0,0)) and (activity.competencia in worker.competencia):
+                            temp_cluster.append(activity)
+                            activity.state = 2
+            radius += 1
         cluster.extend(temp_cluster)
-        print(len(cluster), end=', ')
 
-    # plot_activities_by_state(list_activities, work_Block)
-    # print('Cluster Size = ', len(cluster) )
     return cluster
 
 
 
-def DBSCANS3(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+
+
+
+def Opcao_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
     
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
 
-    print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS: ', int(valores_dict['K_NEAREST_NEIGHBORS']))
+    print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'DBSCANS_IT_NUM: ', int(valores_dict['DBSCAN_IT_NUM']))
 
     for blocoTrabalho in listaBlocoTrabalho:
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
         competencias = trabalhador.competencia
         
-        cluster = DBSCANS2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MAX_BDSCANS_DISTANCE'], int(valores_dict['DBSCANS_IT_NUM']))
+        cluster = DBSCANS2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
-        print('Size: ', len(cluster))
+        # print('Size: ', len(cluster))
         nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
@@ -166,4 +169,15 @@ def DBSCANS3(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], 
 
     
     plot_scatter_with_trendline(list_worker_activityQuantity)
+
+    print('\nManha \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'manha':
+            print(stat.quantidade, end=", ")
+    print('\n\nTarde \n')
+    for stat in list_worker_activityQuantity:
+        if stat.tipo == 'tarde':
+            print(stat.quantidade, end=", ")
+    print('\n')
+
     return
