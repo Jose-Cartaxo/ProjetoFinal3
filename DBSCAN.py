@@ -14,7 +14,7 @@ from Ploting import *
 from Optimization import *
 
 
-def DBSCANS1(list_activities: list [Activity], list_workers: list[Worker], work_Block: WorkBlock, cluster: list [Activity], distance_Min , distance_Max , iterations_Max):
+def DBSCAN1(list_activities: list [Activity], list_workers: list[Worker], work_Block: WorkBlock, cluster: list [Activity], distance_Min , distance_Max , iterations_Max):
 
     worker = Find_Worker_By_Id(list_workers, work_Block.idWorker)
 
@@ -47,7 +47,7 @@ def DBSCANS1(list_activities: list [Activity], list_workers: list[Worker], work_
 
 
 
-def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_Block: WorkBlock, distance_Min: int, distance_Max: int, iterations_Max: int):
+def DBSCAN2(list_activities: list[Activity], list_workers: list[Worker], work_Block: WorkBlock, distance_Min: int, distance_Max: int, iterations_Max: int):
     """
     Esta função faz o clustering das atividades para o workblock.
 
@@ -117,7 +117,7 @@ def DBSCANS2(list_activities: list[Activity], list_workers: list[Worker], work_B
 
 
 
-def Opcao_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
     
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
@@ -128,7 +128,7 @@ def Opcao_DBSCANS(listaAtividades: list[Activity], listaTrabalhadores: list[Work
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
         competencias = trabalhador.competencia
         
-        cluster = DBSCANS2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
+        cluster = DBSCAN2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
         # print('Size: ', len(cluster))
         nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)

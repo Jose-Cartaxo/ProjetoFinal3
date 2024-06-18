@@ -1,5 +1,5 @@
 from KNearest_Neighbors import *
-from DBSCANS import *
+from DBSCAN import *
 from Optimization import *
 from Ploting import *
 from Stats import *

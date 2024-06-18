@@ -10,14 +10,14 @@ from tkinter import N
 import googlemaps
 import datetime
 from Activity import Activity
-from DBSCANS import *
+from DBSCAN import *
 from Workers import *
 from Stats import *
 import pandas as pd
 from Ploting import *
 from KNearest_Neighbors import *
 from Central import *
-from K_N_DBSCANS import *
+from K_N_DBSCAN import *
 from K_NearestNeighbors1 import *
 from K_NearestNeighbors2 import *
 import time
@@ -120,10 +120,10 @@ def main():
         Opcao_K_NearestNeighbors_Adaptado(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 3:
-        Opcao_K_N_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_K_N_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 4:
-        Opcao_DBSCANS(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 5:
         Opcao_Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
