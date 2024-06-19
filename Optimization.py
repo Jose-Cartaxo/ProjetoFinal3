@@ -6,7 +6,7 @@ from Activity import Activity, Find_Activity_By_Id
 from Node import Node
 from Workers import WorkBlock, Worker
 from Workers import Find_Worker_By_Id
-from DBSCANS import Travel_Time
+from DBSCAN import Travel_Time
 from datetime import datetime, timedelta, time
 import pandas as pd
 

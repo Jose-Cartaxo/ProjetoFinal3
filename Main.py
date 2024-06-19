@@ -21,7 +21,6 @@ from K_N_DBSCAN import *
 from K_NearestNeighbors1 import *
 from K_NearestNeighbors2 import *
 import time
-import timeit
 from dotenv import load_dotenv
 import os
 
@@ -162,12 +161,8 @@ os.system("cls")
 '''
     printar o tempo de execução do programa
 '''
-# Medir o tempo de CPU usando timeit
 
-cpu_time_used = timeit.timeit(main, number=1)
-print(f"Tempo timeit de CPU usado: {cpu_time_used} segundos")
-
-
+main()
 end_time = datetime.datetime.now() # type: ignore
 elapsed_time = (end_time - start_time).total_seconds()
 print("Tempo decorrido:", elapsed_time, "segundos")
