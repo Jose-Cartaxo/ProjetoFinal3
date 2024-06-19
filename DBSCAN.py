@@ -122,7 +122,7 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
 
-    print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'DBSCANS_IT_NUM: ', int(valores_dict['DBSCAN_IT_NUM']))
+    print('listaAtividades: ', len(listaAtividades), ' listaTrabalhadores', len(listaTrabalhadores), ' listaBlocoTrabalho: ', len(listaBlocoTrabalho), 'MIN_DBSCAN_DISTANCE: ', valores_dict['MIN_DBSCAN_DISTANCE'], 'MAX_DBSCAN_DISTANCE: ', valores_dict['MAX_DBSCAN_DISTANCE'], 'DBSCANS_IT_NUM: ', int(valores_dict['DBSCAN_IT_NUM']))
 
     for blocoTrabalho in listaBlocoTrabalho:
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
