@@ -117,7 +117,7 @@ def DBSCAN2(list_activities: list[Activity], list_workers: list[Worker], work_Bl
 
 
 
-def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
     
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
     list_worker_activityQuantity = []
@@ -131,7 +131,7 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
         cluster = DBSCAN2(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
         # print('Size: ', len(cluster))
-        nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
 

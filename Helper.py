@@ -38,6 +38,19 @@ def Travel_Time( travel_mult, lat1, lon1, lat2, lon2, gmaps):
     return int(Distance_Calculator( lat1, lon1, lat2, lon2) * travel_mult) # values_dict['TRAVEL_TIME']
 
 Travel_Time.quantidade_de_chamadas = 0
+
+def pedir_Travel_Time(dicionario, travel_mult, lat1, lon1, lat2, lon2, gmaps):
+    
+    chave = ((lat1, lon1), (lat2, lon2))
+
+    if chave not in dicionario:
+        valor = Travel_Time( travel_mult, lat1, lon1, lat2, lon2, gmaps)
+        dicionario[chave] = valor
+        return dicionario[chave]
+    else:
+        return dicionario[chave]
+
+
 '''
 def Travel_Time( travel_mult, x1, y1, x2, y2, gmaps):
     origem = (x1, y1)  # San Francisco, CA

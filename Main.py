@@ -50,12 +50,14 @@ def main():
     '''
     
     gmaps = ''
+    dicionario_distancias = {}
     
     '''
         ler dados do Excel
     '''
+    # activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
     activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
-    listaAtividades = []
+    listaAtividades: list[Activity] = []
     for indice, element in activities_xlsx.iterrows():
 
         if element['ComprirAgendamento'] == 0:
@@ -67,7 +69,8 @@ def main():
 
 
     workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
-    listaTrabalhadores = []
+    listaTrabalhadores: list[Worker] = []
+
     for indice, element in workers_xlsx.iterrows():
         hours_str = element['HorarioTrabalho']
         hours_list = hours_str.split(',')
@@ -78,7 +81,7 @@ def main():
             tempo_listaBlocoTrabalho.append(WorkBlock(element['idTrabalhador'], element['Longitude'], element['Latitude'], i,start_hour, end_hour))
             i += 1
         
-        listaTrabalhadores.append(Worker(element['idTrabalhador'], element['idCentral'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
+        listaTrabalhadores.append(Worker(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
 
     values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
     valores_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
@@ -113,27 +116,25 @@ def main():
     # 5 - Central
 
     if metodoCluster == 1:
-        Opcao_K_NearestNeighbors_Normal(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_K_NearestNeighbors_Normal(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 2:
-        Opcao_K_NearestNeighbors_Adaptado(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_K_NearestNeighbors_Adaptado(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 3:
-        Opcao_K_N_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_K_N_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 4:
-        Opcao_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     elif metodoCluster == 5:
-        Opcao_Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        Opcao_Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
     '''
         Análises estatísticas
     '''
 
     plot_activities_graph_by_state(listaAtividades)
-
-    plot_heatmap_activities_by_state(listaAtividades)
 
     data = DataAnalyticsByHour(listaAtividades)
     sorted_stats_list = sorted(data)
@@ -146,7 +147,20 @@ def main():
     for dat in data:
         dat.print()
 
-    print('')
+    mediaQuantidadeAtividade = CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listaTrabalhadores)
+
+    print('\n\n Média: ', mediaQuantidadeAtividade, '\n')
+    print('\n\n Limite: ', int(0.75 * mediaQuantidadeAtividade), '\n')
+
+    for trabalhador in listaTrabalhadores:
+        if trabalhador.quantidadeAtividades < int(0.75 * mediaQuantidadeAtividade):
+            AnalisaTrabalhador(trabalhador, listaAtividades, valores_dict)
+
+    AnalisaTemposTrabalhadores(listaTrabalhadores, listaAtividades, dicionario_distancias, valores_dict['TRAVEL_TIME'], gmaps)
+    plot_heatmap_activities_by_state(listaAtividades)
+
+
+
 
 '''
     começar o "relógio" para o tempo de execução
@@ -154,7 +168,6 @@ def main():
 
 # Início da medição dos tempos
 start_time = datetime.datetime.now()
-start_time_cpu = time.process_time()
 
 os.system("cls")
 
@@ -166,12 +179,4 @@ main()
 end_time = datetime.datetime.now() # type: ignore
 elapsed_time = (end_time - start_time).total_seconds()
 print("Tempo decorrido:", elapsed_time, "segundos")
-
-# Fim da medição do tempo de CPU
-end_time_cpu = time.process_time()
-
-# Tempo de CPU gasto
-time_used = end_time_cpu - start_time_cpu
-print(f"Tempo de CPU usado: {time_used} segundos")
-
 print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes")

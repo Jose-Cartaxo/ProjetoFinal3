@@ -6,7 +6,7 @@ from Activity import Activity, Find_Activity_By_Id
 from Node import Node
 from Workers import WorkBlock, Worker
 from Workers import Find_Worker_By_Id
-from DBSCAN import Travel_Time
+from DBSCAN import pedir_Travel_Time
 from datetime import datetime, timedelta, time
 import pandas as pd
 
@@ -171,7 +171,7 @@ def subtrairMinutosADatetimeTime(tim, min):
     return saida
 
 
-def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, competencias_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
+def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dicionario_distancias, competencias_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
 
     """
     Esta função verifica qual a melhor combinação de atividades para o trabalhador, faz lhe a rota e devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades.
@@ -246,10 +246,10 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
             
             
             # Tempo necessário para se deslocar até a Atividade
-            travel_Time_Going = Travel_Time(travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, activity.latitude, activity.longitude, gmaps) # type: ignore
+            travel_Time_Going = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, activity.latitude, activity.longitude, gmaps) # type: ignore
 
             # Tempo necessário para se deslocar da Atividade até Casa
-            tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, activity.latitude, activity.longitude, workBlock.latitude, workBlock.longitude, gmaps)
+            tempoEmMinParaVoltarACasa = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, activity.latitude, activity.longitude, workBlock.latitude, workBlock.longitude, gmaps)
 
             # Hora de Chegada a Atividade
             horaDeChegadaAAtividade = adicionarMinutosADatetimeTime(current_Time, travel_Time_Going)
@@ -415,11 +415,15 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
             '''            
             if(current_Node.state == 0):
                 # AQUI VAI DEVOLVER A MELHOR SOLUÇÃO DESCOBERTA
+                trabalhador = Find_Worker_By_Id(list_workers, workBlock.idWorker)
                 path = []
                 while current_Node:
                     path.append(current_Node)
                     current_Node = current_Node.parent
-                return path[::-1]
+                
+                path_invertido = path[::-1]
+                workBlock.atribuirNodeWorkBlock(path_invertido[1:])
+                return path_invertido
             
                 ''' 
             Para entrar aqui:
@@ -436,7 +440,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, comp
                 # Minuto do dia em que Acaba o dia
                 minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.fim)
 
-                tempoEmMinParaVoltarACasa = Travel_Time(travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps) # type: ignore
+                tempoEmMinParaVoltarACasa = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps) # type: ignore
 
                 # Calcular o Custo de volta a casa
                 cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, tempoEmMinParaVoltarACasa, values_dict)

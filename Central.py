@@ -79,7 +79,7 @@ def CentralMaisProxima(listaGruposCentral, lat, lon, central, k) -> list[Activit
     return []
 
 
-def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
+def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
 
 
     listaGruposCentral = Lista_Grupos_Central()
@@ -129,7 +129,7 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
             
             cluster = KNearest_Neighbors_Normal(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
 
-        nodes = Greedy(cluster, blocoTrabalho, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
 
         '''

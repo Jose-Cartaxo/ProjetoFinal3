@@ -208,7 +208,7 @@ def plot_heatmap_activities_by_state(list_activities: list[Activity]):
 
     # Mostrar o heatmap
     plt.savefig('PNG_Graphics/HeatMapState.png')
-    # plt.show()
+    plt.show()
 
 
 

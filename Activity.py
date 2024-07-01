@@ -28,4 +28,4 @@ def Find_Activity_By_Id(list_activities, id):
     for activity in list_activities:
         if(activity.idActivity == id):
             return activity
-    return None    # raise ValueError(f"Item com o nome '{id}' não encontrado na lista.")
+    return None # raise ValueError(f"Item com o nome '{id}' não encontrado na lista.")
