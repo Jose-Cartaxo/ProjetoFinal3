@@ -145,6 +145,7 @@ def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Worker], listAtividades:
     tempoNaoUsadoInicio = 0
     tempoNaoUsadoFim = 0
     tempoBlocosNaoUsados = 0
+    print('\nQuantidade de minutos gastos em:')
     
     for trabalhador in listaTrabalhadores:
         for workblock in trabalhador.work_Blocks:
@@ -194,6 +195,7 @@ def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Worker], listAtividades:
     print('tempoNaoUsadoInicio: ', tempoNaoUsadoInicio,'(Tempo não usado no inicio do dia (o trabalhador pode sair mais tarde de casa))')
     print('tempoNaoUsadoFim: ', tempoNaoUsadoFim,'(Tempo não usado no fim do dia (o trabalhador pode ir mais cedo para casa))')
     print('tempoBlocosNaoUsados: ', tempoBlocosNaoUsados,'(blocos de trabalhado que não conseguiram obter nenhuma atribuição)')
+    print('')
     
 
 
