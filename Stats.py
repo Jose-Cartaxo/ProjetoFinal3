@@ -79,10 +79,10 @@ def plot_scatter_with_trendline(dados):
             y2.append(stat.quantidade)
 
     # Criando o gráfico de dispersão com linha de tendência para a manhã
-    create_scatter_plot_with_trendline(x1, y1, 'Gráfico de Dispersão com Linha de Tendência - Manhã', 'PNG_Graphics/PlotScatterTrendline_Manha.png')
+    create_scatter_plot_with_trendline(x1, y1, 'Gráfico de Dispersão com Linha de Tendência - Manhã', 'PNG_Graphics/PlotTrendline_Manha.png')
 
     # Criando o gráfico de dispersão com linha de tendência para a tarde
-    create_scatter_plot_with_trendline(x2, y2, 'Gráfico de Dispersão com Linha de Tendência - Tarde', 'PNG_Graphics/PlotScatterTrendline_Tarde.png')
+    create_scatter_plot_with_trendline(x2, y2, 'Gráfico de Dispersão com Linha de Tendência - Tarde', 'PNG_Graphics/PlotTrendline_Tarde.png')
 
 def DataAnalyticsByHour(listActivities: list[Activity]):
     statsList = []

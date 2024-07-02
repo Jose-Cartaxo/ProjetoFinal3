@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-30
+- Quantidade atividades realizadas: 1
+
+- Raio: 20.0
+
+- Quantidade de atividades no seu raio: 9
+- Quantidade de atividades no seu raio disponiveis: 6
+- Quantidade de atividades no seu raio indisponiveis: 3
+
+- Quantidade de atividades no seu raio com competencia: 3
+- Quantidade de atividades no seu raio disponiveis com competencia: 2
+
+- Tempo em Viagem: 10
+- Tempo entre Atividades: 400

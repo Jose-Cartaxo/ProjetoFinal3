@@ -149,8 +149,8 @@ def main():
 
     mediaQuantidadeAtividade = CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listaTrabalhadores)
 
-    print('\n\n Média: ', mediaQuantidadeAtividade, '\n')
-    print('\n\n Limite: ', int(0.75 * mediaQuantidadeAtividade), '\n')
+    # print('\n\n Média: ', mediaQuantidadeAtividade, '\n')
+    # print('\n\n Limite: ', int(0.75 * mediaQuantidadeAtividade), '\n')
 
     for trabalhador in listaTrabalhadores:
         if trabalhador.quantidadeAtividades < int(0.75 * mediaQuantidadeAtividade):
@@ -176,7 +176,7 @@ os.system("cls")
 '''
 
 main()
+print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes\n")
 end_time = datetime.datetime.now() # type: ignore
 elapsed_time = (end_time - start_time).total_seconds()
 print("Tempo decorrido:", elapsed_time, "segundos")
-print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes")
