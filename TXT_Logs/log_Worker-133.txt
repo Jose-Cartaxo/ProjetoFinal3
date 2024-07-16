@@ -2,7 +2,7 @@ Informacoes:
 - ID do trabalhador: Worker-133
 - Quantidade atividades realizadas: 0
 
-- Raio: 20.0
+- Raio: 20
 
 - Quantidade de atividades no seu raio: 8
 - Quantidade de atividades no seu raio disponiveis: 6

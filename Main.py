@@ -38,7 +38,13 @@ def main():
     # 4 - DBSCANS
     # 5 - Central
 
-    print("Qual metodo de clustering deseja utilizar?\n1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)\n2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)\n3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)\n4 - DBCANS (normal)\n5 - Central")
+    print("Qual metodo de clustering deseja utilizar?")
+    print("1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)")
+    print("2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)")
+    print("3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)")
+    print("4 - DBCANS (normal)")
+    print("5 - Central")
+    
     metodoCluster = solicitar_input(1, 5)
 
     '''
@@ -61,7 +67,6 @@ def main():
     for indice, element in activities_xlsx.iterrows():
 
         if element['ComprirAgendamento'] == 0:
-
             listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
             # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
         else:
@@ -84,7 +89,54 @@ def main():
         listaTrabalhadores.append(Worker(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
 
     values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
-    valores_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+    valoresTemp_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+
+    precoCombustivelLitro = valoresTemp_dict['Preço_Combustível']
+    custoTrabalhadorHora = valoresTemp_dict['Custo_Trabalhador']
+    velocidadeMediaViagemKMpH = valoresTemp_dict['Média_Velocidade_Viagem']
+    comsumoMedioCombustivel100km = valoresTemp_dict['Consumo_Combustível']
+    valorRecebimentoHora = valoresTemp_dict['Recebimento']
+    valorPenalizacaoOciosoHora = valoresTemp_dict['Penalizacao_Ocioso']
+
+    #  Calcular quantos Km faz num minutos
+    velocidadeMediaViagemKMpM = velocidadeMediaViagemKMpH / 60;
+    # Calcular quantos minutos demora a fazer um Km
+    velocidadeMediaViagemMpKM = 1 / velocidadeMediaViagemKMpM;
+
+    # Quanto Combustivel gasta a fazer 1 Km
+    comsumoMedioCombustivel1km = comsumoMedioCombustivel100km / 100;
+    # Quanto Combustivel em Litros gasta em 1 Min
+    comsumoMedioCombustivelEmLitros1m = comsumoMedioCombustivel1km * velocidadeMediaViagemKMpM;
+
+    # Quanto Combustivel em Euros gasta em 1 Min
+    comsumoMedioCombustivelEmEuro1m = comsumoMedioCombustivelEmLitros1m * precoCombustivelLitro;   
+
+    # Lucro por Min de trabalho do trabalhadar a realizar atividades
+    valorCustoTrabalhadorMin = custoTrabalhadorHora / 60;
+
+    # Lucro por Min de trabalho do trabalhadar a realizar atividades
+    valorRecebimentoMin = valorRecebimentoHora / 60;
+
+    # Penalizacao por Min de trabalho do trabalhadar a fazer nada
+    valorPenalizacaoOciosoMin = valorPenalizacaoOciosoHora / 60;
+
+    valores_dict = {}
+
+    valores_dict['tempoViagem1KM'] = velocidadeMediaViagemMpKM
+    valores_dict['multViagemReal'] = comsumoMedioCombustivelEmEuro1m
+    valores_dict['multCustoTrabalhador'] = valorCustoTrabalhadorMin
+    valores_dict['multRecebimentoTrabalho'] = valorRecebimentoMin
+    valores_dict['multTempoOcioso'] = valorPenalizacaoOciosoMin
+    valores_dict['WINDOW_TIME_POST'] = valoresTemp_dict['WINDOW_TIME_POST']
+    valores_dict['WINDOW_TIME_PRE'] = valoresTemp_dict['WINDOW_TIME_PRE']
+    valores_dict['MIN_DBSCAN_DISTANCE'] = valoresTemp_dict['MIN_DBSCAN_DISTANCE']
+    valores_dict['MAX_DBSCAN_DISTANCE'] = valoresTemp_dict['MAX_DBSCAN_DISTANCE']
+    valores_dict['DBSCAN_IT_NUM'] = valoresTemp_dict['DBSCAN_IT_NUM']
+    valores_dict['K_NEAREST_NEIGHBORS'] = valoresTemp_dict['K_NEAREST_NEIGHBORS']
+    valores_dict['PRIORITY_APPOINTMENT'] = valoresTemp_dict['PRIORITY_APPOINTMENT']
+    valores_dict['PRIORITY_CREATION'] = valoresTemp_dict['PRIORITY_CREATION']
+    valores_dict['RAIO_ANALISE'] = valoresTemp_dict['RAIO_ANALISE']
+
 
     competencias_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
     competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
@@ -149,14 +201,14 @@ def main():
 
     mediaQuantidadeAtividade = CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listaTrabalhadores)
 
-    # print('\n\n Média: ', mediaQuantidadeAtividade, '\n')
-    # print('\n\n Limite: ', int(0.75 * mediaQuantidadeAtividade), '\n')
+    #print('\n\n Média: ', mediaQuantidadeAtividade, '\n')
+    #print('\n\n Limite: ', int(0.75 * mediaQuantidadeAtividade), '\n')
 
     for trabalhador in listaTrabalhadores:
         if trabalhador.quantidadeAtividades < int(0.75 * mediaQuantidadeAtividade):
             AnalisaTrabalhador(trabalhador, listaAtividades, valores_dict)
 
-    AnalisaTemposTrabalhadores(listaTrabalhadores, listaAtividades, dicionario_distancias, valores_dict['TRAVEL_TIME'], gmaps)
+    AnalisaTemposTrabalhadores(listaTrabalhadores, listaAtividades, dicionario_distancias, valores_dict['tempoViagem1KM'], gmaps)
     plot_heatmap_activities_by_state(listaAtividades)
 
 

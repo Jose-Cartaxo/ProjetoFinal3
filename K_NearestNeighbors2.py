@@ -18,29 +18,25 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrab
         nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
-
         colocar as atividades que foram atribuidas com o state == 1
         '''
+
         activitiesToState1(nodes, listaAtividades)
 
         '''
-
         fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-
-
         '''
+
         plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
         '''
-
         colocar todas as atividades que não têm o state igual a 1 a 0
         '''
+        
         for activity in listaAtividades:
             activity.resetStateToZeroIfNotOne()
 
-
         '''
-
         fazer um gráfico com a evolução da atribuição das atividades
         '''
         activityQuantity = len(nodes) - 1

@@ -172,19 +172,38 @@ def plot_activities_graph_by_state(list_activities: list[Activity]):
     plt.bar(indices, list_states)
 
     # Adicionar rótulos aos eixos
-    plt.xlabel('State')
+    plt.xlabel('Estado')
     plt.ylabel('Quantidade')
 
     # Adicionar título ao gráfico
-    plt.title('Gráfico Quantidade por State')
+    plt.title('Gráfico Quantidade por Estado')
 
     # Adicionar rótulos às barras
     for i, valor in enumerate(list_states):
         plt.text(i, valor, str(valor), ha='center', va='bottom')
-    
-    plt.savefig('PNG_Graphics/PlotMapState.png')
-    # plt.show(block = False)
+
+    # Definir os ticks do eixo x com rótulos personalizados
+    plt.xticks(indices, ['Não Atribuídas', 'Atribuídas'])
+
+    #Salvar e fechar
+    plt.savefig('PNG_Graphics/GráficoBarrasQuantidadePorEstado.png')
     plt.close() 
+
+    # Rótulos para os setores
+    labels = ['Não Atribuídas', 'Atribuídas']
+
+    # Cores para os setores
+    colors = ['#b32e2e','#2eb34d']
+
+    # Criar o gráfico de pizza
+    plt.pie(list_states, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
+
+    # Adicionar título ao gráfico
+    plt.title('Gráfico Quantidade por Estado')
+
+    # Salvar o gráfico como um arquivo PNG
+    plt.savefig('PNG_Graphics/GráficoCircularQuantidadePorEstado.png')
+    plt.close()
 
 
 

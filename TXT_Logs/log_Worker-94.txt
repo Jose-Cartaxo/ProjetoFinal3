@@ -1,8 +1,8 @@
 Informacoes:
 - ID do trabalhador: Worker-94
-- Quantidade atividades realizadas: 0
+- Quantidade atividades realizadas: 1
 
-- Raio: 20.0
+- Raio: 20
 
 - Quantidade de atividades no seu raio: 8
 - Quantidade de atividades no seu raio disponiveis: 6
@@ -11,5 +11,5 @@ Informacoes:
 - Quantidade de atividades no seu raio com competencia: 3
 - Quantidade de atividades no seu raio disponiveis com competencia: 3
 
-- Tempo em Viagem: 0
-- Tempo entre Atividades: 450
+- Tempo em Viagem: 72
+- Tempo entre Atividades: 400

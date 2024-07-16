@@ -10,19 +10,19 @@ from DBSCAN import pedir_Travel_Time
 from datetime import datetime, timedelta, time
 import pandas as pd
 
-def CostCalculator(total_time_spend, travel_time, appointment, creationDate, values_dict, considerAppointment, considerPriority):
+def CostCalculator(tempo_entre_atividades, tempo_em_viagem, tempo_em_atividade, agendamento, dataCriacao, values_dict, considerAppointment, considerPriority):
     """
     Esta função calcula o custo, tem em conta se o utilizador pretende dar prioridade às atividade mais antigas ou às atividades com agendamento a cumprir ou não.
 
     Parameters
     ----------
-    total_time_spend: (int)
+    tempo_entre_atividades: (int)
         quantidade de tempo em minutos gasta.
-    travel_time: (float)
+    tempo_em_viagem: (float)
         quantidade de tempo em minutos gasta em viagem.
-    appointment: (bool)
+    agendamento: (bool)
         se tem agendamento ou não.
-    creationDate: (datetime.date)
+    dataCriacao: (datetime.date)
         data de criação da atividade pode ser usadao caso o utilizador queira dar prioridade as atividades agendadas a mais tempo
     values_dict: (dict)
         dicionário com os valores importados do Excel para ser utilizados nos calculos
@@ -38,32 +38,32 @@ def CostCalculator(total_time_spend, travel_time, appointment, creationDate, val
         Retorna o custo da viagem até a atividade.
     """
 
-    travel_Consumption_By_Min = values_dict['GAS_CONSUMPTION'] # 
-    gas_Price = values_dict['GAS_PRICE']
-    labor_Price_Hr = values_dict['LABOR_PRICE']
-    labor_Price_Min = labor_Price_Hr / 60
+    multViagemReal = values_dict['multViagemReal']
+    labor_Price_Min = values_dict['multCustoTrabalhador']
 
-    cost = ((total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price))
+    custo = - ((tempo_entre_atividades * labor_Price_Min) + (tempo_em_viagem * multViagemReal))
 
-    if considerAppointment and appointment:
-        cost = cost * values_dict['PRIORITY_APPOINTMENT']
+    lucro = tempo_em_atividade * values_dict['multRecebimentoTrabalho']
+
+    if considerAppointment and agendamento:
+        lucro = lucro * values_dict['PRIORITY_APPOINTMENT']
     if considerPriority:
-        todayDate = datetime.now().date()
-        daysDiference = (todayDate - creationDate).days
-        weeksDiference = daysDiference // 7
-        mult = values_dict['PRIORITY_CREATION'] ** weeksDiference
-        cost = cost * mult
+        dataHoje = datetime.now().date()
+        diferencadias = (dataHoje - dataCriacao).days
+        diferencaSemanas = diferencadias // 7
+        mult = values_dict['PRIORITY_CREATION'] ** diferencaSemanas
+        lucro = lucro * mult
 
-    return cost
+    return custo + lucro
 
 
-def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
+def CostCalculatorBackHome(tempo_entre_atividades, travel_time, values_dict):
     """
     Esta função calcula o custo de viagem de volta a casa.
 
     Parameters
     ----------
-    total_time_spend: (int)
+    tempo_entre_atividades: (int)
         quantidade de tempo em minutos gasta.
     travel_time: (float)
         quantidade de tempo em minutos gasta em viagem.
@@ -76,12 +76,10 @@ def CostCalculatorBackHome(total_time_spend, travel_time, values_dict):
         Retorna o custo da viagem de volta a casa.
     """
 
-    travel_Consumption_By_Min = values_dict['GAS_CONSUMPTION']
-    gas_Price = values_dict['GAS_PRICE']
-    labor_Price_Hr = values_dict['LABOR_PRICE']
-    labor_Price_Min = labor_Price_Hr / 60
+    multViagemReal = values_dict['multViagemReal']
+    labor_Price_Min = values_dict['multCustoTrabalhador']
 
-    cost = (total_time_spend * labor_Price_Min) + ((travel_time * travel_Consumption_By_Min) * gas_Price)
+    cost = - ((tempo_entre_atividades * labor_Price_Min) + (travel_time * multViagemReal))
 
     return cost
 
@@ -211,7 +209,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
     
 
     # atribuição das vars constantes que vêm do dicionário, que veio do Excel
-    travel_Time_By_1KM = values_dict['TRAVEL_TIME']
+    travel_Time_By_1KM = values_dict['tempoViagem1KM']
     tolerance_For_Activity_Post = int (values_dict['WINDOW_TIME_POST'])
     tolerance_For_Activity_Pre = int (values_dict['WINDOW_TIME_PRE'])
 
@@ -321,7 +319,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                                 MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(current_Time)
 
                                 # Calcular o Custo de Realização desta Atividade
-                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
+                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going,tempoNecessarioParaRealizarAtividade, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
                                 
                                 # Adicionar nova Atividade a lista da Fronteira 
                                 frontier.append(Node(activity.idActivity, cost, travel_Time_Going, horaDeChegadaAAtividade, activity_End_Time_Real, current_Node))
@@ -365,7 +363,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                                 MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(current_Time)
 
                                 # Calcular o Custo de Realização desta Atividade
-                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
+                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, tempoNecessarioParaRealizarAtividade, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
                                 
                                 # Adicionar nova Atividade a lista da Fronteira
                                 frontier.append(Node(activity.idActivity, cost, travel_Time_Going, horaMinimaParaAdiantamento, activity_End_Time_Real , current_Node))
@@ -395,7 +393,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                         MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(current_Time)
                         
                         # Calcular o Custo de Realização desta Atividade
-                        cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, False, activity.data_criacao, values_dict, considerAppointment, considerPriority)
+                        cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, travel_Time_Going, tempoNecessarioParaRealizarAtividade, False, activity.data_criacao, values_dict, considerAppointment, considerPriority)
 
                         # Adicionar nova Atividade a lista da Fronteira
                         frontier.append(Node(activity.idActivity, cost, travel_Time_Going, horaDeChegadaAAtividade, activity_End_Time_Real , current_Node))
