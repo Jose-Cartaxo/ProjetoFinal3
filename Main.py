@@ -136,6 +136,10 @@ def main():
     valores_dict['PRIORITY_APPOINTMENT'] = valoresTemp_dict['PRIORITY_APPOINTMENT']
     valores_dict['PRIORITY_CREATION'] = valoresTemp_dict['PRIORITY_CREATION']
     valores_dict['RAIO_ANALISE'] = valoresTemp_dict['RAIO_ANALISE']
+    print('multViagemReal:', valores_dict['multViagemReal'])
+    print('multCustoTrabalhador:', valores_dict['multCustoTrabalhador'])
+    print('multRecebimentoTrabalho:', valores_dict['multRecebimentoTrabalho'])
+    print('multTempoOcioso:', valores_dict['multTempoOcioso'])
 
 
     competencias_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')

@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-139
+- Quantidade atividades realizadas: 1
+
+- Raio: 20
+
+- Quantidade de atividades no seu raio: 208
+- Quantidade de atividades no seu raio disponiveis: 15
+- Quantidade de atividades no seu raio indisponiveis: 193
+
+- Quantidade de atividades no seu raio com competencia: 149
+- Quantidade de atividades no seu raio disponiveis com competencia: 11
+
+- Tempo em Viagem: 64
+- Tempo entre Atividades: 410

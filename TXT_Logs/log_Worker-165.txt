@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-165
+- Quantidade atividades realizadas: 2
+
+- Raio: 20
+
+- Quantidade de atividades no seu raio: 9
+- Quantidade de atividades no seu raio disponiveis: 0
+- Quantidade de atividades no seu raio indisponiveis: 9
+
+- Quantidade de atividades no seu raio com competencia: 9
+- Quantidade de atividades no seu raio disponiveis com competencia: 0
+
+- Tempo em Viagem: 54
+- Tempo entre Atividades: 360

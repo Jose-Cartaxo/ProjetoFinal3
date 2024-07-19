@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-154
+- Quantidade atividades realizadas: 2
+
+- Raio: 20
+
+- Quantidade de atividades no seu raio: 4
+- Quantidade de atividades no seu raio disponiveis: 0
+- Quantidade de atividades no seu raio indisponiveis: 4
+
+- Quantidade de atividades no seu raio com competencia: 4
+- Quantidade de atividades no seu raio disponiveis com competencia: 0
+
+- Tempo em Viagem: 123
+- Tempo entre Atividades: 360

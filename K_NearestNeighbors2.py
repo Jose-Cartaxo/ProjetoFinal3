@@ -15,7 +15,7 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrab
 
         cluster = KNearest_Neighbors_Adaptado(listaAtividades, listaTrabalhadores, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
 
-        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes: list[Node] = Greedy(cluster, blocoTrabalho, dicionario_distancias, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         '''
         colocar as atividades que foram atribuidas com o state == 1

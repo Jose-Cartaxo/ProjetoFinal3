@@ -13,7 +13,7 @@ def distancia(x1, y1, x2, y2):
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
-def plot_activities_by_order(list_activities: list[Activity], nodes, work_Block: WorkBlock):
+def plot_activities_by_order(list_activities: list[Activity], nodes: list[Node], work_Block: WorkBlock):
     """
     Esta função representa num gráfico de pontos as atividades pertencentes ao cluster pela suas coordenadas, identifica com cores diferentes o trabalhador, as atividades atribuidas, e as atividades não atribuidas.
     Ainda coloca umas setas a mostrar o caminho percorrido pelo trabalhor.
@@ -102,7 +102,7 @@ def plot_activities_by_order(list_activities: list[Activity], nodes, work_Block:
 
     '''
     plt.scatter(longitude_values, latitude_values, c=colors_order)
-    plt.title(str(work_Block.idWorker) + ' Start:' + str(work_Block.inicio)+ ' End:' + str(work_Block.fim))
+    plt.title(str(work_Block.idWorker) + ' Start:' + str(work_Block.inicio)+ ' End:' + str(work_Block.fim) + ' Lucro: ' + str(nodes[-1].total_cost))
     plt.xlabel('Longitude ')
     plt.ylabel('Latitude')
 

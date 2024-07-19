@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-127
+- Quantidade atividades realizadas: 1
+
+- Raio: 20
+
+- Quantidade de atividades no seu raio: 42
+- Quantidade de atividades no seu raio disponiveis: 4
+- Quantidade de atividades no seu raio indisponiveis: 38
+
+- Quantidade de atividades no seu raio com competencia: 35
+- Quantidade de atividades no seu raio disponiveis com competencia: 3
+
+- Tempo em Viagem: 35
+- Tempo entre Atividades: 410
