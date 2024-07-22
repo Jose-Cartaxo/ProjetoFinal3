@@ -1,3 +1,4 @@
+from numpy import double
 from Workers import *
 from KNearest_Neighbors import * 
 from typing import List, Dict, Any, Tuple
@@ -29,19 +30,24 @@ class Elemento_Lista_Grupos_Central:
 
 
 class Lista_Grupos_Central:
+    """Dicionário com o id da central e a lista de atividades que pertencem a essa central.
+
+    Returns:
+        _type_: _description_
+    """
     quantidadeGrupos = 0
 
     def __init__(self):
-        self.lista_grupos_atividades = {}
+        self.lista_grupos_atividades: dict = {}
 
-    def PesquisarPorId(self, id)-> list[Activity]:
-        return self.lista_grupos_atividades.get(id, None).lista_atividades
+    def PesquisarPorId(self, idCentral)-> list[Activity]:
+        return self.lista_grupos_atividades.get(idCentral, None).lista_atividades
     
-    def AdicionarGrupoId(self, id, atividade):
-        if id in self.lista_grupos_atividades:
-            self.lista_grupos_atividades[id].AdicionarAtividade(atividade)
+    def AdicionarGrupoId(self, idCentral, atividade):
+        if idCentral in self.lista_grupos_atividades:
+            self.lista_grupos_atividades[idCentral].AdicionarAtividade(atividade)
         else:
-            self.lista_grupos_atividades[id] = Elemento_Lista_Grupos_Central(atividade)
+            self.lista_grupos_atividades[idCentral] = Elemento_Lista_Grupos_Central(atividade)
             Lista_Grupos_Central.quantidadeGrupos += 1
         
     def CalcularTodosCentros(self):
@@ -50,7 +56,8 @@ class Lista_Grupos_Central:
 
 
 
-def CentralMaisProxima(listaGruposCentral, lat, lon, central, k) -> list[Activity]:
+def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, lat: float, lon: float, central, k: int) -> list[Activity]:
+
     if len(central) < 5:
         # lista de distancias vazia
         lista_distancias = []
@@ -82,22 +89,23 @@ def CentralMaisProxima(listaGruposCentral, lat, lon, central, k) -> list[Activit
 def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps):
 
 
-    listaGruposCentral = Lista_Grupos_Central()
-    meio_dia = datetime.datetime.strptime('11:00:00', '%H:%M:%S').time()
-    list_worker_activityQuantity = []
+    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
+    meio_dia: time = datetime.strptime('11:00:00', '%H:%M:%S').time()
 
+    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
+    list_worker_activityQuantity: list[WorkBlockStats] = []
+
+    # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
-    '''
-    Criar um grupo para cada atividade
-    '''
-    for atividade in listaAtividades:
-        listaGruposCentral.AdicionarGrupoId(atividade.idCentral, atividade)
 
+    # Aqui vão ficar as atividades separadas por Central
+    listaGruposCentral = preencherListaCentral(listaAtividades)
 
     '''
         Fazer a atribuição para casa um dos blocos de trabalho
     '''
+
     for blocoTrabalho in listaBlocoTrabalho:
 
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
@@ -109,19 +117,20 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
         atividades_estado_zero = [atividade for atividade in listaAtividadesGrupoCentral if atividade.state == 0 and atividade.competencia in competencias]
 
 
-        '''
-            Se entrou aqui é porque na Central dele existem mais atividades do que as defenidas pelo utilizador para fazer a atribuição, ou seja não precisa de ir a outra central buscar mais atividades para complementar
-        '''
         if len(atividades_estado_zero) > k_nearest_neighbors:
+            '''
+                Se entrou aqui é porque na Central dele existem mais atividades do que as defenidas pelo utilizador para fazer a atribuição, ou seja não precisa de ir a outra central buscar mais atividades para complementar
+            '''
 
             cluster = KNearest_Neighbors_Normal(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
 
 
 
+        else:
             '''
                 Se entrou aqui é porque na Central dele não existem mais atividades do que as defenidas pelo utilizador para fazer a atribuição, ou seja precisa de ir a outra central buscar mais atividades para complementar
             '''
-        else:
+            
             k = k_nearest_neighbors - len(atividades_estado_zero)
 
             lista_extend = CentralMaisProxima(listaGruposCentral, blocoTrabalho.latitude, blocoTrabalho.longitude, [central], k)
@@ -180,3 +189,12 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
     print('\n')
 
     return
+
+def preencherListaCentral(listaAtividades):
+    '''
+    Criar um grupo para cada atividade
+    '''
+    listaGruposCentral = Lista_Grupos_Central()
+    for atividade in listaAtividades:
+        listaGruposCentral.AdicionarGrupoId(atividade.idCentral, atividade)
+    return listaGruposCentral

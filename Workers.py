@@ -2,29 +2,6 @@ from datetime import datetime, time
 from typing import Optional
 from Node import Node
 
-class Worker:
-    workers_quantity = 0
-
-    def __init__(self, id, Central, competencia, longitude, latitude, work_Blocks):
-        self.idWorker = id
-        self.idCentral = Central
-        self.competencia = competencia
-        self.longitude = longitude
-        self.latitude = latitude
-        self.quantidadeAtividades = 0
-        self.work_Blocks: list[WorkBlock] = work_Blocks
-        Worker.workers_quantity += 1
-
-    def printWorker(self):
-        print('ID: {}; Central: {}; X: {}; Y: {}'.format(self.idWorker, self.idCentral, self.longitude, self.latitude))
-        for work_block in self.work_Blocks:
-            work_block.printWorkBlock()
-
-def Find_Worker_By_Id(list_workers: list[Worker], id: str) -> Worker:
-    for worker in list_workers:
-        if(worker.idWorker == id):
-            return worker
-    raise ValueError(f"ID {id} não encontrado na lista de trabalhadores")
 
 class WorkBlock:
      
@@ -46,16 +23,26 @@ class WorkBlock:
 
 
 
-'''
+class Worker:
+    workers_quantity = 0
 
-class ActivityBlock:
+    def __init__(self, id: str, Central: str, competencia: list[str], longitude: float, latitude: float, work_Blocks: list[WorkBlock]):
+        self.idWorker = id
+        self.idCentral = Central
+        self.competencia = competencia
+        self.longitude = longitude
+        self.latitude = latitude
+        self.quantidadeAtividades = 0
+        self.work_Blocks: list[WorkBlock] = work_Blocks
+        Worker.workers_quantity += 1
 
-    def __init__(self, idActivity, start, finish):
-        self.idActivity = idActivity
-        self.start = start
-        self.finish = finish
-        
-    def printActivityBlock(self):
-        print('idWorker: {}; idBlock: {}; Start: {}; Finish: {}'.format(self.idActivity, self.start, self.finish))
+    def printWorker(self):
+        print('ID: {}; Central: {}; X: {}; Y: {}'.format(self.idWorker, self.idCentral, self.longitude, self.latitude))
+        for work_block in self.work_Blocks:
+            work_block.printWorkBlock()
 
-'''
+def Find_Worker_By_Id(list_workers: list[Worker], id: str) -> Worker:
+    for worker in list_workers:
+        if(worker.idWorker == id):
+            return worker
+    raise ValueError(f"ID {id} não encontrado na lista de trabalhadores")

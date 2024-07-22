@@ -302,3 +302,46 @@ def plot_activities_by_state(list_activities, work_Block):
     plt.close() 
     return
 '''
+
+ # Função auxiliar para criar o gráfico de dispersão com linha de tendência
+def create_scatter_plot_with_trendline(x, y, title, filename):
+    # Criando o gráfico de dispersão
+    plt.scatter(x, y)
+
+    # Calculando a linha de tendência
+    z = np.polyfit(x, y, 1)
+    p = np.poly1d(z)
+    plt.plot(x, p(x), linestyle='-', color='r')
+
+    # Adicionando rótulos aos eixos
+    plt.xlabel('Eixo X')
+    plt.ylabel('Eixo Y')
+
+    # Adicionando título ao gráfico
+    plt.title(title)
+
+    # Exibindo e salvando o gráfico
+    plt.grid(True)
+    plt.savefig(filename)
+    # plt.show()
+    plt.close() 
+
+def plot_scatter_with_trendline(dados):
+    # Separando os dados em listas separadas para o eixo x e y
+    x1 = []
+    x2 = []
+    y1 = []
+    y2 = []
+    for stat in dados:
+        if stat.tipo == 'manha':
+            x1.append(stat.id)
+            y1.append(stat.quantidade)
+        else:
+            x2.append(stat.id)
+            y2.append(stat.quantidade)
+
+    # Criando o gráfico de dispersão com linha de tendência para a manhã
+    create_scatter_plot_with_trendline(x1, y1, 'Gráfico de Dispersão com Linha de Tendência - Manhã', 'PNG_Graphics/PlotTrendline_Manha.png')
+
+    # Criando o gráfico de dispersão com linha de tendência para a tarde
+    create_scatter_plot_with_trendline(x2, y2, 'Gráfico de Dispersão com Linha de Tendência - Tarde', 'PNG_Graphics/PlotTrendline_Tarde.png')

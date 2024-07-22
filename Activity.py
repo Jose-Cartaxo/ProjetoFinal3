@@ -1,10 +1,10 @@
-import datetime
-from datetime import time
+from datetime import time, date
 
 class Activity:
+    
     activities_quantity = 0
 
-    def __init__(self, id: str, Central: str, competencia: str, longitude: float, latitude: float, data_criacao: datetime.date, agendamento = None):
+    def __init__(self, id: str, Central: str, competencia: str, longitude: float, latitude: float, data_criacao: date, agendamento = None):
         self.idActivity = id
         self.idCentral = Central
         self.agendamento = agendamento if agendamento is not None else time(0, 0)
@@ -24,7 +24,16 @@ class Activity:
         print('  ID: {}; State: {}; X: {}; Y: {}'.format(self.idActivity, self.state, self.longitude, self.latitude))
 
 
-def Find_Activity_By_Id(list_activities, id):
+def Find_Activity_By_Id(list_activities: list[Activity], id: str) -> Activity | None:
+    """_Devolve a Atividade na lista fornecida, através do id, se não encontrar devolve Node_ 
+
+    Args:
+        list_activities (list[Activity]): _Lista de atividades onde se está a procurar_
+        id (str): _Id da Atividade que se pretende encontrar_
+
+    Returns:
+        Activity: a atividade procurada
+    """
     for activity in list_activities:
         if(activity.idActivity == id):
             return activity
