@@ -194,7 +194,7 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrab
         cluster: list[Activity] = KNearest_Neighbors_Adaptado(listaAtividades, listaTrabalhadores, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
 
         # faz a atribuição das atividades
-        nodes: list[Node] = Greedy(cluster, blocoTrabalho, dicionario_distancias, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes: list[Node] = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, skills_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         # colocar as atividades que foram atribuidas com o state == 1
         activitiesToState1(nodes, listaAtividades)
@@ -256,7 +256,7 @@ def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabal
         cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
         
         # faz a atribuição das atividades
-        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         # altera o estado das atividades para 1 (atribuidas)
         activitiesToState1(nodes, listaAtividades)
@@ -319,7 +319,7 @@ def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[W
         cluster = DBSCANComplementar(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
         # faz a atribuição das atividades
-        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         # colocar as atividades que foram atribuidas com o state == 1 
         activitiesToState1(nodes, listaAtividades)

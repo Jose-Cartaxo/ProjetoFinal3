@@ -194,7 +194,7 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
         cluster = DBSCANInicio(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
         # chama o metodo de atribuição
-        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         
         # altera o estado das atividades para 1 (atribuidas)

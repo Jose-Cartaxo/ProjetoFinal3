@@ -81,7 +81,7 @@ class Lista_Grupos_Central:
 
 
 
-def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: list[str], lat: float, lon: float, central: list[str], k: int) -> list[Activity]:
+def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: list[str], lat: float, lon: float, listaCentraisExistentes: list[str], k: int) -> list[Activity]:
     """Adiciona recursivamente atividades ao cluster, até atingir a quantidade de atividades definidas
 
     Args:
@@ -96,7 +96,7 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
         list[Activity]: lista de atividades encontradas
     """
 
-    if len(central) < k:
+    if len(listaCentraisExistentes) < k:
 
         # lista de distancias vazia
         lista_distancias = []
@@ -104,7 +104,7 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
         # percorrer o dicionário da classe
         for id, elemento in listaGruposCentral.lista_grupos_atividades.items():
             # se o id não estiver na lista das centrais  que já foram adicionadas
-            if id not in central: 
+            if id not in listaCentraisExistentes: 
                 distancia = Distance_Calculator(elemento.centro[0], elemento.centro[1], lat, lon)
                 lista_distancias.append([id, distancia])
         
@@ -206,7 +206,7 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
             cluster = KNearest_Neighbors_Normal(atividades_estado_zero, competencias, blocoTrabalho, k_nearest_neighbors)
 
         # chama o metodo de atribuição
-        nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
+        nodes = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         # altera o estado das atividades para 1 (atribuidas)
         activitiesToState1(nodes, listaAtividades)
