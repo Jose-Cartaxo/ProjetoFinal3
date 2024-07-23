@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from Helper import *
+from Helper import Travel_Time
 
 gmaps = 0
 print(Travel_Time(1.1, 43.83, 2.99, 44.29, 2.57, gmaps))

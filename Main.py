@@ -8,15 +8,26 @@ Created on Fri Apr  5 14:43:14 2024
 # from tkinter import N
 from tkinter import N
 import googlemaps
-from datetime import datetime
-from Activity import Activity
-from Helper import pedir_s_n, printCadaOpcao, solicitar_input, importarAtividadesExcel, importarTrabalhadoresExcel, importarValoresExcel, preencherListaWorkBlocks, processarOpcao, Quantidade_Chamadas
-from Workers import Worker
-from Stats import DataAnalyticsByHour, DataAnalyticsBySkill, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
-import pandas as pd
-from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_heatmap_activities_by_state
 from dotenv import load_dotenv
 import os
+from datetime import datetime
+
+from Activity import Activity
+
+from Helper import importarAtividadesExcel, importarTrabalhadoresExcel, importarValoresExcel, preencherListaWorkBlocks, Quantidade_Chamadas
+
+from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
+
+from Workers import Worker
+
+from Stats import DataAnalyticsByHour, DataAnalyticsBySkill, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
+
+import pandas as pd
+
+from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_heatmap_activities_by_state
+
+from Node import Node
+
 
 
 os.system("cls")
@@ -42,13 +53,11 @@ gmaps = googlemaps.Client(key=api_key)
 '''
 
 gmaps = ''
+
+# dicuinário coma s distâncias já calculadas
 dicionario_distancias = {}
 
-'''
-    ler dados do Excel
-'''
-
-
+# ler dados do Excel
 activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 listaAtividades: list[Activity] = []
 importarAtividadesExcel(activities_xlsx, listaAtividades)
@@ -115,6 +124,7 @@ plot_heatmap_activities_by_state(listaAtividades)
 '''
 
 print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes\n")
-end_time = datetime.datetime.now() # type: ignore
+end_time = datetime.now() # type: ignore
 elapsed_time = (end_time - start_time).total_seconds()
 print("Tempo decorrido:", elapsed_time, "segundos")
+print("Quantidade Node:", Node.quantidadeNodes)

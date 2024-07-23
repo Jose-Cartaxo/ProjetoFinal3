@@ -2,6 +2,8 @@ from re import X
 
 
 class Node:
+    quantidadeNodes = 0
+
     def __init__(self, id, cost, travel_Time, start_Time, end_Time, parent):
         
         self.id = id  # id da atividade atribuida a este no
@@ -11,6 +13,7 @@ class Node:
         self.end_Time = end_Time # horas em que termina a tarefa
         self.parent = parent # tarefa raelizada anteriormente
         self.state = 1
+        Node.quantidadeNodes += 1
 
         if parent:
             self.gen = parent.gen + 1 # o numero da atividade, a 3ª atividade a ser realizada vai ser gen 3
@@ -29,9 +32,8 @@ class Node:
         if self.parent:
             self.parent.printNodeGen()
 
-    # se for menor tem de retornar true
+    # se for maior tem de retornar true
     def __lt__(self, other):
 
-
-        # return self.total_cost < other.total_cost
-        return (self.total_cost / self.gen) > (other.total_cost / other.gen)
+        return self.total_cost > other.total_cost
+        # return (self.total_cost / self.gen) > (other.total_cost / other.gen)

@@ -1,13 +1,14 @@
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from re import L
-
 from matplotlib.pylab import f
-from Workers import *
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-from Activity import *
+
+from Workers import WorkBlock
+from Activity import Activity, Find_Activity_By_Id
+from Node import Node
 
 def distancia(x1, y1, x2, y2):
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)

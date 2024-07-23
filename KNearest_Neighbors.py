@@ -1,4 +1,3 @@
-# from Helper import *
 from Workers import Worker, WorkBlock, Find_Worker_By_Id, Node
 from Activity import Activity
 from Ploting import plot_activities_by_order, plot_scatter_with_trendline
@@ -6,62 +5,19 @@ from Optimization import Greedy
 from Helper import Distance_Calculator, activitiesToState1
 from datetime import datetime, time
 from Stats import WorkBlockStats
-from DBSCAN import DBSCAN1
-
-class KNearest_Nei:
-    def __init__(self, atividade, distancia):
-        """
-        Inicializa a MinhaClasse com um atividade e a distancia ao trabalhador.
-
-       
-        Parameters
-        ----------
-        atividade: (Atividade)
-            Atividade que esta a ser ponderada.
-        distancia: (Double) 
-            distancia em KM entre o local de partida do trabalhador e a atividade.
-        """
-        self.atividade = atividade
-        self.distancia = distancia
-    # se for menor tem de retornar true
-    def __lt__(self, other):
-        return self.distancia < other.distancia
+from DBSCAN import DBSCANComplementar
 
 
-class Coordenada:
-    def __init__(self, longitude, latitude):
-        """
-        Inicializa a MinhaClasse com um x e um y, que são as coordenadas.
+def KNearest_Neighbors_Vote_in(atividade: Activity, workblock: WorkBlock, competencias: list[str])-> bool:
+    """ver se o elemento entra
 
-       
-        Parameters
-        ----------
-        x: (Int)
-            coordenada do x.
-        y: (Int) 
-            coordendada do y.
-        """
-        self.longitude = longitude
-        self.latitude = latitude
+    Args:
+        atividade (Activity): atividade a entrar
+        workblock (WorkBlock): bloco de trabalho onde vai entrar
+        competencias (_type_): lista de competencia do trabalhador
 
-
-def KNearest_Neighbors_Vote_in(atividade: Activity, workblock: WorkBlock, competencias)-> bool:
-    """
-    Esta função verifica se a tarefa deve ser contada para o clustering do workblick ou não, verifica o estado da atividade, verifica o hora de marcação e se possiu as skills necessárias
-
-    Parameters
-    ----------
-    kNearest_Nei: (KNearest_Nei)
-        elemento a comparar com o bloco de trabalho para ver se entra.
-    workblock: (WorkBlock)
-        workblock que estamos a fazer o clustering das atividades para.
-    skills: (list of str)
-        lista das skills que o trabalhador possuiu.
-
-    Returns
-    -------
-    bool
-        retorna True ou False, conforme se é para ser adicionada a lista ou não.
+    Returns:
+        bool: True se entra, False se não
     """
 
     if atividade.agendamento != time(0, 0):
@@ -76,79 +32,92 @@ def KNearest_Neighbors_Vote_in(atividade: Activity, workblock: WorkBlock, compet
 
 
 
-def KNearest_Neighbors_Normal(list_activities, competencias, workblock, k):
-    """
-    Esta função faz o K-NEAREST-NEIGHBORS para o workblock submetido e devolve uma lista com o atividades do cluster
+def KNearest_Neighbors_Normal(list_activities: list[Activity], competencias: list[str], workblock: WorkBlock, k: int) -> list[Activity]:
+    """Esta função faz o K-NEAREST-NEIGHBORS para o workblock submetido e devolve uma lista com o atividades do cluster
 
-    Parameters
-    ----------
-    list_activities: (list of Activity)
-        lista de todas as atividades existentes.
-    list_workers: (list of Worker)
-        lista de todos as trabalhadores existentes.
-    workblock: (WorkBlock)
-        workblock que estamos a fazer o clustering das atividades para.
-    k: (Int)
-        quantidade de atividades a colocar no Cluster.
+    Args:
+        list_activities (list[Activity]):  lista com todas as atividades
+        competencias (list[str]):  lista com as competencias do trabalhador
+        workblock (WorkBlock): bloco de trabalho a fazer o clustering
+        k (int): tamanho do cluster a criar
 
-    Returns
-    -------
-    list of Activity
-        retorna uma lista das k atividades mais próximas do local de partida do trabalhador.
+    Returns:
+        list[Activity]: retorna o cluster criado, uma lista das k atividades mais próximas do local de partida do trabalhador.
     """
         
-    distances = []
-    # worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
+    # lista vazia para começar a colocar as distancias
+    distances: list[tuple[Activity, float]] = []
 
+    # percorre todas as atividades da listas
     for activity in list_activities:
+
+        # calcula a distancia de cada uma das atividades
         distance = Distance_Calculator(activity.latitude, activity.longitude, workblock.latitude, workblock.longitude)
-        distances.append(KNearest_Nei(activity, distance))
+
+        # adiciona a atividade a lista, e a sua respetiva distancia
+        distances.append((activity, distance))
     
-    distances = sorted(distances)
+    # organiza a lista de ordem crescente de distancia
+    distances.sort(key=lambda x: x[1])
     
-    list_temp = []
-    count = 0
-    indi = 0
+    # inicializa o cluster, para adicionar as atividades e depois o retornar
+    cluster: list[Activity] = []
+
+    # contagem da quantidade de elementos adicionados
+    count: int = 0
+
+    # indice da iteração entre os elementos da lista com as
+    indi: int = 0
+
+    # while que repete enquanto não encontrar a quantidade de atividade desejadas
     while count < k:
+
+        # verificar se ainda existe lista
         if indi < len(distances):
-            if KNearest_Neighbors_Vote_in(distances[indi].atividade, workblock, competencias):
-                distances[indi].atividade.state = 2
-                list_temp.append(distances[indi].atividade)
+
+            # ver se a atividade entra no cluster
+            if KNearest_Neighbors_Vote_in(distances[indi][0], workblock, competencias):
+                
+                # alterar o estado da atividade para 2 (am análise)
+                distances[indi][0].state = 2
+
+                # adicionar a atividade a lista
+                cluster.append(distances[indi][0])
+
+                # aumentar a contagem de atividades
                 count += 1
+
+            # aumentar o indice
             indi += 1
+
+        # verificar se ainda existe lista
         else:
+            # se acabar a lista, sair do loop
             break
     
-    return  list_temp
+    # retornar o cluster
+    return cluster
 
 
 
-def KNearest_Neighbors_Adaptado(list_activities, list_workers, workblock, k):
-    """
-    Esta função faz o clustering das atividades para o workblock.
+def KNearest_Neighbors_Adaptado(list_activities: list[Activity], list_workers: list[Worker], workblock: WorkBlock, k: int) -> list[Activity]:
+    """ Esta função faz o K-NEAREST-NEIGHBORS adaptado para o workblock submetido e devolve uma lista com o atividades do cluster
 
-    Parameters
-    ----------
-    list_activities: (list of Activity)
-        lista de todas as atividades a ponderar para o clustering.
-    list_workers: (list of Workers)
-        lista de todos os trabalhadores a ponderar para o clustering.
-    workblock: (Workblock)
-        workblock a ponderar para o clustering.
-    k: (Int)
-        quantidade de Atividades a colocar no cluster.
+    Args:
+        list_activities (list[Activity]): lista com todas as atividades
+        competencias (list[Worker]): lista com todos os trabalhadores
+        workblock (WorkBlock): bloco de trabalho a fazer o clustering
+        k (int): tamanho do cluster a criar
 
-    Returns
-    -------
-    list of Activity
-        Retorna uma lista de atividades, que é o cluster final.
+    Returns:
+        list[Activity]: retorna o cluster criado, uma lista das k atividades mais próximas do local de partida do trabalhador.
     """
 
     # lista com os Atividades com a respetiva distancia
-    distances = []
+    distances: list[tuple[Activity, float]] = []
 
     # lista com as coordenadas dos elementos que já pertencem ao cluster
-    list_coordenada_temp = []
+    list_coordenada_temp: list[tuple[float, float]]  = []
 
     # lista com os elementes que já pertencem
     list_cluster = []
@@ -156,25 +125,48 @@ def KNearest_Neighbors_Adaptado(list_activities, list_workers, workblock, k):
     # trabalhador que vai realizar este workblock
     worker = Find_Worker_By_Id(list_workers, workblock.idWorker)
 
-    list_coordenada_temp.append(Coordenada(worker.longitude, worker.latitude)) # type: ignore
+    # lista de coordenadas 
+    list_coordenada_temp.append((worker.latitude, worker.longitude))
+
     for count in range(k):
+        '''Basicamente para cada iteração do K adiciona uma atividade, esta atividade é escolhida sendo a atividade com menor distancia ou ao ponto central, o ponto de partida do trabalhador, ou às outras atividades que já pertencem, sempre que adiciona uma atividade adiciona as coordenadas dessa atividades a lista de coordenandas para depois comparar a essa atividade na próxima iteração
+        '''
 
         # colocar as atividades por ordem
         for activity in list_activities:
 
-            # verificar se a atividade ainda não está a ser considerada.
+            # verificar state == 0, não atribuida
             if activity.state == 0:
+
+                # percorre a lista com as coordenadas
                 for coord in list_coordenada_temp:
-                    distance = Distance_Calculator(activity.latitude, activity.longitude, coord.latitude, coord.longitude)
+
+                    # calcula a distancia entre todas as atividades com state 0 e todas as coordenadas da lista de coordendas
+                    distance = Distance_Calculator(activity.latitude, activity.longitude, coord[0], coord[1])
+
+                    # adiciona as possiveis atividades a lista de distancias
                     if KNearest_Neighbors_Vote_in(activity, workblock, worker.competencia): # type: ignore
-                        distances.append(KNearest_Nei(activity, distance))
+                        distances.append((activity, distance))
         
-        distances = sorted(distances)
+        # organiza a lista de ordem crescente de distancia
+        distances.sort(key=lambda x: x[1])
+
+        # verifica se a lista  não está vazia
         if len(distances) != 0:
-            atividade_in = distances[0].atividade
+
+            # retira  aatividade mais proxima
+            atividade_in = distances[0][0]
+
+            # altera o state da atividade para 2, a ser analisada
             atividade_in.state = 2 
-            list_coordenada_temp.append(Coordenada(atividade_in.longitude, atividade_in.latitude)) # type: ignore
+            
+            # adiciona a coordenada da atividade que entrou a lista de coordenadas
+            list_coordenada_temp.append((atividade_in.longitude, atividade_in.latitude)) # type: ignore
+            
+            # adiciona a atividade ao cluster
             list_cluster.append(atividade_in)
+
+            # limpa a lista das distancias
             distances.clear()
             
         else:
@@ -183,44 +175,40 @@ def KNearest_Neighbors_Adaptado(list_activities, list_workers, workblock, k):
     return list_cluster
 
 
+
 def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, skills_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
+    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    
+    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
     list_worker_activityQuantity = []
 
+    # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
+    # percorre todos os blocos de trabalho
     for blocoTrabalho in listaBlocoTrabalho:
 
-        cluster = KNearest_Neighbors_Adaptado(listaAtividades, listaTrabalhadores, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
+        # faz o agrupamento das atividades
+        cluster: list[Activity] = KNearest_Neighbors_Adaptado(listaAtividades, listaTrabalhadores, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
 
+        # faz a atribuição das atividades
         nodes: list[Node] = Greedy(cluster, blocoTrabalho, dicionario_distancias, skills_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
-        '''
-        colocar as atividades que foram atribuidas com o state == 1
-        '''
-
+        # colocar as atividades que foram atribuidas com o state == 1
         activitiesToState1(nodes, listaAtividades)
 
-        '''
-        fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-        '''
-
+        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock 
         plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
-        '''
-        colocar todas as atividades que não têm o state igual a 1 a 0
-        '''
-        
+        # colocar todas as atividades que não têm o state igual a 1 a 0 
         for activity in listaAtividades:
             activity.resetStateToZeroIfNotOne()
 
-        '''
-        fazer um gráfico com a evolução da atribuição das atividades
-        '''
-        activityQuantity = len(nodes) - 1
-        # activityQuantity = len(nodes) - 2
-
+        
+        # fazer um gráfico com a evolução da atribuição das atividades
+        activityQuantity = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
         if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
@@ -242,43 +230,46 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrab
 
     return
 
+
+
 def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
+    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    
+    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
     list_worker_activityQuantity = []
 
+    # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
+    # percorre todos os blocos de trabalho
     for blocoTrabalho in listaBlocoTrabalho:
+
+        # trabalhador do bloco de trabalho
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
+        
+        # competencias do trabalhador do bloco de trabalho
         competencias = trabalhador.competencia
 
+        # faz o agrupamento das atividades
         cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
+        
+        # faz a atribuição das atividades
         nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
-        '''
-            colocar as atividades que foram atribuidas com o state == 1
-        '''
+        # altera o estado das atividades para 1 (atribuidas)
         activitiesToState1(nodes, listaAtividades)
 
-        '''
-            fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-        '''
+        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
         plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
-        '''
-            colocar todas as atividades que não têm o state igual a 1 a 0
-        '''
+        # colocar todas as atividades que não têm o state igual a 1 a 0
         for activity in listaAtividades:
             activity.resetStateToZeroIfNotOne()
 
-
-        '''
-            fazer um gráfico com a evolução da atribuição das atividades
-        '''
-        activityQuantity = len(nodes) - 1
-        # activityQuantity = len(nodes) - 2
-
+        # fazer um gráfico com a evolução da atribuição das atividades
+        activityQuantity = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
         if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
         else:
@@ -287,8 +278,6 @@ def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabal
 
     
     plot_scatter_with_trendline(list_worker_activityQuantity)
-
-
     print('\nManha \n')
     for stat in list_worker_activityQuantity:
         if stat.tipo == 'manha':
@@ -305,48 +294,46 @@ def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabal
 
 def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
+    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    
+    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
     list_worker_activityQuantity = []
 
+    # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']), 'MIN_DBSCAN_DISTANCE:', valores_dict['MIN_DBSCAN_DISTANCE'], 'MAX_DBSCAN_DISTANCE:', valores_dict['MAX_DBSCAN_DISTANCE'], 'DBSCANS_IT_NUM:', int(valores_dict['DBSCAN_IT_NUM']))
 
+    # percorre todos os blocos de trabalho
     for blocoTrabalho in listaBlocoTrabalho:
+
+        # trabalhador do bloco de trabalho
         trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
+        
+        # competencias do trabalhador do bloco de trabalho
         competencias = trabalhador.competencia
         
+        # começa o agrupamento das atividades
         cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, 4)
-        cluster = DBSCAN1(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
+        
+        # acaba o agrupamento das atividades
+        cluster = DBSCANComplementar(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
 
+        # faz a atribuição das atividades
         nodes = Greedy(cluster, blocoTrabalho, dicionario_distancias, competencias_dict, listaTrabalhadores, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
-        '''
-
-        colocar as atividades que foram atribuidas com o state == 1
-        '''
+        # colocar as atividades que foram atribuidas com o state == 1 
         activitiesToState1(nodes, listaAtividades)
 
-        '''
-
-        fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-
-
-        '''
+        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock 
         plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
-        '''
-
-        colocar todas as atividades que não têm o state igual a 1 a 0
-        '''
+        # colocar todas as atividades que não têm o state igual a 1 a 0 
         for activity in listaAtividades:
             activity.resetStateToZeroIfNotOne()
 
 
-        '''
-
-        fazer um gráfico com a evolução da atribuição das atividades
-        '''
-        activityQuantity = len(nodes) - 1
-        # activityQuantity = len(nodes) - 2
+        # fazer um gráfico com a evolução da atribuição das atividades 
+        activityQuantity = len(nodes) - 2
 
         if blocoTrabalho.inicio < meio_dia:
             list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
@@ -368,3 +355,5 @@ def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[W
     print('\n')
 
     return
+
+

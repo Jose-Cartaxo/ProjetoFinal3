@@ -1,123 +1,109 @@
 from ast import List
 import heapq
-
 from bson import _get_decimal128
-from Activity import Activity, Find_Activity_By_Id
-from Node import Node
-from Workers import WorkBlock, Worker
-from Workers import Find_Worker_By_Id
-from DBSCAN import pedir_Travel_Time
-from datetime import datetime, timedelta, time
 import pandas as pd
 
-def CostCalculator(tempo_entre_atividades, tempo_em_viagem, tempo_em_atividade, agendamento, dataCriacao, values_dict, considerAppointment, considerPriority):
-    """
-    Esta função calcula o custo, tem em conta se o utilizador pretende dar prioridade às atividade mais antigas ou às atividades com agendamento a cumprir ou não.
+from Activity import Activity, Find_Activity_By_Id
+from Node import Node
+from Workers import WorkBlock, Worker, Find_Worker_By_Id
+from datetime import datetime, time, date
 
-    Parameters
-    ----------
-    tempo_entre_atividades: (int)
-        quantidade de tempo em minutos gasta.
-    tempo_em_viagem: (float)
-        quantidade de tempo em minutos gasta em viagem.
-    agendamento: (bool)
-        se tem agendamento ou não.
-    dataCriacao: (datetime.date)
-        data de criação da atividade pode ser usadao caso o utilizador queira dar prioridade as atividades agendadas a mais tempo
-    values_dict: (dict)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-    considerAppointment: (bool)
-        bool que se for true significa que o utilizador quer considerar as atividades com agendamento mais prioritárias do que as sem, false são todas iguais
-    considerPriority: (bool)
-        bool que se for true significa que o utilizador quer considerar as atividades com agendamento mais antigo mais prioritárias do que as com mais recente, false são todas iguais
 
-        
-    Returns
-    -------
-    int
-        Retorna o custo da viagem até a atividade.
+def CostCalculator(tempo_entre_atividades: int, tempo_em_viagem: int, tempo_em_atividade: int, agendamento: bool, dataCriacao: date, values_dict: dict, considerAppointment: bool, considerPriority: bool) -> float:
+    """calcula o custo, tem em conta se o utilizador pretende dar prioridade às atividade mais antigas ou às atividades com agendamento a cumprir ou não
+
+    Args:
+        tempo_entre_atividades (int): tempo entre as atividades, em minutos
+        tempo_em_viagem (int): tempo em viagem entre as atividades, em minutos
+        tempo_em_atividade (int): tempo em atividade
+        agendamento (bool): se é do tipo de cumprir agendamento, True, se não, False
+        dataCriacao (date): data da criação da atividade
+        values_dict (dict): dicionário com valores importados do Excel para se utilizar nos cálculos
+        considerAppointment (bool): se é para dar prioridade as atividade com cumprimento de agendamento
+        considerPriority (bool): se é para dar prioridade as atividades com data de criação mais antiga
+
+    Returns:
+        float: valor do custo da realização desta atividade
     """
 
+    # retirar o multiplicador do tempo de viagem do dicionário
     multViagemReal = values_dict['multViagemReal']
-    labor_Price_Min = values_dict['multCustoTrabalhador']
 
-    custo = ((tempo_entre_atividades + tempo_em_atividade) * labor_Price_Min) + (tempo_em_viagem * multViagemReal)
+    # retirar o multiplicador do tempo de trabalho do dicionário
+    multTrabalhador = values_dict['multCustoTrabalhador']
 
+    # calcular o custo do trabalhador mais o custo da viagem
+    custo = ((tempo_entre_atividades + tempo_em_atividade) * multTrabalhador) + (tempo_em_viagem * multViagemReal)
+
+    # calcular o lucro obtido com a realização da atividade
     lucro = tempo_em_atividade * values_dict['multRecebimentoTrabalho']
 
+    # verificar se é para daar prioridade as atividades de cumprir agendamento
     if considerAppointment and agendamento:
+
+        # multiplicar o lucro pelo valor definido
         lucro = lucro * values_dict['PRIORITY_APPOINTMENT']
+
+
+    # verificar se é para daar prioridade as atividades de acordo com a data de criação
     if considerPriority:
+
+        # verificar a data de hoje
         dataHoje = datetime.now().date()
+
+        # diferenca de dias entre o dia de hoje e a data de criação da atividade
         diferencadias = (dataHoje - dataCriacao).days
+
+        # transformar a diferença em dias, para diferença em semanas
         diferencaSemanas = diferencadias // 7
+
+        # aumentar o multiplicador de forma proporcianal a quantidade de semanas
         mult = values_dict['PRIORITY_CREATION'] ** diferencaSemanas
+
+        # multiplicar o lucro pelo valor definido
         lucro = lucro * mult
 
+    # devolve a diferença entre o custo e o lucro
     return (lucro - custo)
 
 
-def CostCalculatorBackHome(tempo_entre_atividades, travel_time, values_dict):
-    """
-    Esta função calcula o custo de viagem de volta a casa.
+def CostCalculatorBackHome(tempo_entre_atividades: int, tempo_em_viagem: int, values_dict: dict) -> float:
+    """Calcula o custo de retornar a casa
 
-    Parameters
-    ----------
-    tempo_entre_atividades: (int)
-        quantidade de tempo em minutos gasta.
-    travel_time: (float)
-        quantidade de tempo em minutos gasta em viagem.
-    values_dict: (dict)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        
-    Returns
-    -------
-    Int
-        Retorna o custo da viagem de volta a casa.
+    Args:
+        tempo_entre_atividades (int): tempo entre as atividades, em minutos
+        tempo_em_viagem (int): tempo em viagem ate casa, em minutos
+        values_dict (dict): dicionário com valores importados do Excel para se utilizar nos cálculos
+
+    Returns:
+        float: valor do custo de volta a casa
     """
 
+    # retirar o multiplicador do tempo de viagem do dicionário
     multViagemReal = values_dict['multViagemReal']
-    labor_Price_Min = values_dict['multCustoTrabalhador']
 
-    cost = (((tempo_entre_atividades + travel_time) * labor_Price_Min) + (travel_time * multViagemReal))
+    # retirar o multiplicador do tempo de trabalho do dicionário
+    multTrabalhador = values_dict['multCustoTrabalhador']
 
-    return (0 - cost)
+    # calcular o custo do trabalhador mais o custo da viagem
+    cost = (((tempo_entre_atividades + tempo_em_viagem) * multTrabalhador) + (tempo_em_viagem * multViagemReal))
 
-
-def DateTimeTimeParaMinutosDoDia(tim):
-    """
-    Esta função calcula o minuto do dia através do datetime.time fornecido.
-
-    Parameters
-    ----------
-    tim: (datetime.time)
-        datetime.time a ser convertido.
-        
-    Returns
-    -------
-    Int
-        Retorna o minuto do dia calculado.
-    """
-    return (tim.hour * 60 + tim.minute)
+    # da return ao custo, mas negativo porque é uma despesa
+    return (-cost)
 
 
-def adicionarMinutosADatetimeTime(tim, min):
-    """
-    Esta função faz a conta, adicionando à hora fornecida os minutos fornecidos, e devolve o resultado
+def adicionarMinutosADatetimeTime(tim: time, min: int) -> time:
+    """adiciona uma quantidade de minutos a uma hora (hh:mm) do tipo datetime.time e devolve em datetime.time
 
-    Parameters
-    ----------
-    tim: (datetime.time)
-        hora sujeita a subração.
-    min: (Int)
-        quantidade de minutos a adicionar.
-        
-    Returns
-    -------
-    datetime.time
-        devolve a hora após a conta
+    Args:
+        tim (time): hora a ser acrescentado uma quantidade de minutos
+        min (int): quantidade de minutos a adicionar
+
+    Returns:
+        time: hora com os minutos adicionados
     """
 
+    # adiciona a quantidade de minutos da hora, com a quantidade de minutos a adicionar, faz a divisão inteira por 60 pois por cada 60 min completos, é uma hora que tem de se adicionar às horas, depois o resto desta divisão é a quantidade de minutos final
     minutosTotais = tim.minute + min
 
     # quantidade de horas dentro dos minutos
@@ -126,132 +112,126 @@ def adicionarMinutosADatetimeTime(tim, min):
 
     horas = tim.hour + quantidadeDeHoras 
     horas = horas
+
+    # como o algoritmo não funciona de um dia para o outro, caso tente ultrapassar para o próximo dia ele dá lhe a hora 23:59
     if horas > 23:
         return time(23,59)
 
     return time(horas, minutos)
 
 
-def subtrairMinutosADatetimeTime(tim, min):
-    """
-    Esta função faz a conta, subtraindo a hora fornecida os minutos fornecidos, e devolve o resultado
+def subtrairMinutosADatetimeTime(tim: time, min: int) -> time:
+    """adiciona uma quantidade de minutos a uma hora (hh:mm) do tipo datetime.time e devolve em datetime.time
 
-    Parameters
-    ----------
-    tim: (datetime.time)
-        hora sujeita a subração.
-    min: (Int)
-        quantidade de minutos a subtrair.
-        
-    Returns
-    -------
-    datetime.time
-        devolve a hora após a conta
+    Args:
+        tim (time): hora a ser retirada uma quantidade de minutos
+        min (int): quantidade de minutos a retirar
+
+    Returns:
+        time: hora com os minutos subtraidos
     """
+
+    # divide a quantidade de horas da quantidade de minutos
 
     # quantidade de horas dentro dos minutos
     quantidadeDeHoras = min // 60
+
+    # quantidade de minutos restantes
     min = min % 60
     
+    # subtrai a quantidade de horas
     horas = tim.hour - quantidadeDeHoras
     
+    # se os minutos a subtrais forem menos do que tem, retira uma hora e depois retira a diferença do total
     if min > tim.minute:
         horas = horas - 1
         min = 60 - (min - tim.minute)
     else: 
         min = tim.minute - min 
 
-    horas = horas % 24
+    # como o algoritmo não funciona de um dia para o outro, caso tente ultrapassar para outro dia ele dá lhe a hora 00:01
     if horas < 0:
-        horas = horas + 24
+        return time(00,1)
     
-    saida = time(horas, min)
-    return saida
+    return time(horas, min)
 
 
-def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dicionario_distancias, competencias_dict, list_workers, values_dict, considerAppointment, considerPriority, gmaps):
+def Greedy(worker_Activities_Cluster: list[Activity], list_workers: list[Worker], workBlock: WorkBlock, dicionario_distancias: dict, competencias_dict: dict, values_dict: dict, considerAppointment: bool, considerPriority: bool, gmaps) -> list[Node]:
+    """verifica qual a melhor combinação de atividades para o trabalhador, faz lhe a rota e devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades
 
-    """
-    Esta função verifica qual a melhor combinação de atividades para o trabalhador, faz lhe a rota e devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades.
+    Args:
+        worker_Activities_Cluster (list[Activity]): lista com todas as atividades
+        list_workers (list[Worker]): lista com todos os trabalhadores
+        workBlock (WorkBlock): bloco de trabalho a ser atribuido
+        dicionario_distancias (dict): dicionário com as distancias já calculadas
+        competencias_dict (dict): dicionário com as competências e o tempo de realização das atividades
+        values_dict (dict): dicionário com valores importados do Excel
+        considerAppointment (bool): True se for para considerar a prioridade de tipo de agendamento, False se não
+        considerPriority (bool): True se for para considerar a prioridade de data de criação, False se não
+        gmaps (_type_): _description_
 
-    Parameters
-    ----------
-    worker_Activities_Cluster: (list of Activity.Activity)
-        quantidade de tempo em minutos gasta.
-    workBlock: (Workers.WorkBlock)
-        quantidade de tempo em minutos gasta em viagem.
-    competencias_dict: (dict)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        quantidade de tempo em minutos gasta em viagem.
-    list_workers: (list of Workers.Worker)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        quantidade de tempo em minutos gasta em viagem.
-    values_dict: (dict)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        quantidade de tempo em minutos gasta em viagem.
-    considerAppointment: (bool)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        quantidade de tempo em minutos gasta em viagem.
-    considerPriority: (bool)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        quantidade de tempo em minutos gasta em viagem.
-    gmaps: (googlemaps.client.Client)
-        dicionário com os valores importados do Excel para ser utilizados nos calculos
-        
-    Returns
-    -------
-    list of Node
-        devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades
+    Returns:
+        list[Node]: lista de nós pela ordem a serem percorridas
     """
 
-    # Aqui cria uma lista "frontier", para guardar os nós que estão na fronteira
-    frontier: list[Node] = []
+    # este import teve de vir para aqui para evitar as importações circulares
+    from Helper import pedir_Travel_Time, DateTimeTimeParaMinutosDoDia
     
-
+    # Aqui cria uma lista fronteira, para guardar os nós que estão na fronteira
+    fronteira: list[Node] = []
+    
     # atribuição das vars constantes que vêm do dicionário, que veio do Excel
-    travel_Time_By_1KM = values_dict['tempoViagem1KM']
-    tolerance_For_Activity_Post = int (values_dict['WINDOW_TIME_POST'])
-    tolerance_For_Activity_Pre = int (values_dict['WINDOW_TIME_PRE'])
+    tempoViagem1KM = values_dict['tempoViagem1KM']
+    tolerancia_Activity_Post = int (values_dict['WINDOW_TIME_POST'])
+    tolerancia__Activity_Pre = int (values_dict['WINDOW_TIME_PRE'])
 
     # inicio é o WorkBlock
-    frontier.append(Node(workBlock.idWorker, 0, 0,workBlock.inicio, workBlock.inicio, None))
+    fronteira.append(Node(workBlock.idWorker, 0, 0,workBlock.inicio, workBlock.inicio, None))
 
-    # enquanto existirem elementos na lista "frontier", ou então quando um ramo finalizado voltar a ser escolhido ele dá o ghost
+    # enquanto existirem elementos na lista fronteira, ou então quando um ramo finalizado ele termina
+    while fronteira:
 
-    while frontier:
+        # organiza a fronteira
+        fronteira = sorted(fronteira)
 
-        frontier = sorted(frontier)
+        # escolhe o no com o melhor custo
+        current_Node = fronteira[0]
 
+        # retira o no da fronteira
+        fronteira.remove(current_Node)
 
-        current_Node = frontier[0]
-        # print('Escolhido:', current_Node.id, 'Custo:', current_Node.total_cost) 
-        # print('')
-        # print('')
-        frontier.remove(current_Node)
+        # verifica o estado do no
         if(current_Node.state == 0):
-            # AQUI VAI DEVOLVER A MELHOR SOLUÇÃO DESCOBERTA
-            # trabalhador = Find_Worker_By_Id(list_workers, workBlock.idWorker)
+            '''aqui ele entra se já tiver chegado ao fim, a ultima atividade'''
+
+            # cria a lista para colocar os nos por ordem
             path = []
+
+            # preenche a lista ao contrário (da folha até a raiz) 
             while current_Node:
                 path.append(current_Node)
                 current_Node = current_Node.parent
             
             # inverter a lista
             path_invertido = path[::-1]
+
+            # retirar o primeiro e ultimo no para o colocar no bloco de trabalho (o primeiro e o ultimo são casa)
             workBlock.atribuirNodeWorkBlock(path_invertido[1:-1])
+
+            # dar return a lista
             return path_invertido
         
         # a hora em que o node atual acabou, a hora a partir da qual vamos começar
         current_Time = current_Node.end_Time
 
-        # se encontrar atividade passa a true, isto para ser usado mais a frente, pois se não conseguir encontrar mais atividades, volta para casa
+        # se encontrar atividade passa a true, se não conseguir encontrar mais atividades, volta para casa
         foundActivity = False
 
         # aqui temos um problema pois se no futuro se for possivel um trabalhador e uma atividade terem o mesmo id, isto começa a dar raia
-        # como só guardamos o id da tarefa no nó, vamos buscar a última atividade realizada pelo id
+        # como só guardamos o id da atividade no nó, vamos buscar a última atividade realizada pelo id
         current_Activity = Find_Activity_By_Id(worker_Activities_Cluster,current_Node.id)
 
-        # se não existir uma atividade com o id é por que é porque é um trabalhador, por exemplo o primeiro nó da lista
+        # se não existir uma atividade com o id é porque é um trabalhador
         if not current_Activity:
             current_Activity = Find_Worker_By_Id(list_workers, current_Node.id)
 
@@ -261,10 +241,10 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
             
             
             # Tempo necessário para se deslocar até a Atividade
-            tempoEmMinParaIrParaAAtividade = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, activity.latitude, activity.longitude, gmaps) # type: ignore
+            tempoEmMinParaIrParaAAtividade = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, current_Activity.latitude, current_Activity.longitude, activity.latitude, activity.longitude, gmaps) 
 
             # Tempo necessário para se deslocar da Atividade até Casa
-            tempoEmMinParaVoltarACasa = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, activity.latitude, activity.longitude, workBlock.latitude, workBlock.longitude, gmaps)
+            tempoEmMinParaVoltarACasa = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, activity.latitude, activity.longitude, workBlock.latitude, workBlock.longitude, gmaps)
 
             # Hora de Chegada a Atividade
             horaDeChegadaAAtividade = adicionarMinutosADatetimeTime(current_Time, tempoEmMinParaIrParaAAtividade)
@@ -282,7 +262,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                 if not activity.agendamento == time(0, 0):
 
                     # aqui adiciona o tolerance_For_Activity_Post retirado do Excel, que é o tempo que pode chegar atrasado, 
-                    max_Time_Activity = adicionarMinutosADatetimeTime(activity.agendamento, tolerance_For_Activity_Post)
+                    max_Time_Activity = adicionarMinutosADatetimeTime(activity.agendamento, tolerancia_Activity_Post)
                 
                     
                     ''' 
@@ -295,7 +275,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                     if horaDeChegadaAAtividade <= max_Time_Activity:
 
                         # aqui adiciona o tolerance_For_Activity_Post retirado do Excel, que é o tempo que pode chegar atrasado, 
-                        horaMinimaParaAdiantamento = subtrairMinutosADatetimeTime(activity.agendamento, tolerance_For_Activity_Pre)
+                        horaMinimaParaAdiantamento = subtrairMinutosADatetimeTime(activity.agendamento, tolerancia__Activity_Pre)
                         
                         ''' 
                         Para entrar aqui:
@@ -339,7 +319,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                                 cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, tempoEmMinParaIrParaAAtividade,tempoNecessarioParaRealizarAtividade, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
                                 
                                 # Adicionar nova Atividade a lista da Fronteira 
-                                frontier.append(Node(activity.idActivity, cost, tempoEmMinParaIrParaAAtividade, horaDeChegadaAAtividade, activity_End_Time_Real, current_Node))
+                                fronteira.append(Node(activity.idActivity, cost, tempoEmMinParaIrParaAAtividade, horaDeChegadaAAtividade, activity_End_Time_Real, current_Node))
 
 
                             '''
@@ -383,7 +363,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                                 cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, tempoEmMinParaIrParaAAtividade, tempoNecessarioParaRealizarAtividade, True, activity.data_criacao, values_dict, considerAppointment, considerPriority)
                                 
                                 # Adicionar nova Atividade a lista da Fronteira
-                                frontier.append(Node(activity.idActivity, cost, tempoEmMinParaIrParaAAtividade, horaMinimaParaAdiantamento, activity_End_Time_Real , current_Node))
+                                fronteira.append(Node(activity.idActivity, cost, tempoEmMinParaIrParaAAtividade, horaMinimaParaAdiantamento, activity_End_Time_Real , current_Node))
 
 
                     ''' 
@@ -413,7 +393,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
                         cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, tempoEmMinParaIrParaAAtividade, tempoNecessarioParaRealizarAtividade, False, activity.data_criacao, values_dict, considerAppointment, considerPriority)
 
                         # Adicionar nova Atividade a lista da Fronteira
-                        frontier.append(Node(activity.idActivity, cost, tempoEmMinParaIrParaAAtividade, horaDeChegadaAAtividade, activity_End_Time_Real , current_Node))
+                        fronteira.append(Node(activity.idActivity, cost, tempoEmMinParaIrParaAAtividade, horaDeChegadaAAtividade, activity_End_Time_Real , current_Node))
 
         ''' 
         Para entrar aqui:
@@ -427,14 +407,14 @@ def Greedy(worker_Activities_Cluster: list[Activity], workBlock: WorkBlock, dici
             # Minuto do dia em que Acaba o dia
             minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.fim)
 
-            tempoEmMinParaVoltarACasa = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps) # type: ignore
+            tempoEmMinParaVoltarACasa: int = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps) # type: ignore
 
             # Calcular o Custo de volta a casa
             cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, tempoEmMinParaVoltarACasa, values_dict)
 
             noVolta: Node = Node(workBlock.idWorker, cost, tempoEmMinParaVoltarACasa, workBlock.fim, workBlock.fim, current_Node)
             noVolta.state = 0
-            frontier.append(noVolta)
+            fronteira.append(noVolta)
 
 
             

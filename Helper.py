@@ -1,50 +1,17 @@
-from traitlets import Float
-from Activity import *
+from datetime import datetime
 import math
-from Workers import *
-from KNearest_Neighbors import Opcao_K_NearestNeighbors_Adaptado, Opcao_K_NearestNeighbors_Normal, Opcao_K_N_DBSCAN
-from DBSCAN import Opcao_DBSCAN
-from Central import Opcao_Agrupamento_Por_Central
 
+from Activity import Activity, Find_Activity_By_Id
+from Node import Node
+from Workers import Worker, WorkBlock
 
+def activitiesToState1(nodes: list [Node], list_activities: list[Activity]):
+    """Altera o estado de todas as atividades atribuidas para 1
 
-def solicitar_input(min, max):
-    while True:
-        try:
-            valor = int(input('Por favor, insira um número entre ' + str(min) + ' e ' + str(max) +': '))
-            if min <= valor <= max:
-                return valor
-            else:
-                print("Valor fora do intervalo. Tente novamente.")
-        except ValueError:
-            print("Entrada inválida. Por favor, insira um número inteiro.")
-
-
-def pedir_s_n():
-    while True:
-        inp = input('"s" para sim, "n" para não: ')
-        if inp != 's' and inp != 'n':
-            print('Input errado! Tente novamente.')
-        else:
-            if inp == 'n':
-                return False
-            return True
-       
-def printCadaOpcao():
-    # 1 - K-NearestNeighbors 1.0
-    # 2 - K-NearestNeighbors 2.0
-    # 3 - K-NearestNeighbors com DBSCANS
-    # 4 - DBSCANS
-    # 5 - Central
-
-    print("Qual metodo de clustering deseja utilizar?")
-    print("1 - K-Nearest Neighbors (a comparar apenas ao ponto de partida)")
-    print("2 - K-Nearest Neighbors adapatado (a comparar a todos os elementos pertencentes ao cluster)")
-    print("3 - K-NearestNeighbors com DBSCANS (primeiro k nearest neighbors, depois o DBSCANS)")
-    print("4 - DBCANS (normal)")
-    print("5 - Central") 
-
-def activitiesToState1(nodes, list_activities):
+    Args:
+        nodes (list[Node]): lista de nós com ids das atividades que foram atribuidas
+        list_activities (list[Activity]): lista de todas as atividades
+    """
     for node in nodes:
         activity = Find_Activity_By_Id(list_activities, node.id)
         if activity:
@@ -58,16 +25,30 @@ def Travel_Time( travel_mult, lat1, lon1, lat2, lon2, gmaps):
 
 Travel_Time.quantidade_de_chamadas = 0
 
-def pedir_Travel_Time(dicionario, travel_mult, lat1, lon1, lat2, lon2, gmaps):
-    
-    chave = ((lat1, lon1), (lat2, lon2))
+def pedir_Travel_Time(dicionarioTempoViagem: dict, travel_mult: float, lat1: float, lon1: float, lat2: float, lon2: float, gmaps) -> int:
+    """calcula a quantidade de tempo de viagem em minutos entre duas coordenadas
 
-    if chave not in dicionario:
+    Args:
+        dicionario (dict): dicionário com os tempos de viagem já calculador
+        travel_mult (float): multiplicador do tempo de viagem
+        lat1 (float): latitude ponto 1
+        lon1 (float): longitude ponto 1
+        lat2 (float): latitude ponto 2
+        lon2 (float): longitude ponto 2
+        gmaps (_type_): _description_
+
+    Returns:
+        int: tempo em minutos de viagem
+    """
+    
+    chave = str(lat1 + lon1 + lat2 + lon2)
+
+    if chave not in dicionarioTempoViagem:
         valor = Travel_Time( travel_mult, lat1, lon1, lat2, lon2, gmaps)
-        dicionario[chave] = valor
-        return dicionario[chave]
+        dicionarioTempoViagem[chave] = valor
+        return valor
     else:
-        return dicionario[chave]
+        return dicionarioTempoViagem[chave]
 
 
 '''
@@ -190,28 +171,19 @@ def preencherListaWorkBlocks(listaTrabalhadores):
     return listaBlocoTrabalho
 
 
-def processarOpcao(considerarAgendamento, considerarPrioridade, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho):
-    '''
-        correr o programa com o método de clustering escolhido
-    '''
+def DateTimeTimeParaMinutosDoDia(tim):
+    """
+    Esta função calcula o minuto do dia através do datetime.time fornecido.
 
-    # 1 - K-NearestNeighbors 1.0
-    # 2 - K-NearestNeighbors 2.0
-    # 3 - K-NearestNeighbors com DBSCANS
-    # 4 - DBSCANS
-    # 5 - Central
+    Parameters
+    ----------
+    tim: (datetime.time)
+        datetime.time a ser convertido.
+        
+    Returns
+    -------
+    Int
+        Retorna o minuto do dia calculado.
+    """
+    return (tim.hour * 60 + tim.minute)
 
-    if metodoCluster == 1:
-        Opcao_K_NearestNeighbors_Normal(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-
-    elif metodoCluster == 2:
-        Opcao_K_NearestNeighbors_Adaptado(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-
-    elif metodoCluster == 3:
-        Opcao_K_N_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-
-    elif metodoCluster == 4:
-        Opcao_DBSCAN(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
-
-    elif metodoCluster == 5:
-        Opcao_Agrupamento_Por_Central(listaAtividades, listaTrabalhadores, listaBlocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']), dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)

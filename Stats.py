@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 import os
+from Helper import Distance_Calculator, pedir_Travel_Time, DateTimeTimeParaMinutosDoDia
 from Workers import Worker
 from Activity import Activity, Find_Activity_By_Id
-from Helper import Distance_Calculator, pedir_Travel_Time
-from Optimization import DateTimeTimeParaMinutosDoDia
 
 class Stats:
     def __init__(self, tipo):
@@ -21,6 +21,7 @@ class Stats:
 
     def print(self):
         print('Tipo Atividade:',self.tipo, ' ATIVA: ', self.active,' TOTAL: ', self.total, ' PERCENT: ', (100/self.total * self.active))
+        sys.stdout.flush()
 
     def __lt__(self, other):
         return self.tipo < other.tipo
@@ -63,7 +64,7 @@ def DataAnalyticsByHour(listActivities: list[Activity]):
     return statsList
 
 
-def DataAnalyticsBySkill(listActivities: list[Activity]):
+def DataAnalyticsBySkill(listActivities: list[Activity]) -> list[Stats]:
     statsList = []
     for activity in listActivities:
         found = False
