@@ -113,29 +113,25 @@ def importarValoresExcel(valoresTemp_dict):
     velocidadeMediaViagemKMpH = valoresTemp_dict['Média_Velocidade_Viagem']
     comsumoMedioCombustivel100km = valoresTemp_dict['Consumo_Combustível']
     valorRecebimentoHora = valoresTemp_dict['Recebimento']
-    valorPenalizacaoOciosoHora = valoresTemp_dict['Penalizacao_Ocioso']
 
-#  Calcular quantos Km faz num minutos
+    #  Calcular quantos Km faz num minutos
     velocidadeMediaViagemKMpM = velocidadeMediaViagemKMpH / 60;
-# Calcular quantos minutos demora a fazer um Km
+    # Calcular quantos minutos demora a fazer um Km
     velocidadeMediaViagemMpKM = 1 / velocidadeMediaViagemKMpM;
 
-# Quanto Combustivel gasta a fazer 1 Km
+    # Quanto Combustivel gasta a fazer 1 Km
     comsumoMedioCombustivel1km = comsumoMedioCombustivel100km / 100;
-# Quanto Combustivel em Litros gasta em 1 Min
+    # Quanto Combustivel em Litros gasta em 1 Min
     comsumoMedioCombustivelEmLitros1m = comsumoMedioCombustivel1km * velocidadeMediaViagemKMpM;
 
-# Quanto Combustivel em Euros gasta em 1 Min
+    # Quanto Combustivel em Euros gasta em 1 Min
     comsumoMedioCombustivelEmEuro1m = comsumoMedioCombustivelEmLitros1m * precoCombustivelLitro;   
 
-# Lucro por Min de trabalho do trabalhadar a realizar atividades
+    # Lucro por Min de trabalho do trabalhadar a realizar atividades
     valorCustoTrabalhadorMin = custoTrabalhadorHora / 60;
 
-# Lucro por Min de trabalho do trabalhadar a realizar atividades
+    # Lucro por Min de trabalho do trabalhadar a realizar atividades
     valorRecebimentoMin = valorRecebimentoHora / 60;
-
-# Penalizacao por Min de trabalho do trabalhadar a fazer nada
-    valorPenalizacaoOciosoMin = valorPenalizacaoOciosoHora / 60;
 
     valores_dict = {}
 
@@ -143,20 +139,7 @@ def importarValoresExcel(valoresTemp_dict):
     valores_dict['multViagemReal'] = comsumoMedioCombustivelEmEuro1m
     valores_dict['multCustoTrabalhador'] = valorCustoTrabalhadorMin
     valores_dict['multRecebimentoTrabalho'] = valorRecebimentoMin
-    valores_dict['multTempoOcioso'] = valorPenalizacaoOciosoMin
-    valores_dict['WINDOW_TIME_POST'] = valoresTemp_dict['WINDOW_TIME_POST']
-    valores_dict['WINDOW_TIME_PRE'] = valoresTemp_dict['WINDOW_TIME_PRE']
-    valores_dict['MIN_DBSCAN_DISTANCE'] = valoresTemp_dict['MIN_DBSCAN_DISTANCE']
-    valores_dict['MAX_DBSCAN_DISTANCE'] = valoresTemp_dict['MAX_DBSCAN_DISTANCE']
-    valores_dict['DBSCAN_IT_NUM'] = valoresTemp_dict['DBSCAN_IT_NUM']
-    valores_dict['K_NEAREST_NEIGHBORS'] = valoresTemp_dict['K_NEAREST_NEIGHBORS']
-    valores_dict['PRIORITY_APPOINTMENT'] = valoresTemp_dict['PRIORITY_APPOINTMENT']
-    valores_dict['PRIORITY_CREATION'] = valoresTemp_dict['PRIORITY_CREATION']
-    valores_dict['RAIO_ANALISE'] = valoresTemp_dict['RAIO_ANALISE']
-    print('multViagemReal:', valores_dict['multViagemReal'])
-    print('multCustoTrabalhador:', valores_dict['multCustoTrabalhador'])
-    print('multRecebimentoTrabalho:', valores_dict['multRecebimentoTrabalho'])
-    print('multTempoOcioso:', valores_dict['multTempoOcioso'])
+    
     return valores_dict
 
 def preencherListaWorkBlocks(listaTrabalhadores):

@@ -4,127 +4,56 @@ Created on Fri Apr  5 14:43:14 2024
 
 @author: jgac0
 """
-
-# from tkinter import N
-from tkinter import N
-import googlemaps
-from dotenv import load_dotenv
-import os
-from datetime import datetime
-
-from Activity import Activity
-
-from Helper import importarAtividadesExcel, importarTrabalhadoresExcel, importarValoresExcel, preencherListaWorkBlocks, Quantidade_Chamadas
-
-from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
-
-from Workers import Worker
-
-from Stats import DataAnalyticsByHour, DataAnalyticsBySkill, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
-
 import pandas as pd
 
-from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_heatmap_activities_by_state
-
+from Activity import Activity
+from Helper import importarAtividadesExcel, importarTrabalhadoresExcel, importarValoresExcel, preencherListaWorkBlocks
+from Printer import processarOpcao
+from Workers import Worker
+from Stats import CalcularQuantidadeAtividadesRealizadas
 from Node import Node
 
+def main(metodoCluster: int, dbscan_min: int, dbscan_max: int , dbscan_ite: int, knn_ite: int, tempo_dep: int, tempo_ant: int) -> list:
 
 
-os.system("cls")
+    gmaps = ''
+    Node.quantidadeNodes = 0
+    # dicuinário coma s distâncias já calculadas
+    dicionario_distancias = {}
 
-print("Deseja que seja considerada a prioridade das Atividades com marcação?")
-considerarAgendamento = pedir_s_n()
-
-print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
-considerarPrioridade = pedir_s_n()
-
-printCadaOpcao()
-metodoCluster = solicitar_input(1, 5)
-
-# Início da medição dos tempos
-start_time = datetime.now()
-
-'''
-    Configurar o Google Maps
-
-api_key = os.getenv("api_key") 
-print(api_key)
-gmaps = googlemaps.Client(key=api_key)
-'''
-
-gmaps = ''
-
-# dicuinário coma s distâncias já calculadas
-dicionario_distancias = {}
-
-# ler dados do Excel
-activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
-listaAtividades: list[Activity] = []
-importarAtividadesExcel(activities_xlsx, listaAtividades)
+    # ler dados do Excel
+    activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
+    listaAtividades: list[Activity] = []
+    importarAtividadesExcel(activities_xlsx, listaAtividades)
 
 
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
-listaTrabalhadores: list[Worker] = []
-importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores)
+    workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
+    listaTrabalhadores: list[Worker] = []
+    importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores)
 
 
-values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
-valoresTemp_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
-valores_dict = importarValoresExcel(valoresTemp_dict)
+    values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+    valoresTemp_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+    valores_dict = importarValoresExcel(valoresTemp_dict)
+    
+    valores_dict['MIN_DBSCAN_DISTANCE'] = dbscan_min
+    valores_dict['MAX_DBSCAN_DISTANCE'] = dbscan_max
+    valores_dict['DBSCAN_IT_NUM']       = dbscan_ite
+    valores_dict['K_NEAREST_NEIGHBORS'] = knn_ite
+
+    valores_dict['WINDOW_TIME_POST']    = tempo_dep
+    valores_dict['WINDOW_TIME_PRE']     = tempo_ant
+
+    competencias_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+    competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
 
 
-competencias_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
-competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
+    listaBlocoTrabalho = preencherListaWorkBlocks(listaTrabalhadores)
 
 
-'''
-    heat map por hora de marcação, mais escuro, mais tarde a hora de marcação
-'''
-plot_heatmap_activities_by_hour(listaAtividades)
+    processarOpcao(False, False, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho)
 
+    quantidadeAtividade = CalcularQuantidadeAtividadesRealizadas(listaTrabalhadores)
+    quantidadeAtividadePercent = float(quantidadeAtividade) / 10
 
-listaBlocoTrabalho = preencherListaWorkBlocks(listaTrabalhadores)
-
-
-processarOpcao(considerarAgendamento, considerarPrioridade, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho)
-
-'''
-    Análises estatísticas
-'''
-
-plot_activities_graph_by_state(listaAtividades)
-
-data = DataAnalyticsByHour(listaAtividades)
-sorted_stats_list = sorted(data)
-print('Atividades por hora agendamento (0 é sem agendamento):')
-for dat in sorted_stats_list:
-    dat.print()
-
-data = DataAnalyticsBySkill(listaAtividades)
-print('\nAtividades por tipo de competencia:')
-for dat in data:
-    dat.print()
-
-mediaQuantidadeAtividade = CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listaTrabalhadores)
-
-#print('\n\n Média: ', mediaQuantidadeAtividade, '\n')
-#print('\n\n Limite: ', int(0.75 * mediaQuantidadeAtividade), '\n')
-
-for trabalhador in listaTrabalhadores:
-    if trabalhador.quantidadeAtividades < int(0.75 * mediaQuantidadeAtividade):
-        AnalisaTrabalhador(trabalhador, listaAtividades, valores_dict)
-
-AnalisaTemposTrabalhadores(listaTrabalhadores, listaAtividades, dicionario_distancias, valores_dict['tempoViagem1KM'], gmaps)
-plot_heatmap_activities_by_state(listaAtividades)
-
-
-
-'''
-    printar o tempo de execução do programa
-'''
-
-print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes\n")
-end_time = datetime.now() # type: ignore
-elapsed_time = (end_time - start_time).total_seconds()
-print("Tempo decorrido:", elapsed_time, "segundos")
-print("Quantidade Node:", Node.quantidadeNodes)
+    return [ quantidadeAtividadePercent, len(dicionario_distancias), Node.quantidadeNodes]

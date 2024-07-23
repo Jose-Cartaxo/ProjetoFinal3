@@ -95,6 +95,14 @@ def CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listTrabalhadores:
 
     return total / len(listTrabalhadores)
 
+def CalcularQuantidadeAtividadesRealizadas(listTrabalhadores: list[Worker]):
+    total = 0
+    for trabalhador in listTrabalhadores:
+        for workblock in trabalhador.work_Blocks:
+            total += len(workblock.listNodes)
+
+    return total
+
 
 
 def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Worker], listAtividades: list[Activity], dicionario_distancias, travel_Time_By_1KM, gmaps):

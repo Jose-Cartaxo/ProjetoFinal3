@@ -407,7 +407,7 @@ def Greedy(worker_Activities_Cluster: list[Activity], list_workers: list[Worker]
             # Minuto do dia em que Acaba o dia
             minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.fim)
 
-            tempoEmMinParaVoltarACasa: int = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps) # type: ignore
+            tempoEmMinParaVoltarACasa: int = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, current_Activity.latitude, current_Activity.longitude, workBlock.latitude, workBlock.longitude, gmaps)
 
             # Calcular o Custo de volta a casa
             cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, tempoEmMinParaVoltarACasa, values_dict)

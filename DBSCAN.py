@@ -172,12 +172,6 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
         considerarPrioridade (bool): bool com a opção de considerar prioridade
         gmaps (_type_): _description_
     """
-    
-    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-
-    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
-    list_worker_activityQuantity = []
 
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), '\nMIN_DBSCAN_DISTANCE:', valores_dict['MIN_DBSCAN_DISTANCE'], 'MAX_DBSCAN_DISTANCE:', valores_dict['MAX_DBSCAN_DISTANCE'], 'DBSCANS_IT_NUM:', int(valores_dict['DBSCAN_IT_NUM']))
@@ -200,34 +194,8 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
         # altera o estado das atividades para 1 (atribuidas)
         activitiesToState1(nodes, listaAtividades)
 
-        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-        plot_activities_by_order(cluster, nodes, blocoTrabalho)
-
         # colocar todas as atividades que não têm o state igual a 1 a 0
         for activity in listaAtividades:
             activity.resetStateToZeroIfNotOne()
-
-
-        
-        # fazer um gráfico com a evolução da atribuição das atividades
-        activityQuantity = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
-        if blocoTrabalho.inicio < meio_dia:
-            list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
-        else:
-            list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
-
-
-    
-    plot_scatter_with_trendline(list_worker_activityQuantity)
-
-    print('\nManha \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'manha':
-            print(stat.quantidade, end=", ")
-    print('\n\nTarde \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'tarde':
-            print(stat.quantidade, end=", ")
-    print('\n')
 
     return

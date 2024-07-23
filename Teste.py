@@ -1,10 +1,53 @@
-import datetime
+from Main import main
 import pandas as pd
-from Helper import Travel_Time
 
-gmaps = 0
-print(Travel_Time(1.1, 43.83, 2.99, 44.29, 2.57, gmaps))
+# Caminho para o arquivo Excel existente
+caminho_arquivo = 'ResultadosCU.xlsx'
 
+
+metodoCluster = 1
+dbscan_min = -1
+dbscan_max = -1
+dbscan_ite = -1
+knn_ite = 1
+tempo_dep = 1
+tempo_ant = 1
+res = main(metodoCluster, dbscan_min, dbscan_max, dbscan_ite, knn_ite, tempo_dep, tempo_ant)
+Percent_Atividades = res[0]
+Quant_Pdd = res[1]
+Quant_No = res[2]
+
+novos_dados = {
+    'metodoClustering': metodoCluster,
+    'dbscan_min': dbscan_min,
+    'dbscan_max': dbscan_max,
+    'dbscan_ite': dbscan_ite,
+    'knn_ite': knn_ite,
+    'tempo_dep': tempo_dep,
+    'tempo_ant': tempo_ant,
+    'Percent Atividades': Percent_Atividades,
+    'Quant Pdd': Quant_Pdd,
+    'Quant No': Quant_No
+}
+
+
+# Carregar o arquivo Excel existente
+df = pd.read_excel(caminho_arquivo)
+
+# Criar um DataFrame com a nova linha
+df_novos_dados = pd.DataFrame([novos_dados])
+
+# Concatenar o DataFrame existente com o DataFrame da nova linha
+df = pd.concat([df, df_novos_dados], ignore_index=True)
+
+# Salvar o arquivo Excel
+df.to_excel(caminho_arquivo, index=False)
+
+
+"""
+MetodoClustering	dbscan_min	dbscan_max	dbscan_ite	knn_ite	tempo_dep	tempo_ant	Percent Atividades
+Quant Pdd	Quant No
+"""
 
 
 '''
