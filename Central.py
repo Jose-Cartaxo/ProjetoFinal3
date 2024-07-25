@@ -14,9 +14,9 @@ from Stats import WorkBlockStats
 class Elemento_Lista_Grupos_Central:
     """É cada elemento da lista de atividades separadas por Central
     """
-    def __init__(self, atividade):
+    def __init__(self, atividade: Activity):
         self.centro = [0,0]
-        self.lista_atividades = [atividade]
+        self.lista_atividades: list[Activity] = [atividade]
 
     def AdicionarAtividade(self, atividade: Activity):
         """Adiciona a atividade recebida à "lista"
@@ -29,15 +29,15 @@ class Elemento_Lista_Grupos_Central:
     def CalcularCentro(self):
         """Calcula o centro, através da média de todas as atividades pertencentes, e passa a ver o centro desta "central"
         """
-        x_total = 0
-        y_total = 0
+        latitude_total = 0
+        longitude_total = 0
         for atividade in self.lista_atividades:
-            x_total += atividade.x
-            y_total += atividade.y
+            latitude_total += atividade.latitude
+            longitude += atividade.longitude
 
-        x_medio = x_total / len(self.lista_atividades)
-        y_medio = y_total / len(self.lista_atividades)
-        self.centro = [x_medio, y_medio]
+        latitude_medio = latitude_total / len(self.lista_atividades)
+        longitude_medio = longitude / len(self.lista_atividades)
+        self.centro = [latitude_medio, longitude_medio]
 
 
 
@@ -47,9 +47,9 @@ class Lista_Grupos_Central:
     quantidadeGrupos = 0
 
     def __init__(self):
-        self.lista_grupos_atividades: dict = {}
+        self.lista_grupos_atividades: dict[str, Elemento_Lista_Grupos_Central] = {}
 
-    def PesquisarPorId(self, idCentral: str)-> list[Activity]:
+    def PesquisarPorId(self, idCentral: str) -> list[Activity]:
         """Perquisa a Central pelo seu Id
 
         Args:
@@ -58,7 +58,10 @@ class Lista_Grupos_Central:
         Returns:
             list[Activity]: lista de todas as atividades pertencentes a essa central
         """
-        return self.lista_grupos_atividades.get(idCentral, None).lista_atividades
+        elemento = self.lista_grupos_atividades.get(idCentral)
+        if elemento is None:
+            raise ValueError(f"Central com id {idCentral} não encontrada")
+        return elemento.lista_atividades
     
     def AdicionarGrupoId(self, idCentral: str, atividade: Activity):
         """Adiciona a atividade ao seu grupo de acordo com o id da sua central
@@ -89,7 +92,7 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
         competencias (list[str]): competencias do trabalhador
         lat (float): latitude do trabalhador
         lon (float): longitude do trabalhador
-        central (list[str]): lista com os ids das centrais que já foram adicionadas
+        listaCentraisExistentes (list[str]): lista com os ids das centrais que já foram adicionadas
         k (int): quantidade de atividades
 
     Returns:
@@ -99,30 +102,38 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
     if len(listaCentraisExistentes) < k:
 
         # lista de distancias vazia
-        lista_distancias = []
+        lista_distancias: list[tuple[str, float]] = []
 
         # percorrer o dicionário da classe
         for id, elemento in listaGruposCentral.lista_grupos_atividades.items():
             # se o id não estiver na lista das centrais  que já foram adicionadas
             if id not in listaCentraisExistentes: 
                 distancia = Distance_Calculator(elemento.centro[0], elemento.centro[1], lat, lon)
-                lista_distancias.append([id, distancia])
+                lista_distancias.append((id, distancia))
         
         # organiza a lista por ordem crescente (do menor para o maior) de acordo com a distancia
         lista_distancias = sorted(lista_distancias, key=lambda x: x[1])
 
         # id da central mais próxima
         primeiro_elemento = lista_distancias.pop(0)
+        idCentral = primeiro_elemento[0]
+        if idCentral == None:
+            return []
+
+        listaCentraisExistentes.append(idCentral)
 
         # lista de atividades da central mais próxima 
-        lista = listaGruposCentral.PesquisarPorId(primeiro_elemento[0])
+        lista = listaGruposCentral.PesquisarPorId(idCentral)
 
         # atividades da lsita com o state == 0 
         lista_atividades_estado_zero = [atividade for atividade in lista if atividade.state == 0 and atividade.competencia in competencias]
         # todo #1 
 
+        if len(lista_atividades_estado_zero) == 0:
+            return []
+
         if len(lista_atividades_estado_zero) < k:
-            lista_atividades_estado_zero.extend(CentralMaisProxima(listaGruposCentral, lat, lon, central.append(primeiro_elemento[0]), k - len(lista_atividades_estado_zero))) # type: ignore
+            lista_atividades_estado_zero.extend(CentralMaisProxima(listaGruposCentral, competencias, lat, lon, listaCentraisExistentes, k - len(lista_atividades_estado_zero)))
         
         return lista_atividades_estado_zero
     return []

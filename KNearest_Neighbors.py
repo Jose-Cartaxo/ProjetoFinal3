@@ -161,7 +161,7 @@ def KNearest_Neighbors_Adaptado(list_activities: list[Activity], list_workers: l
             atividade_in.state = 2 
             
             # adiciona a coordenada da atividade que entrou a lista de coordenadas
-            list_coordenada_temp.append((atividade_in.longitude, atividade_in.latitude)) # type: ignore
+            list_coordenada_temp.append((atividade_in.latitude, atividade_in.longitude)) # type: ignore
             
             # adiciona a atividade ao cluster
             list_cluster.append(atividade_in)
@@ -179,7 +179,7 @@ def KNearest_Neighbors_Adaptado(list_activities: list[Activity], list_workers: l
 def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, skills_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
 
     # Print básico com a informação
-    print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
+    print('K_NEAREST_NEIGHBORS_A:', int(valores_dict['K_NEAREST_NEIGHBORS']), flush=True)
 
     # percorre todos os blocos de trabalho
     for blocoTrabalho in listaBlocoTrabalho:
@@ -203,7 +203,7 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrab
 def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
 
     # Print básico com a informação
-    print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
+    print('K_NEAREST_NEIGHBORS_N:', int(valores_dict['K_NEAREST_NEIGHBORS']), flush=True)
 
     # percorre todos os blocos de trabalho
     for blocoTrabalho in listaBlocoTrabalho:
@@ -246,7 +246,7 @@ def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[W
         competencias = trabalhador.competencia
         
         # começa o agrupamento das atividades
-        cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, 4)
+        cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
         
         # acaba o agrupamento das atividades
         cluster = DBSCANComplementar(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))

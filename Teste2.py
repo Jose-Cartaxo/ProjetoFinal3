@@ -1,6 +1,10 @@
 import gmaps
 import gmaps.datasets
+from Helper import Distance_Calculator
 
-# Defina as coordenadas dos pontos
-latitude = [37.774929, 34.052235, 40.712776, 38.889931, 41.878876]  # Exemplo de latitude dos pontos
-longitude = [-122.419416, -118.243683, -74.005974, -77.009003, -87.635915]  # Exemplo de longitude dos pontos
+# Distance_Calculator(42.99, 1.23, 43.09, 1.87)
+# Distance_Calculator(42.99, 1.23, 1.87, 43.09)
+print(Distance_Calculator(42.99, 1.23, 43.09, 1.87))
+print(Distance_Calculator(42.99, 1.23, 1.87, 43.09))
+
+
