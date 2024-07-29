@@ -415,10 +415,6 @@ def Greedy(worker_Activities_Cluster: list[Activity], list_workers: list[Worker]
             noVolta: Node = Node(workBlock.idWorker, cost, tempoEmMinParaVoltarACasa, workBlock.fim, workBlock.fim, current_Node)
             noVolta.state = 0
             fronteira.append(noVolta)
-
-
-            
-
            
       
     '''

@@ -1,3 +1,6 @@
+from lib2to3.main import diff_texts
+
+from traitlets import Integer
 from Workers import Worker, WorkBlock, Find_Worker_By_Id, Node
 from Activity import Activity
 from Ploting import plot_activities_by_order, plot_scatter_with_trendline
@@ -232,14 +235,27 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Activity], listaTrab
 
 
 
-def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
-    
-    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-    
-    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
-    list_worker_activityQuantity = []
+def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias: dict, competencias_dict: dict, valores_dict: dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
+    """Trata de chamar as funções para a atribuição de atividades com o método de clustering KNNN
 
+    Args:
+        listaAtividades (list[Activity]): lista com todas as atividades
+        listaTrabalhadores (list[Worker]): lista com todos os trabalhadores
+        listaBlocoTrabalho (list[WorkBlock]): lista com todos os blocos de trabalho
+        dicionario_distancias (dict): dicionário com todas as distâncias calculadas
+        competencias_dict (dict): dicionário com todas as competências
+        valores_dict (dict): dicionário com todos os valores
+        considerarAgendamento (bool): bool para a consideração de prioridade de acordo com o tipo de agendamento
+        considerarPrioridade (bool): bool para a consideração de prioridade de acordo com a data de criação
+        gmaps (_type_): _description_
+    """
+
+    meio_dia: time = datetime.strptime('11:00:00', '%H:%M:%S').time()
+    """Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde"""
+    
+    list_worker_activityQuantity: list[WorkBlockStats] = []
+    """lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem"""
+    
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
@@ -292,7 +308,20 @@ def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Activity], listaTrabal
 
 
 
-def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
+def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias: dict, competencias_dict: dict, valores_dict: dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
+    """Trata de chamar as funções para fazer a atribuição de atividades com o método de clutering KNN, DBSCAN
+
+    Args:
+        listaAtividades (list[Activity]): lista com todas as atividades
+        listaTrabalhadores (list[Worker]): lista com todos os trabalhadores
+        listaBlocoTrabalho (list[WorkBlock]): lista com todos os blocos de trabalho
+        dicionario_distancias (dict): dicionário com todas as distâncias já calculadas
+        competencias_dict (dict): dicionário com todas as competências
+        valores_dict (dict): dicionário com todos os valores
+        considerarAgendamento (bool): bool para a consideração de prioridade de acordo com o tipo de agendamento
+        considerarPrioridade (bool): bool apra a consideração de prioridade de acordo com a data de criação
+        gmaps (_type_): _description_
+    """
     
     # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
@@ -313,7 +342,7 @@ def Opcao_K_N_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[W
         competencias = trabalhador.competencia
         
         # começa o agrupamento das atividades
-        cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, 4)
+        cluster = KNearest_Neighbors_Normal(listaAtividades, competencias, blocoTrabalho, int(valores_dict['K_NEAREST_NEIGHBORS']))
         
         # acaba o agrupamento das atividades
         cluster = DBSCANComplementar(listaAtividades, listaTrabalhadores, blocoTrabalho, cluster, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))

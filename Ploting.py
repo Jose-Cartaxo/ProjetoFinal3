@@ -14,24 +14,13 @@ def distancia(x1, y1, x2, y2):
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 
-def plot_activities_by_order(list_activities: list[Activity], nodes: list[Node], work_Block: WorkBlock):
-    """
-    Esta função representa num gráfico de pontos as atividades pertencentes ao cluster pela suas coordenadas, identifica com cores diferentes o trabalhador, as atividades atribuidas, e as atividades não atribuidas.
-    Ainda coloca umas setas a mostrar o caminho percorrido pelo trabalhor.
+def plot_activities_by_order(list_activities: list[Activity], nodes: list[Node], work_Block: WorkBlock) -> None:
+    """Apresenta por ordem de realização, as atividades a serem realizadas pelo trabalhador, mostra ainda as atividades pertencentes ao cluster não atribuidas
 
-    Parameters
-    ----------
-    list_activities: (lsit of Activity)
-        atividades pertencentes ao cluster.
-    nodes: (list of Node)
-        lista de Node com as atividades que foram atribuidas pela ordem de atribuição.
-    work_Block: (WorkBlock)
-        lista das skills que o trabalhador possuiu.
-
-    Returns
-    -------
-    null
-        não retorna nada, só cria a imagem.
+    Args:
+        list_activities (list[Activity]): lista com as atividades do cluster
+        nodes (list[Node]): lista com os nós por ordem de realização
+        work_Block (WorkBlock): bloco de trabalho a que a atribuição foi realizada
     """
 
 
@@ -232,7 +221,12 @@ def plot_heatmap_activities_by_state(list_activities: list[Activity]):
 
 
 
-def plot_heatmap_activities_by_hour(list_activities: list[Activity]):
+def plot_heatmap_activities_by_hour(list_activities: list[Activity]) -> None:
+    """Faz um Heatmap com todas as atividades no seu local geográfico, a cor de cada ponto do heat map representa a sua hora de agendamento
+
+    Args:
+        list_activities (list[Activity]): Lista com todas as atividades a serem representadas no Heatmap
+    """
     # Extrair coordenadas x, y e timestamps
     longitude_values = [task.longitude for task in list_activities]
     latitude_values = [task.latitude for task in list_activities]

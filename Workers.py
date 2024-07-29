@@ -43,6 +43,18 @@ class Worker:
             work_block.printWorkBlock()
 
 def Find_Worker_By_Id(list_workers: list[Worker], id: str) -> Worker:
+    """Encontra o trabalhador com o id fornecido, na lista fornecida
+
+    Args:
+        list_workers (list[Worker]): lista com todos os trabalhsdores
+        id (str): id fo trabalhador procurado
+
+    Raises:
+        ValueError: caso não exista um trabalhador com esse id na lista de trabalhdores
+
+    Returns:
+        Worker: o trabalhador encontrado
+    """
     for worker in list_workers:
         if(worker.idWorker == id):
             return worker

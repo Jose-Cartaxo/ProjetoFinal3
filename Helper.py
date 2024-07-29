@@ -1,5 +1,6 @@
 from datetime import datetime
 import math
+import pandas as pd
 
 from Activity import Activity, Find_Activity_By_Id
 from Node import Node
@@ -84,7 +85,13 @@ def Distance_Calculator( lat1, lon1, lat2, lon2) -> float:
     distance = R * c
     return distance
 
-def importarAtividadesExcel(activities_xlsx, listaAtividades):
+def importarAtividadesExcel(activities_xlsx: pd.DataFrame, listaAtividades: list [Activity]):
+    """Importa os dados das atividades do Excel para a lista fornecida
+
+    Args:
+        activities_xlsx (_type_): _description_
+        listaAtividades (list[Activity]): _description_
+    """
     for indice, element in activities_xlsx.iterrows():
         if element['ComprirAgendamento'] == 0:
             listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
@@ -107,7 +114,16 @@ def importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores):
         listaTrabalhadores.append(Worker(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
 
 
-def importarValoresExcel(valoresTemp_dict):
+def importarValoresExcel(valoresTemp_dict: dict) -> dict:
+    """Recebe um dicionário com valores do Excel, transforma os para ser aplicaveis. Ex transforma 7 litros de consumo por 100km e uma velocidade média de 60 km/h, em consumo médio por minuto de viagem.
+
+    Args:
+        valoresTemp_dict (dict): dicionário com valores do Excel
+
+    Returns:
+        dict: dicionário com valores aplicaveis
+    """
+
     precoCombustivelLitro = valoresTemp_dict['Preço_Combustível']
     custoTrabalhadorHora = valoresTemp_dict['Custo_Trabalhador']
     velocidadeMediaViagemKMpH = valoresTemp_dict['Média_Velocidade_Viagem']
@@ -157,17 +173,24 @@ def importarValoresExcel(valoresTemp_dict):
     print('multCustoTrabalhador:', valores_dict['multCustoTrabalhador'])
     print('multRecebimentoTrabalho:', valores_dict['multRecebimentoTrabalho'])
     print('multTempoOcioso:', valores_dict['multTempoOcioso'])
+
     return valores_dict
 
-def preencherListaWorkBlocks(listaTrabalhadores):
-    '''
-    Fazer uma lista só com os workblocks para se irem adicionamdo as atividades a estes
-'''
+def preencherListaWorkBlocks(listaTrabalhadores: list[Worker]) -> list[WorkBlock]:
+    """Coloca todos os blocos de trabalho de todos os trabalhadores em um lista.
+
+    Args:
+        listaTrabalhadores (list[Worker]): Lista com todos os trabalhadores
+
+    Returns:
+        list[WorkBlock]: Lista com todos os blocos de trabalho
+    """
 
     listaBlocoTrabalho = []
     for worker in listaTrabalhadores:
         for workBlock in worker.work_Blocks:
             listaBlocoTrabalho.append(workBlock)
+            
     return listaBlocoTrabalho
 
 

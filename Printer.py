@@ -1,9 +1,13 @@
+from Activity import Activity
 from KNearest_Neighbors import Opcao_K_NearestNeighbors_Adaptado, Opcao_K_NearestNeighbors_Normal, Opcao_K_N_DBSCAN
 from DBSCAN import Opcao_DBSCAN
 from Central import Opcao_Agrupamento_Por_Central
+from Workers import WorkBlock, Worker
        
 
-def printCadaOpcao():
+def printCadaOpcao() -> None:
+    """Faz o print de cada opção para clustering
+    """
     # 1 - K-NearestNeighbors 1.0
     # 2 - K-NearestNeighbors 2.0
     # 3 - K-NearestNeighbors com DBSCANS
@@ -18,7 +22,17 @@ def printCadaOpcao():
     print("5 - Central") 
 
 
-def solicitar_input(min, max):
+def solicitar_input(min: int, max: int) -> int:
+    """Pede um input entre o min e max fornecido, devolve esse valor
+
+    Args:
+        min (int): Valor mínimo de input
+        max (int): Valor máximo de outut
+
+    Returns:
+        int: Valor de input introduzido
+    """
+
     while True:
         try:
             valor = int(input('Por favor, insira um número entre ' + str(min) + ' e ' + str(max) +': '))
@@ -30,7 +44,14 @@ def solicitar_input(min, max):
             print("Entrada inválida. Por favor, insira um número inteiro.")
 
 
-def pedir_s_n():
+def pedir_s_n() -> bool:
+    """Pergunta sim ou não, com respetiva resposta s, n
+    se Sim devolve True, se Não devolve False
+
+    Returns:
+        bool: True ou False
+    """
+
     while True:
         inp = input('"s" para sim, "n" para não: ')
         if inp != 's' and inp != 'n':
@@ -40,10 +61,21 @@ def pedir_s_n():
                 return False
             return True
 
-def processarOpcao(considerarAgendamento, considerarPrioridade, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho):
-    '''
-        correr o programa com o método de clustering escolhido
-    '''
+def processarOpcao(considerarAgendamento: bool, considerarPrioridade: bool, metodoCluster: int, gmaps, dicionario_distancias: dict, listaAtividades: list[Activity], listaTrabalhadores: list[Worker], valores_dict: dict, competencias_dict: dict, listaBlocoTrabalho: list[WorkBlock]) -> None:
+    """Verifica qual o método de clustering escolhido e chama as funções de acordo
+
+    Args:
+        considerarAgendamento (bool): bool para a consideração de prioridade de acordo com o tipo de agendamento
+        considerarPrioridade (bool): bool para a consideração de prioridade de acordo com a data de criação
+        metodoCluster (int): método de clustering escolhido
+        gmaps (_type_): _description_
+        dicionario_distancias (dict): dicionário com as distâncias já calculadas
+        listaAtividades (list[Activity]): lista com todas as atividades 
+        listaTrabalhadores (list[Worker]): lista com todos os trabalhadores
+        valores_dict (dict): dicionário com valores
+        competencias_dict (dict): dicionário com as competências
+        listaBlocoTrabalho (list[WorkBlock]): lista com todos os blocos de trabalho
+    """
 
     # 1 - K-NearestNeighbors 1.0
     # 2 - K-NearestNeighbors 2.0

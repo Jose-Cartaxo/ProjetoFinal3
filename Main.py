@@ -11,6 +11,7 @@ import googlemaps
 from dotenv import load_dotenv
 import os
 from datetime import datetime
+import pandas as pd
 
 from Activity import Activity
 
@@ -18,11 +19,10 @@ from Helper import importarAtividadesExcel, importarTrabalhadoresExcel, importar
 
 from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
 
-from Workers import Worker
+from Workers import WorkBlock, Worker
 
 from Stats import DataAnalyticsByHour, DataAnalyticsBySkill, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
 
-import pandas as pd
 
 from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_heatmap_activities_by_state
 
@@ -33,16 +33,19 @@ from Node import Node
 os.system("cls")
 
 print("Deseja que seja considerada a prioridade das Atividades com marcação?")
-considerarAgendamento = pedir_s_n()
+considerarAgendamento: bool = pedir_s_n()
+"""Bool com a informação de é para considerar a prioridade no agendamento ou não"""
 
 print("Deseja que seja considerada a prioridade das Atividades com menor data de criação?")  
-considerarPrioridade = pedir_s_n()
+considerarPrioridade: bool = pedir_s_n()
+"""Bool com a informação de é para considerar a prioridade na data de criação ou não"""
 
 printCadaOpcao()
-metodoCluster = solicitar_input(1, 5)
+metodoCluster: int = solicitar_input(1, 5)
+"""Método de clustering escolhido"""
 
 # Início da medição dos tempos
-start_time = datetime.now()
+start_time: datetime = datetime.now()
 
 '''
     Configurar o Google Maps
@@ -55,26 +58,30 @@ gmaps = googlemaps.Client(key=api_key)
 gmaps = ''
 
 # dicuinário coma s distâncias já calculadas
-dicionario_distancias = {}
+dicionario_distancias: dict = {}
 
 # ler dados do Excel
-activities_xlsx = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
+activities_xlsx: pd.DataFrame = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
 listaAtividades: list[Activity] = []
+"""Lista com todas as atividades do Excel importadas"""
 importarAtividadesExcel(activities_xlsx, listaAtividades)
 
 
-workers_xlsx = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
+workers_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
 listaTrabalhadores: list[Worker] = []
+"""Lista com todos os trabalhadores do Excel"""
 importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores)
 
 
-values_xlsx = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
-valoresTemp_dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
-valores_dict = importarValoresExcel(valoresTemp_dict)
+values_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+valoresTemp_dict: dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+valores_dict: dict = importarValoresExcel(valoresTemp_dict)
+"""Dicionário com os valores do Excel, consumos, lucros..."""
 
 
-competencias_xlsx = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
-competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
+competencias_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+competencias_dict: dict  = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
+"""Dicionário com todas as competências do Excel"""
 
 
 '''
@@ -83,8 +90,8 @@ competencias_dict = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity
 plot_heatmap_activities_by_hour(listaAtividades)
 
 
-listaBlocoTrabalho = preencherListaWorkBlocks(listaTrabalhadores)
-
+listaBlocoTrabalho: list[WorkBlock] = preencherListaWorkBlocks(listaTrabalhadores)
+"""Lista com todos os blocos de trabalho"""
 
 processarOpcao(considerarAgendamento, considerarPrioridade, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho)
 
