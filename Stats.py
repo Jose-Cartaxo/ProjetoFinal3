@@ -44,8 +44,18 @@ class WorkBlockStats:
 
 
 
-def DataAnalyticsByHour(listActivities: list[Activity]):
-    statsList = []
+def DataAnalyticsByHour(listActivities: list[Activity]) -> list[Stats]:
+    """
+    Separa as atividades por hora de marcação, guarda a quantidade de atividades que foram realizadas em cada grupo
+
+    Args:
+        listActivities (list[Activity]): lista com todas as atividades
+
+    Returns:
+        list[Stats]: lista com a quantidade de atividades realizadas por hora
+    """
+
+    statsList: list[Stats] = []
     for activity in listActivities:
         found = False
         for stat in statsList:
