@@ -13,24 +13,24 @@ import os
 from datetime import datetime
 import pandas as pd
 
-from Activity import Activity
+from Activity import Atividade
 
-from Helper import importarAtividadesExcel, importarTrabalhadoresExcel, importarValoresExcel, preencherListaWorkBlocks, Quantidade_Chamadas
+from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, importar_Valores_Excel, preencherListaWorkBlocks, Quantidade_Chamadas
 
 from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
 
-from Workers import WorkBlock, Worker
+from Workers import BlocoTrabalho, Trabalhador
 
-from Stats import DataAnalyticsByHour, DataAnalyticsBySkill, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
+from Stats import AnalisaDadosPorSkill, AnalisaDadosPorHora, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
 
 
 from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_heatmap_activities_by_state
 
-from Node import Node
+from Node import No
 
 
 
-os.system("cls")
+# os.system("cls")
 
 print("Deseja que seja considerada a prioridade das Atividades com marcação?")
 considerarAgendamento: bool = pedir_s_n()
@@ -62,20 +62,20 @@ dicionario_distancias: dict = {}
 
 # ler dados do Excel
 activities_xlsx: pd.DataFrame = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
-listaAtividades: list[Activity] = []
+listaAtividades: list[Atividade] = []
 """Lista com todas as atividades do Excel importadas"""
-importarAtividadesExcel(activities_xlsx, listaAtividades)
+importar_Atividades_Excel(activities_xlsx, listaAtividades)
 
 
 workers_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
-listaTrabalhadores: list[Worker] = []
+listaTrabalhadores: list[Trabalhador] = []
 """Lista com todos os trabalhadores do Excel"""
-importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores)
+importar_Trabalhadores_Excel(workers_xlsx, listaTrabalhadores)
 
 
 values_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
 valoresTemp_dict: dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
-valores_dict: dict = importarValoresExcel(valoresTemp_dict)
+valores_dict: dict = importar_Valores_Excel(valoresTemp_dict)
 """Dicionário com os valores do Excel, consumos, lucros..."""
 
 
@@ -90,7 +90,7 @@ competencias_dict: dict  = competencias_xlsx.set_index('Skill').to_dict()['TimeA
 plot_heatmap_activities_by_hour(listaAtividades)
 
 
-listaBlocoTrabalho: list[WorkBlock] = preencherListaWorkBlocks(listaTrabalhadores)
+listaBlocoTrabalho: list[BlocoTrabalho] = preencherListaWorkBlocks(listaTrabalhadores)
 """Lista com todos os blocos de trabalho"""
 
 processarOpcao(considerarAgendamento, considerarPrioridade, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho)
@@ -101,13 +101,13 @@ processarOpcao(considerarAgendamento, considerarPrioridade, metodoCluster, gmaps
 
 plot_activities_graph_by_state(listaAtividades)
 
-data = DataAnalyticsByHour(listaAtividades)
+data = AnalisaDadosPorHora(listaAtividades)
 sorted_stats_list = sorted(data)
 print('Atividades por hora agendamento (0 é sem agendamento):')
 for dat in sorted_stats_list:
     dat.print()
 
-data = DataAnalyticsBySkill(listaAtividades)
+data = AnalisaDadosPorSkill(listaAtividades)
 print('\nAtividades por tipo de competencia:')
 for dat in data:
     dat.print()
@@ -122,6 +122,7 @@ for trabalhador in listaTrabalhadores:
         AnalisaTrabalhador(trabalhador, listaAtividades, valores_dict)
 
 AnalisaTemposTrabalhadores(listaTrabalhadores, listaAtividades, dicionario_distancias, valores_dict['tempoViagem1KM'], gmaps)
+
 plot_heatmap_activities_by_state(listaAtividades)
 
 
@@ -131,7 +132,8 @@ plot_heatmap_activities_by_state(listaAtividades)
 '''
 
 print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes\n")
+print("Quantidade Node:", No.quantidadeNos)
+
 end_time = datetime.now() # type: ignore
 elapsed_time = (end_time - start_time).total_seconds()
 print("Tempo decorrido:", elapsed_time, "segundos")
-print("Quantidade Node:", Node.quantidadeNodes)

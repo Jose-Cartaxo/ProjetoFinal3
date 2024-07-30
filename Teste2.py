@@ -14,4 +14,4 @@ camada_marcadores = gmaps.marker_layer(list(zip(latitude, longitude)))
 fig.add_layer(camada_marcadores)
 
 # Exiba o mapa
-fig
+fig.open()

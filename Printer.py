@@ -1,8 +1,8 @@
-from Activity import Activity
+from Activity import Atividade
 from KNearest_Neighbors import Opcao_K_NearestNeighbors_Adaptado, Opcao_K_NearestNeighbors_Normal, Opcao_K_N_DBSCAN
 from DBSCAN import Opcao_DBSCAN
 from Central import Opcao_Agrupamento_Por_Central
-from Workers import WorkBlock, Worker
+from Workers import BlocoTrabalho, Trabalhador
        
 
 def printCadaOpcao() -> None:
@@ -61,7 +61,7 @@ def pedir_s_n() -> bool:
                 return False
             return True
 
-def processarOpcao(considerarAgendamento: bool, considerarPrioridade: bool, metodoCluster: int, gmaps, dicionario_distancias: dict, listaAtividades: list[Activity], listaTrabalhadores: list[Worker], valores_dict: dict, competencias_dict: dict, listaBlocoTrabalho: list[WorkBlock]) -> None:
+def processarOpcao(considerarAgendamento: bool, considerarPrioridade: bool, metodoCluster: int, gmaps, dicionario_distancias: dict, listaAtividades: list[Atividade], listaTrabalhadores: list[Trabalhador], valores_dict: dict, competencias_dict: dict, listaBlocoTrabalho: list[BlocoTrabalho]) -> None:
     """Verifica qual o método de clustering escolhido e chama as funções de acordo
 
     Args:
@@ -70,8 +70,8 @@ def processarOpcao(considerarAgendamento: bool, considerarPrioridade: bool, meto
         metodoCluster (int): método de clustering escolhido
         gmaps (_type_): _description_
         dicionario_distancias (dict): dicionário com as distâncias já calculadas
-        listaAtividades (list[Activity]): lista com todas as atividades 
-        listaTrabalhadores (list[Worker]): lista com todos os trabalhadores
+        listaAtividades (list[Atividade]): lista com todas as atividades 
+        listaTrabalhadores (list[Trabalhador]): lista com todos os trabalhadores
         valores_dict (dict): dicionário com valores
         competencias_dict (dict): dicionário com as competências
         listaBlocoTrabalho (list[WorkBlock]): lista com todos os blocos de trabalho

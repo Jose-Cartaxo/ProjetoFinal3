@@ -1,39 +1,40 @@
 from re import X
+from datetime import time
 
 
-class Node:
-    quantidadeNodes = 0
+class No:
+    quantidadeNos = 0
 
-    def __init__(self, id, cost, travel_Time, start_Time, end_Time, parent):
+    def __init__(self, id, custo, tempo_Viagem, tempo_Inicio, tempo_Fim, pai):
         
-        self.id = id  # id da atividade atribuida a este no
-        self.cost = cost # custo da realização da atividade
-        self.travel_Time = travel_Time # tempo em viagem entre Tarefas
-        self.start_Time = start_Time # horas a que começa a realizar a tarefa
-        self.end_Time = end_Time # horas em que termina a tarefa
-        self.parent = parent # tarefa raelizada anteriormente
-        self.state = 1
-        Node.quantidadeNodes += 1
+        self.id: str = id  # id da atividade atribuida a este no
+        self.custo: float = custo # custo da realização da atividade
+        self.tempo_Viagem: int = tempo_Viagem # tempo em viagem entre Tarefas
+        self.tempo_Inicio: time = tempo_Inicio # horas a que começa a realizar a tarefa
+        self.tempo_Fim: time = tempo_Fim # horas em que termina a tarefa
+        self.pai: No = pai # tarefa raelizada anteriormente
+        self.estado: bool = True
+        No.quantidadeNos += 1
 
-        if parent:
-            self.gen = parent.gen + 1 # o numero da atividade, a 3ª atividade a ser realizada vai ser gen 3
-            self.total_cost = parent.total_cost + cost # custo total, o custo desta atividade em especifico mais o total de todas as atividade enteriones
-            self.family = parent.family.copy() # copiar a familia da atividade anterior
+        if pai:
+            self.gen = pai.gen + 1 # o numero da atividade, a 3ª atividade a ser realizada vai ser gen 3
+            self.custo_total = pai.custo_total + custo # custo total, o custo desta atividade em especifico mais o total de todas as atividade enteriones
+            self.family = pai.family.copy() # copiar a familia da atividade anterior
         else:
             self.gen = 0
-            self.total_cost = 0
+            self.custo_total = 0
             self.family = []
         
         self.family.append(id) # adicionar o proprio id a lista de atividades
         
 
     def printNodeGen(self):
-        print('ID: ', self.id, ' Cost: ', self.cost,' TotalCost: ', self.total_cost)
-        if self.parent:
-            self.parent.printNodeGen()
+        print('ID: ', self.id, ' custo: ', self.custo,' Totalcusto: ', self.custo_total)
+        if self.pai:
+            self.pai.printNodeGen()
 
     # se for maior tem de retornar true
     def __lt__(self, other):
 
-        return self.total_cost > other.total_cost
-        # return (self.total_cost / self.gen) > (other.total_cost / other.gen)
+        return self.custo_total > other.custo_total
+        # return (self.custo_total / self.gen) > (other.custo_total / other.gen)

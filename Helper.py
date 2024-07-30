@@ -2,21 +2,21 @@ from datetime import datetime
 import math
 import pandas as pd
 
-from Activity import Activity, Find_Activity_By_Id
-from Node import Node
-from Workers import Worker, WorkBlock
+from Activity import Atividade, Encontrar_Atividade_Por_Id
+from Node import No
+from Workers import Trabalhador, BlocoTrabalho
 
-def activitiesToState1(nodes: list [Node], list_activities: list[Activity]):
+def actividades_Para_Estado_1(nodes: list [No], list_activities: list[Atividade]):
     """Altera o estado de todas as atividades atribuidas para 1
 
     Args:
-        nodes (list[Node]): lista de nós com ids das atividades que foram atribuidas
+        nodes (list[No]): lista de nós com ids das atividades que foram atribuidas
         list_activities (list[Activity]): lista de todas as atividades
     """
     for node in nodes:
-        activity = Find_Activity_By_Id(list_activities, node.id)
+        activity = Encontrar_Atividade_Por_Id(list_activities, node.id)
         if activity:
-            activity.state = 1
+            activity.estado = 1
 
 
 # devolve a quantidade de Minutos necessários para relizar o trajeto
@@ -85,7 +85,7 @@ def Distance_Calculator( lat1, lon1, lat2, lon2) -> float:
     distance = R * c
     return distance
 
-def importarAtividadesExcel(activities_xlsx: pd.DataFrame, listaAtividades: list [Activity]):
+def importar_Atividades_Excel(activities_xlsx: pd.DataFrame, listaAtividades: list [Atividade]):
     """Importa os dados das atividades do Excel para a lista fornecida
 
     Args:
@@ -94,13 +94,13 @@ def importarAtividadesExcel(activities_xlsx: pd.DataFrame, listaAtividades: list
     """
     for indice, element in activities_xlsx.iterrows():
         if element['ComprirAgendamento'] == 0:
-            listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
+            listaAtividades.append(Atividade(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date()))
         # listaAtividades.append(Activity(element['NUMINT'], element['Central'], element['CodigoPostal'], element['Skill'], element['Latitude'], element['Longitude']))
         else:
-            listaAtividades.append(Activity(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(), agendamento = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
+            listaAtividades.append(Atividade(id = element['NUMINT'], Central = element['Central'], competencia = element['Skill'], longitude = element['Longitude'], latitude = element['Latitude'], data_criacao = datetime.strptime(element['DataCriacao'], '%d/%m/%y').date(), agendamento = datetime.strptime(element['HoraAgendamento'], '%H:%M').time()))
 
 
-def importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores):
+def importar_Trabalhadores_Excel(workers_xlsx, listaTrabalhadores):
     for indice, element in workers_xlsx.iterrows():
         hours_str = element['HorarioTrabalho']
         hours_list = hours_str.split(',')
@@ -108,13 +108,13 @@ def importarTrabalhadoresExcel(workers_xlsx, listaTrabalhadores):
         i = 0
         for hours in hours_list:
             start_hour, end_hour = hours.split(';')
-            tempo_listaBlocoTrabalho.append(WorkBlock(element['idTrabalhador'], element['Longitude'], element['Latitude'], i,start_hour, end_hour))
+            tempo_listaBlocoTrabalho.append(BlocoTrabalho(element['idTrabalhador'], element['Longitude'], element['Latitude'], i,start_hour, end_hour))
             i += 1
     
-        listaTrabalhadores.append(Worker(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
+        listaTrabalhadores.append(Trabalhador(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
 
 
-def importarValoresExcel(valoresTemp_dict: dict) -> dict:
+def importar_Valores_Excel(valoresTemp_dict: dict) -> dict:
     """Recebe um dicionário com valores do Excel, transforma os para ser aplicaveis. Ex transforma 7 litros de consumo por 100km e uma velocidade média de 60 km/h, em consumo médio por minuto de viagem.
 
     Args:
@@ -176,19 +176,19 @@ def importarValoresExcel(valoresTemp_dict: dict) -> dict:
 
     return valores_dict
 
-def preencherListaWorkBlocks(listaTrabalhadores: list[Worker]) -> list[WorkBlock]:
+def preencherListaWorkBlocks(listaTrabalhadores: list[Trabalhador]) -> list[BlocoTrabalho]:
     """Coloca todos os blocos de trabalho de todos os trabalhadores em um lista.
 
     Args:
         listaTrabalhadores (list[Worker]): Lista com todos os trabalhadores
 
     Returns:
-        list[WorkBlock]: Lista com todos os blocos de trabalho
+        list[BlocoTrabalho]: Lista com todos os blocos de trabalho
     """
 
     listaBlocoTrabalho = []
     for worker in listaTrabalhadores:
-        for workBlock in worker.work_Blocks:
+        for workBlock in worker.lista_Blocos_Trabalho:
             listaBlocoTrabalho.append(workBlock)
             
     return listaBlocoTrabalho

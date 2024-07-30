@@ -1,31 +1,31 @@
 from datetime import datetime, time
 
-from Workers import Worker, WorkBlock, Find_Worker_By_Id
-from Helper import Distance_Calculator, activitiesToState1
-from Activity import Activity
+from Workers import Trabalhador, BlocoTrabalho, Find_Worker_By_Id
+from Helper import Distance_Calculator, actividades_Para_Estado_1
+from Activity import Atividade
 from Stats import WorkBlockStats
 from Ploting import plot_activities_by_order, plot_scatter_with_trendline
 from Optimization import Greedy
 
 
-def DBSCANComplementar(list_activities: list [Activity], list_workers: list[Worker], work_Block: WorkBlock, cluster: list [Activity], distance_Min: int, distance_Max: int, iterations_Max: int) -> list[Activity]:
+def DBSCANComplementar(list_activities: list [Atividade], list_workers: list[Trabalhador], work_Block: BlocoTrabalho, cluster: list [Atividade], distance_Min: int, distance_Max: int, iterations_Max: int) -> list[Atividade]:
     """DBSCAN que começa a partir do KNN, recebe uma lista de atividades, um cluster, a começa a expandi lo
 
     Args:
-        list_activities (list[Activity]): lista com todas as atividades
-        list_workers (list[Worker]): lista com todos os trabalhadores
-        work_Block (WorkBlock): lista com todos os blocos de trabalho
-        cluster (list[Activity]): cluster inicial para ser expandido
+        list_activities (list[Atividade]): lista com todas as atividades
+        list_workers (list[Trabalhador]): lista com todos os trabalhadores
+        work_Block (BlocoTrabalho): lista com todos os blocos de trabalho
+        cluster (list[Atividade]): cluster inicial para ser expandido
         distance_Min (int): distancia minima para o DBSCAN adaptavel
         distance_Max (int): distancia máxima para o DBSCAN adaptavel
         iterations_Max (int): quantidade de iterações
 
     Returns:
-        list[Activity]: cluster final
+        list[Atividade]: cluster final
     """
 
     # encontrar o worker
-    worker = Find_Worker_By_Id(list_workers, work_Block.idWorker)
+    worker = Find_Worker_By_Id(list_workers, work_Block.idTrabalhador)
 
     # executar a quantidade definida de iterações
     for i in range(iterations_Max):
@@ -43,36 +43,36 @@ def DBSCANComplementar(list_activities: list [Activity], list_workers: list[Work
         while previous_size == len(cluster) and radius <= distance_Max:
 
             # percorre as atividades do cluster
-            for activity_clustered in cluster:
+            for actividade_cluster in cluster:
 
                 # percorre todas as atividades
-                for activity in list_activities:
+                for atividade in list_activities:
 
                     # verifica que o estado é igual a 0
-                    if activity.state == 0:
+                    if atividade.estado == 0:
 
                         # calcula a distancia entre a atividade do cluster e a atividade da lista de todas as atividades
-                        distance = Distance_Calculator(activity.latitude, activity.longitude, activity_clustered.latitude, activity_clustered.longitude)
+                        distance = Distance_Calculator(atividade.latitude, atividade.longitude, actividade_cluster.latitude, actividade_cluster.longitude)
 
                         # verifica se está dentro do raio
                         if distance < radius:
                             
                             # Verifica se a atividade está dentro do bloco de trabalho
                             agendamento_dentro_do_bloco = (
-                                activity.agendamento < work_Block.fim and 
-                                activity.agendamento > work_Block.inicio
+                                atividade.agendamento < work_Block.fim and 
+                                atividade.agendamento > work_Block.inicio
                             )
 
                             # Verifica se a atividade não tem agendamento
-                            agendamento_a_meia_noite = activity.agendamento == time(0, 0)
+                            agendamento_a_meia_noite = atividade.agendamento == time(0, 0)
 
                             # Verifica se a competência da atividade está nas competências do trabalhador
-                            competencia_adequada = activity.competencia in worker.competencia
+                            competencia_adequada = atividade.competencia in worker.competencia
 
                             # Combina todas as condições
                             if (agendamento_dentro_do_bloco or agendamento_a_meia_noite) and competencia_adequada:
-                                temp_cluster.append(activity)
-                                activity.state = 2
+                                temp_cluster.append(atividade)
+                                atividade.estado = 2
 
             if len( temp_cluster) == 0:
                 radius += 1
@@ -83,52 +83,52 @@ def DBSCANComplementar(list_activities: list [Activity], list_workers: list[Work
 
 
 
-def DBSCANInicio(list_activities: list[Activity], list_workers: list[Worker], work_Block: WorkBlock, distance_Min: int, distance_Max: int, iterations_Max: int) -> list[Activity]:
+def DBSCANInicio(list_activities: list[Atividade], list_workers: list[Trabalhador], work_Block: BlocoTrabalho, distance_Min: int, distance_Max: int, iterations_Max: int) -> list[Atividade]:
     """A partir do ponto de partida do trabalhador começa a adicionar atividades a um cluster, de acordo com o algoritmo DBSCAN
 
     Args:
-        list_activities (list[Activity]): lista de todas as atividades
-        list_workers (list[Worker]): lista de todos os trabalhadores
-        work_Block (WorkBlock): lista de todos os workblocks
+        list_activities (list[Atividade]): lista de todas as atividades
+        list_workers (list[Trabalhador]): lista de todos os trabalhadores
+        work_Block (BlocoTrabalho): lista de todos os workblocks
         distance_Min (int): distancia minima para o DBSCAN variavel
         distance_Max (int): distancia maxima para o DBSCAN variavel
         iterations_Max (int): quantidade de iteraçoes do DBSCAN
 
     Returns:
-        list[Activity]: lista de atividades do cluster criado
+        list[Atividade]: lista de atividades do cluster criado
     """
 
-    def adicionar_atividades_ao_cluster(atividades: list[Activity], referencia_lat: float, referencia_long: float):
+    def adicionar_atividades_ao_cluster(atividades: list[Atividade], referencia_lat: float, referencia_long: float):
         """Adiciona atividades ao cluster temporário com base na distância e condições.
 
         Args:
-            atividades (list[Activity]): lista com todas as atividades
+            atividades (list[Atividade]): lista com todas as atividades
             referencia_lat (float): latitude a comparar
             referencia_long (float): longitude a comparar
         """
-        for activity in atividades:
-            if activity.state == 0:
-                distance = Distance_Calculator(activity.latitude, activity.longitude, referencia_lat, referencia_long)
+        for atividade in atividades:
+            if atividade.estado == 0:
+                distance = Distance_Calculator(atividade.latitude, atividade.longitude, referencia_lat, referencia_long)
                 if distance <= radius:
-                    agendamento_dentro_do_bloco = (activity.agendamento < work_Block.fim and activity.agendamento > work_Block.inicio)
-                    agendamento_a_meia_noite = (activity.agendamento == time(0, 0))
-                    competencia_adequada = (activity.competencia in worker.competencia)
+                    agendamento_dentro_do_bloco = (atividade.agendamento < work_Block.fim and atividade.agendamento > work_Block.inicio)
+                    agendamento_a_meia_noite = (atividade.agendamento == time(0, 0))
+                    competencia_adequada = (atividade.competencia in worker.competencia)
                     if (agendamento_dentro_do_bloco or agendamento_a_meia_noite) and competencia_adequada:
-                        temp_cluster.append(activity)
-                        activity.state = 2
+                        temp_cluster.append(atividade)
+                        atividade.estado = 2
 
 
     # encontrar o trabalhador a que pertence o bloco de trabalho
-    worker: Worker = Find_Worker_By_Id(list_workers, work_Block.idWorker)
+    worker: Trabalhador = Find_Worker_By_Id(list_workers, work_Block.idTrabalhador)
 
     # cluster vazio
-    cluster: list[Activity] = []
+    cluster: list[Atividade] = []
     
     # igual o raio ao cumprimento minimo
     radius: int = distance_Min
 
     # lista temporária para colocar as atividades antes de as adicionar ao cluster
-    temp_cluster: list[Activity]  = []
+    temp_cluster: list[Atividade]  = []
    
     for i in range(iterations_Max):
         # Loop enquanto não forem adicionadas novas atividades ou o raio não atingir o limite máximo
@@ -158,13 +158,13 @@ def DBSCANInicio(list_activities: list[Activity], list_workers: list[Worker], wo
 
 
 
-def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], dicionario_distancias: dict, competencias_dict: dict, valores_dict: dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
+def Opcao_DBSCAN(listaAtividades: list[Atividade], listaTrabalhadores: list[Trabalhador], listaBlocoTrabalho: list[BlocoTrabalho], dicionario_distancias: dict, competencias_dict: dict, valores_dict: dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     """Faz a ateribuição de atividades pelo DBSCAN
 
     Args:
-        listaAtividades (list[Activity]): lista de todas as atividades
-        listaTrabalhadores (list[Worker]): lista de todos os trabalhadores
-        listaBlocoTrabalho (list[WorkBlock]): lista de todos os blocos trabalho
+        listaAtividades (list[Atividade]): lista de todas as atividades
+        listaTrabalhadores (list[Trabalhador]): lista de todos os trabalhadores
+        listaBlocoTrabalho (list[BlocoTrabalho]): lista de todos os blocos trabalho
         dicionario_distancias (dict): dicionário com os tempos de viagem já calculadas
         competencias_dict (dict): dicionário com as competencias, e o tempo de realização das atividades
         valores_dict (dict): dicionário com os valores de configuração
@@ -177,7 +177,7 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
     meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
 
     # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
-    list_worker_activityQuantity = []
+    lista_quantidade_atividades_trabalhador = []
 
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), '\nMIN_DBSCAN_DISTANCE:', valores_dict['MIN_DBSCAN_DISTANCE'], 'MAX_DBSCAN_DISTANCE:', valores_dict['MAX_DBSCAN_DISTANCE'], 'DBSCANS_IT_NUM:', int(valores_dict['DBSCAN_IT_NUM']))
@@ -185,7 +185,7 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
     for blocoTrabalho in listaBlocoTrabalho:
         
         # trabalhador do bloco de trabalho a ser atribuido
-        trabalhador: Worker = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
+        trabalhador: Trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idTrabalhador)
         
         # competencias do trabalhador
         competencias: list[str] = trabalhador.competencia
@@ -198,34 +198,34 @@ def Opcao_DBSCAN(listaAtividades: list[Activity], listaTrabalhadores: list[Worke
 
         
         # altera o estado das atividades para 1 (atribuidas)
-        activitiesToState1(nodes, listaAtividades)
+        actividades_Para_Estado_1(nodes, listaAtividades)
 
         # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
         plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
         # colocar todas as atividades que não têm o state igual a 1 a 0
-        for activity in listaAtividades:
-            activity.resetStateToZeroIfNotOne()
+        for ativ in listaAtividades:
+            ativ.estado_A_0_Se_Diferente_De_1()
 
 
         
         # fazer um gráfico com a evolução da atribuição das atividades
-        activityQuantity = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
+        quantidade_atividades = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
         if blocoTrabalho.inicio < meio_dia:
-            list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
+            lista_quantidade_atividades_trabalhador.append(WorkBlockStats('manha',quantidade_atividades))
         else:
-            list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
+            lista_quantidade_atividades_trabalhador.append(WorkBlockStats('tarde',quantidade_atividades))
 
 
     
-    plot_scatter_with_trendline(list_worker_activityQuantity)
+    plot_scatter_with_trendline(lista_quantidade_atividades_trabalhador)
 
     print('\nManha \n')
-    for stat in list_worker_activityQuantity:
+    for stat in lista_quantidade_atividades_trabalhador:
         if stat.tipo == 'manha':
             print(stat.quantidade, end=", ")
     print('\n\nTarde \n')
-    for stat in list_worker_activityQuantity:
+    for stat in lista_quantidade_atividades_trabalhador:
         if stat.tipo == 'tarde':
             print(stat.quantidade, end=", ")
     print('\n')

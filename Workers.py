@@ -1,52 +1,52 @@
 from datetime import datetime, time
 from typing import Optional
 
-from Node import Node
+from Node import No
 
 
-class WorkBlock:
+class BlocoTrabalho:
      
-    def __init__(self, idWorker: str, longitude: float, latitude: float, idBlock: int, inicio: str, fim: str):
-        self.idWorker = idWorker
-        self.idBlock = idBlock
+    def __init__(self, idTrabalhador: str, longitude: float, latitude: float, idBlock: int, inicio: str, fim: str):
+        self.idTrabalhador = idTrabalhador
+        self.idBloco = idBlock
         self.longitude = longitude
         self.latitude = latitude
-        self.listNodes: list[Node] = []
+        self.listaNos: list[No] = []
         self.inicio = datetime.strptime(inicio.strip(), '%H:%M').time()
         self.fim = datetime.strptime(fim.strip(), '%H:%M').time()
 
-    def atribuirNodeWorkBlock(self, listNodes: list[Node]):
-        self.listNodes = listNodes
+    def atribuir_Nos_Bloco_Trabalho(self, lista_Nos: list[No]):
+        self.listaNos = lista_Nos
 
 
     def printWorkBlock(self):
-        print('    idBlock: {}; Start: {}; Finish: {}'.format( self.idBlock, self.inicio, self.fim))
+        print('    idBlock: {}; Start: {}; Finish: {}'.format( self.idBloco, self.inicio, self.fim))
 
 
 
-class Worker:
-    workers_quantity = 0
+class Trabalhador:
+    quantidade_Trabalhadores = 0
 
-    def __init__(self, id: str, Central: str, competencia: list[str], longitude: float, latitude: float, work_Blocks: list[WorkBlock]):
-        self.idWorker = id
+    def __init__(self, id: str, Central: str, competencia: list[str], longitude: float, latitude: float, lista_Blocos_Trabalho: list[BlocoTrabalho]):
+        self.idTrabalhador = id
         self.idCentral = Central
         self.competencia = competencia
         self.longitude = longitude
         self.latitude = latitude
         self.quantidadeAtividades = 0
-        self.work_Blocks: list[WorkBlock] = work_Blocks
-        Worker.workers_quantity += 1
+        self.lista_Blocos_Trabalho: list[BlocoTrabalho] = lista_Blocos_Trabalho
+        Trabalhador.quantidade_Trabalhadores += 1
 
     def printWorker(self):
-        print('ID: {}; Central: {}; X: {}; Y: {}'.format(self.idWorker, self.idCentral, self.longitude, self.latitude))
-        for work_block in self.work_Blocks:
+        print('ID: {}; Central: {}; X: {}; Y: {}'.format(self.idTrabalhador, self.idCentral, self.longitude, self.latitude))
+        for work_block in self.lista_Blocos_Trabalho:
             work_block.printWorkBlock()
 
-def Find_Worker_By_Id(list_workers: list[Worker], id: str) -> Worker:
+def Find_Worker_By_Id(lista_Trabalhadores: list[Trabalhador], id: str) -> Trabalhador:
     """Encontra o trabalhador com o id fornecido, na lista fornecida
 
     Args:
-        list_workers (list[Worker]): lista com todos os trabalhsdores
+        lista_Trabalhadores (list[Trabalhador]): lista com todos os trabalhsdores
         id (str): id fo trabalhador procurado
 
     Raises:
@@ -55,7 +55,7 @@ def Find_Worker_By_Id(list_workers: list[Worker], id: str) -> Worker:
     Returns:
         Worker: o trabalhador encontrado
     """
-    for worker in list_workers:
-        if(worker.idWorker == id):
-            return worker
+    for trabalhador in lista_Trabalhadores:
+        if(trabalhador.idTrabalhador == id):
+            return trabalhador
     raise ValueError(f"ID {id} não encontrado na lista de trabalhadores")

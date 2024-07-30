@@ -4,23 +4,23 @@ import sys
 
 import os
 from Helper import Distance_Calculator, pedir_Travel_Time, DateTimeTimeParaMinutosDoDia
-from Workers import Worker
-from Activity import Activity, Find_Activity_By_Id
+from Workers import Trabalhador
+from Activity import Atividade, Encontrar_Atividade_Por_Id
 
 class Stats:
     def __init__(self, tipo):
         self.tipo = tipo
-        self.active = 0
+        self.ativa = 0
         self.total = 1
     
-    def plusOneActive(self):
-        self.active = self.active + 1
+    def maisUmaAtiva(self):
+        self.ativa = self.ativa + 1
     
-    def plusOne(self):
+    def maisUma(self):
         self.total = self.total + 1
 
     def print(self):
-        print('Tipo Atividade:',self.tipo, ' ATIVA: ', self.active,' TOTAL: ', self.total, ' PERCENT: ', (100/self.total * self.active))
+        print('Tipo Atividade:',self.tipo, ' ATIVA: ', self.ativa,' TOTAL: ', self.total, ' PERCENT: ', (100/self.total * self.ativa))
         sys.stdout.flush()
 
     def __lt__(self, other):
@@ -44,70 +44,70 @@ class WorkBlockStats:
 
 
 
-def DataAnalyticsByHour(listActivities: list[Activity]) -> list[Stats]:
+def AnalisaDadosPorHora(lista_atividades: list[Atividade]) -> list[Stats]:
     """
     Separa as atividades por hora de marcação, guarda a quantidade de atividades que foram realizadas em cada grupo
 
     Args:
-        listActivities (list[Activity]): lista com todas as atividades
+        lista_atividades (list[Atividade]): lista com todas as atividades
 
     Returns:
         list[Stats]: lista com a quantidade de atividades realizadas por hora
     """
 
     statsList: list[Stats] = []
-    for activity in listActivities:
+    for atividade in lista_atividades:
         found = False
         for stat in statsList:
-            if stat.tipo == activity.agendamento.hour:
+            if stat.tipo == atividade.agendamento.hour:
                 found = True
-                stat.plusOne()
-                if activity.state == 1:
-                    stat.plusOneActive()
+                stat.maisUma()
+                if atividade.estado == 1:
+                    stat.maisUmaAtiva()
                 break
         if not found:
-            new = Stats(activity.agendamento.hour)
-            if activity.state == 1:
-                new.plusOneActive()
+            new = Stats(atividade.agendamento.hour)
+            if atividade.estado == 1:
+                new.maisUmaAtiva()
             statsList.append(new)
     
     return statsList
 
 
-def DataAnalyticsBySkill(listActivities: list[Activity]) -> list[Stats]:
-    statsList = []
-    for activity in listActivities:
+def AnalisaDadosPorSkill(lista_atividades: list[Atividade]) -> list[Stats]:
+    statsList: list[Stats] = []
+    for atividade in lista_atividades:
         found = False
         for stat in statsList:
-            if stat.tipo == activity.competencia:
+            if stat.tipo == atividade.competencia:
                 found = True
-                stat.plusOne()
-                if activity.state == 1:
-                    stat.plusOneActive()
+                stat.maisUma()
+                if atividade.estado == 1:
+                    stat.maisUmaAtiva()
                 break
         if not found:
-            new = Stats(activity.competencia)
-            if activity.state == 1:
-                new.plusOneActive()
+            new = Stats(atividade.competencia)
+            if atividade.estado == 1:
+                new.maisUmaAtiva()
             statsList.append(new)
     
     return statsList
 
 
-def CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listTrabalhadores: list[Worker]):
+def CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listTrabalhadores: list[Trabalhador]):
     total = 0
     for trabalhador in listTrabalhadores:
         local = 0
-        for workblock in trabalhador.work_Blocks:
-            total += len(workblock.listNodes)
-            local += len(workblock.listNodes)
+        for workblock in trabalhador.lista_Blocos_Trabalho:
+            total += len(workblock.listaNos)
+            local += len(workblock.listaNos)
         trabalhador.quantidadeAtividades = local
 
     return total / len(listTrabalhadores)
 
 
 
-def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Worker], listAtividades: list[Activity], dicionario_distancias, travel_Time_By_1KM, gmaps):
+def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Trabalhador], listAtividades: list[Atividade], dicionario_distancias, travel_Time_By_1KM, gmaps):
     tempoTotal = 0
     tempoTotalAtividades = 0
     tempoTotalViagem = 0
@@ -118,36 +118,36 @@ def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Worker], listAtividades:
     print('\nQuantidade de minutos gastos em:')
     
     for trabalhador in listaTrabalhadores:
-        for workblock in trabalhador.work_Blocks:
+        for workblock in trabalhador.lista_Blocos_Trabalho:
             tempoTotal += DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
             
-            if len(workblock.listNodes) > 0:
+            if len(workblock.listaNos) > 0:
 
-                for node in workblock.listNodes:
-                    tempoTotalViagem += node.travel_Time
+                for node in workblock.listaNos:
+                    tempoTotalViagem += node.tempo_Viagem
 
                 # tempo Extra no inicio do dia sem contar com a viagem. Ex. começa as 8:00 uma atividade, o deu dia de trabalho começa as 7:30, mas só demora 10 minutos a lá chegar, ou seja pode sair 20 minutos mais tarde, este tempo vai para o tempo não usado 
-                tempoInicioDia = DateTimeTimeParaMinutosDoDia(workblock.listNodes[0].start_Time) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
-                tempoInicioDia -= workblock.listNodes[0].travel_Time
+                tempoInicioDia = DateTimeTimeParaMinutosDoDia(workblock.listaNos[0].tempo_Inicio) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
+                tempoInicioDia -= workblock.listaNos[0].tempo_Viagem
                 tempoNaoUsadoInicio += tempoInicioDia
 
-                tempoTotalAtividades += DateTimeTimeParaMinutosDoDia(workblock.listNodes[0].end_Time) - DateTimeTimeParaMinutosDoDia(workblock.listNodes[0].start_Time)
+                tempoTotalAtividades += DateTimeTimeParaMinutosDoDia(workblock.listaNos[0].tempo_Fim) - DateTimeTimeParaMinutosDoDia(workblock.listaNos[0].tempo_Inicio)
 
-                for i in range(1, len(workblock.listNodes)):
-                    no_atual = workblock.listNodes[i]
-                    no_anterior = workblock.listNodes[i - 1]
-                    tempoEntreAtividades = DateTimeTimeParaMinutosDoDia(no_atual.start_Time) - DateTimeTimeParaMinutosDoDia(no_anterior.end_Time)
+                for i in range(1, len(workblock.listaNos)):
+                    no_atual = workblock.listaNos[i]
+                    no_anterior = workblock.listaNos[i - 1]
+                    tempoEntreAtividades = DateTimeTimeParaMinutosDoDia(no_atual.tempo_Inicio) - DateTimeTimeParaMinutosDoDia(no_anterior.tempo_Fim)
 
                     # tempo extra entre viagens, ex. acaba a atividade anterior as 9:00, a próx é as 9:30, e só demora 15 min a lá chegar, 
-                    tempoEspera += tempoEntreAtividades - no_atual.travel_Time
+                    tempoEspera += tempoEntreAtividades - no_atual.tempo_Viagem
 
-                    tempoTotalAtividades += DateTimeTimeParaMinutosDoDia(no_atual.end_Time) - DateTimeTimeParaMinutosDoDia(no_atual.start_Time)
+                    tempoTotalAtividades += DateTimeTimeParaMinutosDoDia(no_atual.tempo_Fim) - DateTimeTimeParaMinutosDoDia(no_atual.tempo_Inicio)
 
 
 
-                tempoFimDia = DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.listNodes[len(workblock.listNodes) - 1].end_Time)
+                tempoFimDia = DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.listaNos[len(workblock.listaNos) - 1].tempo_Fim)
 
-                ultima = Find_Activity_By_Id(listAtividades, workblock.listNodes[len(workblock.listNodes) - 1].id)
+                ultima = Encontrar_Atividade_Por_Id(listAtividades, workblock.listaNos[len(workblock.listaNos) - 1].id)
                 ultimaViagem = pedir_Travel_Time(dicionario_distancias, travel_Time_By_1KM, ultima.latitude, ultima.longitude, workblock.latitude, workblock.longitude, gmaps) # type: ignore
                 
                 tempoTotalViagem += ultimaViagem
@@ -171,8 +171,8 @@ def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Worker], listAtividades:
 
 
 
-def AnalisaTrabalhador(trabalhador: Worker, listaAtividades: list[Activity], valores_dict):
-    nome_txt = "log_" + trabalhador.idWorker + ".txt"
+def AnalisaTrabalhador(trabalhador: Trabalhador, listaAtividades: list[Atividade], valores_dict):
+    nome_txt = "log_" + trabalhador.idTrabalhador + ".txt"
     pasta = "TXT_Logs"
     texto = ""
 
@@ -184,7 +184,7 @@ def AnalisaTrabalhador(trabalhador: Worker, listaAtividades: list[Activity], val
     quantidadeAtividades = 0
 
     raio = valores_dict['RAIO_ANALISE']
-    listaAnalise: list[Activity] = []
+    listaAnalise: list[Atividade] = []
     for atividade in listaAtividades:
         distancia = Distance_Calculator(atividade.latitude, atividade.longitude, trabalhador.latitude, trabalhador.longitude)
         if distancia < raio:
@@ -192,41 +192,41 @@ def AnalisaTrabalhador(trabalhador: Worker, listaAtividades: list[Activity], val
 
     for atividade in listaAnalise:
 
-        if atividade.state == 0:
+        if atividade.estado == 0:
             atividadesDisponiveis += 1
         else:
             atividadesIndisponiveis += 1
 
         if atividade.competencia in trabalhador.competencia:
             atividadesCompetencia += 1
-            if atividade.state == 0:
+            if atividade.estado == 0:
                 atividadesDisponiveisCompetencia += 1
 
     tempoTotalViagem = 0
 
 
-    for workblock in trabalhador.work_Blocks:
+    for workblock in trabalhador.lista_Blocos_Trabalho:
 
-        quantidadeAtividades += len(workblock.listNodes)
+        quantidadeAtividades += len(workblock.listaNos)
         
-        if len(workblock.listNodes) > 0:
-            for node in workblock.listNodes:
-                tempoTotalViagem += node.travel_Time
+        if len(workblock.listaNos) > 0:
+            for node in workblock.listaNos:
+                tempoTotalViagem += node.tempo_Viagem
 
 
-            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.listNodes[0].start_Time) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
-            for i in range(1, len(workblock.listNodes)):
-                no_atual = workblock.listNodes[i]
-                no_anterior = workblock.listNodes[i - 1]
-                tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(no_atual.start_Time) - DateTimeTimeParaMinutosDoDia(no_anterior.end_Time)
+            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.listaNos[0].tempo_Inicio) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
+            for i in range(1, len(workblock.listaNos)):
+                no_atual = workblock.listaNos[i]
+                no_anterior = workblock.listaNos[i - 1]
+                tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(no_atual.tempo_Inicio) - DateTimeTimeParaMinutosDoDia(no_anterior.tempo_Fim)
 
 
-            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.listNodes[len(workblock.listNodes) - 1].end_Time)
+            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.listaNos[len(workblock.listaNos) - 1].tempo_Fim)
         else:
             tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
 
     texto = f"""Informacoes:
-- ID do trabalhador: {trabalhador.idWorker}
+- ID do trabalhador: {trabalhador.idTrabalhador}
 - Quantidade atividades realizadas: {quantidadeAtividades}
 
 - Raio: {raio}

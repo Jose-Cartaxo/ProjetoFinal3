@@ -3,11 +3,11 @@ from typing import List, Dict, Any, Tuple
 from datetime import datetime, time
 
 from KNearest_Neighbors import KNearest_Neighbors_Normal
-from Helper import activitiesToState1, Distance_Calculator
+from Helper import actividades_Para_Estado_1, Distance_Calculator
 from Optimization import Greedy
-from Workers import Worker, WorkBlock, Find_Worker_By_Id
+from Workers import Trabalhador, BlocoTrabalho, Find_Worker_By_Id
 from Ploting import plot_activities_by_order, plot_scatter_with_trendline
-from Activity import Activity
+from Activity import Atividade
 from Stats import WorkBlockStats
 
 
@@ -18,7 +18,7 @@ class Elemento_Lista_Grupos_Central:
         self.centro = [0,0]
         self.lista_atividades = [atividade]
 
-    def AdicionarAtividade(self, atividade: Activity):
+    def AdicionarAtividade(self, atividade: Atividade):
         """Adiciona a atividade recebida à "lista"
 
         Args:
@@ -49,23 +49,23 @@ class Lista_Grupos_Central:
     def __init__(self):
         self.lista_grupos_atividades: dict = {}
 
-    def PesquisarPorId(self, idCentral: str)-> list[Activity]:
+    def PesquisarPorId(self, idCentral: str)-> list[Atividade]:
         """Perquisa a Central pelo seu Id
 
         Args:
             idCentral (str): id da central procurada
 
         Returns:
-            list[Activity]: lista de todas as atividades pertencentes a essa central
+            list[Atividade]: lista de todas as atividades pertencentes a essa central
         """
         return self.lista_grupos_atividades.get(idCentral, None).lista_atividades
     
-    def AdicionarGrupoId(self, idCentral: str, atividade: Activity):
+    def AdicionarGrupoId(self, idCentral: str, atividade: Atividade):
         """Adiciona a atividade ao seu grupo de acordo com o id da sua central
 
         Args:
             idCentral (str): id da central da atividade
-            atividade (Activity): atividade a ser adicionada
+            atividade (Atividade): atividade a ser adicionada
         """
         if idCentral in self.lista_grupos_atividades:
             self.lista_grupos_atividades[idCentral].AdicionarAtividade(atividade)
@@ -81,7 +81,7 @@ class Lista_Grupos_Central:
 
 
 
-def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: list[str], lat: float, lon: float, listaCentraisExistentes: list[str], k: int) -> list[Activity]:
+def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: list[str], lat: float, lon: float, listaCentraisExistentes: list[str], k: int) -> list[Atividade]:
     """Adiciona recursivamente atividades ao cluster, até atingir a quantidade de atividades definidas
 
     Args:
@@ -93,7 +93,7 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
         k (int): quantidade de atividades
 
     Returns:
-        list[Activity]: lista de atividades encontradas
+        list[Atividade]: lista de atividades encontradas
     """
 
     if len(listaCentraisExistentes) < k:
@@ -118,7 +118,7 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
         lista = listaGruposCentral.PesquisarPorId(primeiro_elemento[0])
 
         # atividades da lsita com o state == 0 
-        lista_atividades_estado_zero = [atividade for atividade in lista if atividade.state == 0 and atividade.competencia in competencias]
+        lista_atividades_estado_zero = [atividade for atividade in lista if atividade.estado == 0 and atividade.competencia in competencias]
         # todo #1 
 
         if len(lista_atividades_estado_zero) < k:
@@ -128,13 +128,13 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
     return []
 
 
-def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalhadores: list[Worker], listaBlocoTrabalho: list[WorkBlock], k_nearest_neighbors: int, dicionario_distancias: dict, competencias_dict: dict, valores_dict: dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
+def Opcao_Agrupamento_Por_Central(listaAtividades: list[Atividade], listaTrabalhadores: list[Trabalhador], listaBlocoTrabalho: list[BlocoTrabalho], k_nearest_neighbors: int, dicionario_distancias: dict, competencias_dict: dict, valores_dict: dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     """Faz a ateribuição de atividades por central
 
     Args:
-        listaAtividades (list[Activity]): lista de todas as atividades
-        listaTrabalhadores (list[Worker]): lista de todos os trabalhadores
-        listaBlocoTrabalho (list[WorkBlock]): lista de todos os blocos de trabalho
+        listaAtividades (list[Atividade]): lista de todas as atividades
+        listaTrabalhadores (list[Trabalhador]): lista de todos os trabalhadores
+        listaBlocoTrabalho (list[BlocoTrabalho]): lista de todos os blocos de trabalho
         k_nearest_neighbors (int): quantidade de atividades para o clustering
         dicionario_distancias (dict): dicionário com os tempos de viagem já calculadas
         competencias_dict (dict): dicionário com as competencias, e o tempo de realização das atividades
@@ -164,7 +164,7 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
     for blocoTrabalho in listaBlocoTrabalho:
 
         # trabalhador do bloco de trabalho a ser atribuido
-        trabalhador: Worker = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idWorker)
+        trabalhador: Trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idTrabalhador)
         
         # competencias do trabalhador
         competencias: list[str] = trabalhador.competencia
@@ -176,7 +176,7 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
         listaAtividadesGrupoCentral = listaGruposCentral.PesquisarPorId(central)
 
         # lista de atividades da central do trabalhador com o state == 0, e com uma competencia possuida pelo trabalhador
-        atividades_estado_zero = [atividade for atividade in listaAtividadesGrupoCentral if atividade.state == 0 and atividade.competencia in competencias]
+        atividades_estado_zero = [atividade for atividade in listaAtividadesGrupoCentral if atividade.estado == 0 and atividade.competencia in competencias]
 
 
         if len(atividades_estado_zero) > k_nearest_neighbors:
@@ -209,14 +209,14 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
         nodes = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
         # altera o estado das atividades para 1 (atribuidas)
-        activitiesToState1(nodes, listaAtividades)
+        actividades_Para_Estado_1(nodes, listaAtividades)
 
         # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
         plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
         # colocar todas as atividades que não têm o state igual a 1 a 0
         for activity in listaAtividades:
-            activity.resetStateToZeroIfNotOne()
+            activity.estado_A_0_Se_Diferente_De_1()
 
 
         # fazer um gráfico com a evolução da atribuição das atividades
@@ -240,11 +240,11 @@ def Opcao_Agrupamento_Por_Central(listaAtividades: list[Activity], listaTrabalha
 
     return
 
-def preencherListaCentral(listaAtividades: list[Activity]) -> Lista_Grupos_Central:
+def preencherListaCentral(listaAtividades: list[Atividade]) -> Lista_Grupos_Central:
     """Agrupa as atividades por central
 
     Args:
-        listaAtividades (list[Activity]): lista das atividades a serem agrupadas
+        listaAtividades (list[Atividade]): lista das atividades a serem agrupadas
 
     Returns:
         Lista_Grupos_Central: lista com as atividades já agrupadas
