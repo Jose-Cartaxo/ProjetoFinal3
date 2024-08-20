@@ -7,15 +7,15 @@ from Node import No
 class BlocoTrabalho:
      
     def __init__(self, idTrabalhador: str, longitude: float, latitude: float, idBlock: int, inicio: str, fim: str):
-        self.idTrabalhador = idTrabalhador
-        self.idBloco = idBlock
-        self.longitude = longitude
-        self.latitude = latitude
+        self.idTrabalhador: str = idTrabalhador
+        self.idBloco: int = idBlock
+        self.longitude: float = longitude
+        self.latitude: float = latitude
         self.listaNos: list[No] = []
-        self.inicio = datetime.strptime(inicio.strip(), '%H:%M').time()
-        self.fim = datetime.strptime(fim.strip(), '%H:%M').time()
+        self.inicio: time = datetime.strptime(inicio.strip(), '%H:%M').time()
+        self.fim: time = datetime.strptime(fim.strip(), '%H:%M').time()
 
-    def atribuir_Nos_Bloco_Trabalho(self, lista_Nos: list[No]):
+    def atribuir_Nos_Bloco_Trabalho(self, lista_Nos: list[No]) -> None:
         self.listaNos = lista_Nos
 
 
@@ -28,13 +28,13 @@ class Trabalhador:
     quantidade_Trabalhadores = 0
 
     def __init__(self, id: str, Central: str, competencia: list[str], longitude: float, latitude: float, lista_Blocos_Trabalho: list[BlocoTrabalho]):
-        self.idTrabalhador = id
-        self.idCentral = Central
-        self.competencia = competencia
-        self.longitude = longitude
-        self.latitude = latitude
-        self.quantidadeAtividades = 0
+        self.idTrabalhador: str = id
+        self.idCentral: str = Central
+        self.competencia: list[str] = competencia
+        self.longitude: float = longitude
+        self.latitude: float = latitude
         self.lista_Blocos_Trabalho: list[BlocoTrabalho] = lista_Blocos_Trabalho
+        self.quantidadeAtividades: int = 0
         Trabalhador.quantidade_Trabalhadores += 1
 
     def printWorker(self):

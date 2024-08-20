@@ -111,7 +111,7 @@ def importar_Trabalhadores_Excel(workers_xlsx, listaTrabalhadores):
             tempo_listaBlocoTrabalho.append(BlocoTrabalho(element['idTrabalhador'], element['Longitude'], element['Latitude'], i,start_hour, end_hour))
             i += 1
     
-        listaTrabalhadores.append(Trabalhador(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
+        listaTrabalhadores.append(Trabalhador(element['idTrabalhador'], element['Central'], [item.strip() for item in  element['Skills'].split(',')]  , element['Longitude'], element['Latitude'], tempo_listaBlocoTrabalho))
 
 
 def importar_Valores_Excel(valoresTemp_dict: dict) -> dict:
@@ -210,3 +210,16 @@ def DateTimeTimeParaMinutosDoDia(tim):
     """
     return (tim.hour * 60 + tim.minute)
 
+
+
+def Encontrar_Atividade_or_Trabalhador_Por_Id(lista_atividades: list[Atividade], lista_trabalhadores: list[Trabalhador], id: str) -> Atividade | Trabalhador:
+    
+    for atividade in lista_atividades:
+        if(atividade.idAtividade == id):
+            return atividade
+    
+    for trabalhador in lista_trabalhadores:
+        if(trabalhador.idTrabalhador == id):
+            return trabalhador
+    
+    raise ValueError(f"ID {id} não encontrado na lista de atividades nem de trabalhadores")

@@ -3,9 +3,9 @@ import heapq
 from bson import _get_decimal128
 import pandas as pd
 
-from Activity import Atividade, Encontrar_Atividade_Por_Id
+from Activity import Atividade
 from Node import No
-from Workers import BlocoTrabalho, Trabalhador, Find_Worker_By_Id
+from Workers import BlocoTrabalho, Trabalhador
 from datetime import datetime, time, date
 
 
@@ -32,8 +32,11 @@ def CostCalculator(tempo_entre_atividades: int, tempo_em_viagem: int, tempo_em_a
     # retirar o multiplicador do tempo de trabalho do dicionário
     multTrabalhador = values_dict['multCustoTrabalhador']
 
+    # retirar o multiplicador do tempo ocioso do dicionário
+    multOcioso = values_dict['Penalizacao_Ocioso']
+
     # calcular o custo do trabalhador mais o custo da viagem
-    custo = ((tempo_entre_atividades + tempo_em_atividade) * multTrabalhador) + (tempo_em_viagem * multViagemReal)
+    custo = ((tempo_entre_atividades + tempo_em_atividade) * multTrabalhador) + (tempo_em_viagem * multViagemReal) + ((tempo_entre_atividades - tempo_em_viagem) * multOcioso)
 
     # calcular o lucro obtido com a realização da atividade
     lucro = tempo_em_atividade * values_dict['multRecebimentoTrabalho']
@@ -159,18 +162,18 @@ def subtrairMinutosADatetimeTime(tim: time, min: int) -> time:
     return time(horas, min)
 
 
-def Greedy(cluster_Atividades: list[Atividade], list_workers: list[Trabalhador], workBlock: BlocoTrabalho, dicionario_distancias: dict, competencias_dict: dict, values_dict: dict, considerAppointment: bool, considerPriority: bool, gmaps) -> list[No]:
+def Greedy(cluster_Atividades: list[Atividade], lista_Trabalhadores: list[Trabalhador], blocoTrabalho: BlocoTrabalho, dicionario_distancias: dict, competencias_dict: dict, values_dict: dict, considerar_Agendamento: bool, considerar_Data_Criacao: bool, gmaps) -> list[No]:
     """verifica qual a melhor combinação de atividades para o trabalhador, faz lhe a rota e devolve uma lista nós, pela ordem pela qual devem ser percorridas as atividades
 
     Args:
         cluster_Atividades (list[Atividade]): lista com todas as atividades
-        list_workers (list[Trabalhador]): lista com todos os trabalhadores
-        workBlock (BlocoTrabalho): bloco de trabalho a ser atribuido
+        lista_Trabalhadores (list[Trabalhador]): lista com todos os trabalhadores
+        blocoTrabalho (BlocoTrabalho): bloco de trabalho a ser atribuido
         dicionario_distancias (dict): dicionário com as distancias já calculadas
         competencias_dict (dict): dicionário com as competências e o tempo de realização das atividades
         values_dict (dict): dicionário com valores importados do Excel
-        considerAppointment (bool): True se for para considerar a prioridade de tipo de agendamento, False se não
-        considerPriority (bool): True se for para considerar a prioridade de data de criação, False se não
+        considerar_Agendamento (bool): True se for para considerar a prioridade de tipo de agendamento, False se não
+        considerar_Data_Criacao (bool): True se for para considerar a prioridade de data de criação, False se não
         gmaps (_type_): _description_
 
     Returns:
@@ -178,21 +181,18 @@ def Greedy(cluster_Atividades: list[Atividade], list_workers: list[Trabalhador],
     """
 
     # este import teve de vir para aqui para evitar as importações circulares
-    from Helper import pedir_Travel_Time, DateTimeTimeParaMinutosDoDia
+    from Helper import pedir_Travel_Time, DateTimeTimeParaMinutosDoDia, Encontrar_Atividade_or_Trabalhador_Por_Id
     
     fronteira: list[No] = [] # lista com todos os nos da fronteira
-
 
 
     '''
     Importar uns valores e guardar em vars para usar depois
     '''
     tempoViagem1KM: float = values_dict['tempoViagem1KM']
-    tolerancia_Atividade_Post: int = int (values_dict['WINDOW_TIME_POST'])
-    tolerancia__Atividade_Pre: int = int (values_dict['WINDOW_TIME_PRE'])
 
-    # inicio é o WorkBlock
-    fronteira.append(No(workBlock.idTrabalhador, 0, 0,workBlock.inicio, workBlock.inicio, None))
+    # inicio é o blocoTrabalho
+    fronteira.append(No(blocoTrabalho.idTrabalhador, 0, 0,blocoTrabalho.inicio, blocoTrabalho.inicio, None))
 
     # enquanto existirem elementos na lista fronteira, ou então quando um ramo finalizado ele termina
     while fronteira:
@@ -206,173 +206,51 @@ def Greedy(cluster_Atividades: list[Atividade], list_workers: list[Trabalhador],
         # retira o no da fronteira
         fronteira.remove(no_Atual)
 
-        # verifica o estado do no
+#--------------------------------
         if(no_Atual.estado == 0):
-            '''aqui ele entra se já tiver chegado ao fim, a ultima atividade'''
+            """aqui ele entra se já tiver chegado ao fim, a ultima atividade"""
 
             caminho_Em_Nos = Caminho_Nos(no_Atual)
 
             # retirar o primeiro e ultimo no para o colocar no bloco de trabalho (o primeiro e o ultimo são casa)
-            workBlock.atribuir_Nos_Bloco_Trabalho(caminho_Em_Nos[1:-1])
+            blocoTrabalho.atribuir_Nos_Bloco_Trabalho(caminho_Em_Nos[1:-1])
 
             # dar return a lista
             return caminho_Em_Nos
+#--------------------------------
         
-        tempo_Atual, atividade_Atual, encontrou_Atividade = local_Atual(cluster_Atividades, list_workers, no_Atual)
+
+        atividade_Atual = Encontrar_Atividade_or_Trabalhador_Por_Id(cluster_Atividades, lista_Trabalhadores, no_Atual.id)
+
+        encontrou_Atividade = False
 
 
-        # aqui percorre todas as atividades do cluster, isto para as tentar adicionar a rota
         for atividade in cluster_Atividades:
+            """Percorre todas as atividades do cluster, para as tentar adicionar a seguir a este nó"""
             
+            tempo_De_Viagem_Para_A_Atividade = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, atividade_Atual.latitude, atividade_Atual.longitude, atividade.latitude, atividade.longitude, gmaps) 
             
-            tempoEmMinParaIrParaAAtividade, tempoEmMinParaVoltarACasa, horaDeChegadaAAtividade = calcular_Tempos(workBlock, dicionario_distancias, gmaps, tempoViagem1KM, tempo_Atual, atividade_Atual, atividade)
+            tempo_De_Viagem_Para_Voltar_A_Casa = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, atividade.latitude, atividade.longitude, blocoTrabalho.latitude, blocoTrabalho.longitude, gmaps)
+
+            # Hora de Chegada a Atividade
+            hora_De_Chegada_A_Atividade = adicionar_Minutos_A_DatetimeTime(no_Atual.tempo_Fim, tempo_De_Viagem_Para_A_Atividade)
 
             # Tempo em minutos necessárioa para realizar a Atividade em si
-            tempoNecessarioParaRealizarAtividade = competencias_dict[atividade.competencia]
+            tempo_Para_Realizar_Atividade = competencias_dict[atividade.competencia]
 
+            if not atividade.idAtividade in no_Atual.familia:
+                """Verifica se esta atividade já não pertence ao ramo deste nó"""
 
-            # verificar se a atividade já foi usada antes neste ramo, basicamente anda para trás a ver as tarefas anteriores, se não estiver lá ele deixa, se estivar lá, não deixa
-            if not atividade.idAtividade in no_Atual.family :
-
-                # as atividades com o tempo de agendamento == 00:00 não têm de cumprir o agendamento, ou seja podem ser realizadas a qualquer hora.
-
-                
-                ''' 
-                Para entrar aqui:
-                     - tem de cumprir o agendamento
-                '''
                 if not atividade.agendamento == time(0, 0):
+                    """ Tem de cumprir o agendamento, tem a janela de tempo para realizar a atividade
+                    """
+                    encontrou_Atividade = atribuir_Atividade_Com_Agendamento(blocoTrabalho, values_dict, considerar_Agendamento, considerar_Data_Criacao, fronteira, no_Atual, atividade, tempo_De_Viagem_Para_A_Atividade, tempo_De_Viagem_Para_Voltar_A_Casa, hora_De_Chegada_A_Atividade, tempo_Para_Realizar_Atividade)
 
-                    # aqui adiciona o tolerance_For_Atividade_Post retirado do Excel, que é o tempo que pode chegar atrasado, 
-                    max_Time_Atividade: time = adicionar_Minutos_A_DatetimeTime(atividade.agendamento, tolerancia_Atividade_Post)
-                    """tempo máximo para chegar a atividade"""
-                
-                    
-                    ''' 
-                    Para entrar aqui:
-                         - tem de cumprir o agendamento
-                         - consegue chegar antes do limite máximo de atraso
-                    Ou seja:
-                         - dependendo do seguinte, pode ser atribuida a a tividade
-                    '''
-                    if horaDeChegadaAAtividade <= max_Time_Atividade:
-
-                        # aqui adiciona o tolerance_For_Atividade_Post retirado do Excel, que é o tempo que pode chegar atrasado, 
-                        horaMinimaParaAdiantamento = subtrairMinutosADatetimeTime(atividade.agendamento, tolerancia__Atividade_Pre)
-
-                        ''' 
-                        Para entrar aqui:
-                             - tem de cumprir o agendamento
-                             - consegue chegar antes do limite máximo de atraso
-                             - consegue chegar depois do limite máximo de adiantamento
-                        Ou seja:
-                             - assim que chegar pode começar a trabalhar imediatamente
-                        '''
-                        if horaDeChegadaAAtividade >= horaMinimaParaAdiantamento:
-                            
-                            # Hora a que acaba a Tarefa
-                            atividade_End_Time_Real =  adicionar_Minutos_A_DatetimeTime(horaDeChegadaAAtividade, tempoNecessarioParaRealizarAtividade)
-
-                            # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
-                            atividade_End_Time_Home = adicionar_Minutos_A_DatetimeTime(atividade_End_Time_Real, tempoEmMinParaVoltarACasa)
-
-                            '''
-                            Para entrar aqui:
-                                 - tem de cumprir o agendamento
-                                 - consegue chegar a atividade antes do limite máximo de atraso
-                                 - consegue chegar a atividade depois do limite máximo de adiantamento
-                                 - consegue chegar a casa depois do limite máximo de adiantamento
-                            Ou seja:
-                                 - pode ser adicionada a atividade pois tem tempo de a realizar e voltar a casa a tempo
-                            '''
-                            if atividade_End_Time_Home < workBlock.fim:
-                                
-                                # Encontrou uma atividade entao passa isso a true para não entrar no if lá em baixo
-                                encontrou_Atividade = True
-
-                                # Minuto do dia em que Começa a Atividade
-                                MinutosDoDiaComecarAtividade = DateTimeTimeParaMinutosDoDia(horaDeChegadaAAtividade)
-
-                                # Minuto do dia em que Acaba a Atividade Anterior
-                                MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(tempo_Atual)
-
-                                # Calcular o Custo de Realização desta Atividade
-                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, tempoEmMinParaIrParaAAtividade,tempoNecessarioParaRealizarAtividade, True, atividade.data_criacao, values_dict, considerAppointment, considerPriority)
-                                
-                                # Adicionar nova Atividade a lista da Fronteira 
-                                fronteira.append(No(atividade.idAtividade, cost, tempoEmMinParaIrParaAAtividade, horaDeChegadaAAtividade, atividade_End_Time_Real, no_Atual))
-
-
-                            '''
-                        Para entrar aqui:
-                             - tem de cumprir o agendamento
-                             - consegue chegar antes a atividade do limite máximo de atraso
-                             - NÃO consegue chegar a atividade depois do limite máximo de adiantamento, tem de esperar
-                        Ou seja:
-                             - quando chegar tem de ficar a espera da hora de adiantamento
-                        '''
-                        else:
-                            
-                            # Tempo em que acaba a Tarefa
-                            atividade_End_Time_Real = adicionar_Minutos_A_DatetimeTime(horaMinimaParaAdiantamento, tempoNecessarioParaRealizarAtividade)
-
-                            # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
-                            atividade_End_Time_Home = adicionar_Minutos_A_DatetimeTime(atividade_End_Time_Real, tempoEmMinParaVoltarACasa)
-
-                            '''
-                            Para entrar aqui:
-                                 - tem de cumprir o agendamento
-                                 - consegue chegar a atividade antes do limite máximo de atraso
-                                 - NÃO consegue chegar a atividade depois do limite máximo de adiantamento
-                                 - consegue chegar a casa depois do limite máximo de adiantamento
-                            Ou seja:
-                                 - pode ser adicionada a atividade pois tem tempo de a realizar e voltar a casa a tempo, mas antes de começar a atividade tem de ficar a espera
-                            '''
-                            if atividade_End_Time_Home < workBlock.fim:
-                                # Encontrou uma atividade entao passa isso a true para não entrar no if lá em baixo
-                                encontrou_Atividade = True
-                                
-                                # Minuto do dia em que Começa a Atividade
-                                MinutosDoDiaComecarAtividade = DateTimeTimeParaMinutosDoDia(horaMinimaParaAdiantamento)
-
-                                # Minuto do dia em que Acaba a Atividade Anterior
-                                MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(tempo_Atual
-                    )
-
-                                # Calcular o Custo de Realização desta Atividade
-                                cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, tempoEmMinParaIrParaAAtividade, tempoNecessarioParaRealizarAtividade, True, atividade.data_criacao, values_dict, considerAppointment, considerPriority)
-                                
-                                # Adicionar nova Atividade a lista da Fronteira
-                                fronteira.append(No(atividade.idAtividade, cost, tempoEmMinParaIrParaAAtividade, horaMinimaParaAdiantamento, atividade_End_Time_Real , no_Atual))
-
-
-                    ''' 
-                Para entrar aqui:
-                     - não tem de cumprir o agendamento
-                '''
                 else:
-                    # Tempo em que acaba a Tarefa
-                    atividade_End_Time_Real = adicionar_Minutos_A_DatetimeTime( horaDeChegadaAAtividade, tempoNecessarioParaRealizarAtividade)
+                    """ Não tem de cumprir o agendamento, pode começar a realizar a atividade a qualquer hora
+                    """
 
-                    # Verificar se tem Tempo para voltar a casa, se não olha, já não cabe
-                    atividade_End_Time_Home = adicionar_Minutos_A_DatetimeTime( atividade_End_Time_Real, tempoEmMinParaVoltarACasa)
-
-                    if atividade_End_Time_Home < workBlock.fim:
-                        # Encontrou uma atividade entao passa isso a true para não entrar no if lá em baixo
-                        encontrou_Atividade = True
-
-                        # Minuto do dia em que Começa a Atividade
-                        MinutosDoDiaComecarAtividade = DateTimeTimeParaMinutosDoDia(horaDeChegadaAAtividade)
-
-                        # Minuto do dia em que Acaba a Atividade Anterior
-                        MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(tempo_Atual
-            )
-                        
-                        # Calcular o Custo de Realização desta Atividade
-                        cost = CostCalculator(MinutosDoDiaComecarAtividade - MinutosDoDiaAcabarAtividadeAnterior, tempoEmMinParaIrParaAAtividade, tempoNecessarioParaRealizarAtividade, False, atividade.data_criacao, values_dict, considerAppointment, considerPriority)
-
-                        # Adicionar nova Atividade a lista da Fronteira
-                        fronteira.append(No(atividade.idAtividade, cost, tempoEmMinParaIrParaAAtividade, horaDeChegadaAAtividade, atividade_End_Time_Real , no_Atual))
+                    encontrou_Atividade = atribuir_Atividade_Sem_Agendamento(blocoTrabalho, values_dict, considerar_Agendamento, considerar_Data_Criacao, fronteira, no_Atual, atividade, tempo_De_Viagem_Para_A_Atividade, tempo_De_Viagem_Para_Voltar_A_Casa, hora_De_Chegada_A_Atividade, tempo_Para_Realizar_Atividade)
 
         ''' 
         Para entrar aqui:
@@ -381,18 +259,17 @@ def Greedy(cluster_Atividades: list[Atividade], list_workers: list[Trabalhador],
         if not encontrou_Atividade:
             
             # Minuto do dia em que Acaba a Atividade
-            minutesDayStart = DateTimeTimeParaMinutosDoDia(tempo_Atual
-)
+            minutesDayStart = DateTimeTimeParaMinutosDoDia(no_Atual.tempo_Fim)
 
             # Minuto do dia em que Acaba o dia
-            minutesDayEnd = DateTimeTimeParaMinutosDoDia(workBlock.fim)
+            minutesDayEnd = DateTimeTimeParaMinutosDoDia(blocoTrabalho.fim)
 
-            tempoEmMinParaVoltarACasa: int = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, atividade_Atual.latitude, atividade_Atual.longitude, workBlock.latitude, workBlock.longitude, gmaps) 
+            tempoEmMinParaVoltarACasa: int = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, atividade_Atual.latitude, atividade_Atual.longitude, blocoTrabalho.latitude, blocoTrabalho.longitude, gmaps) 
 
             # Calcular o Custo de volta a casa
             cost = CostCalculatorBackHome(minutesDayEnd - minutesDayStart, tempoEmMinParaVoltarACasa, values_dict)
 
-            noVolta: No = No(workBlock.idTrabalhador, cost, tempoEmMinParaVoltarACasa, workBlock.fim, workBlock.fim, no_Atual)
+            noVolta: No = No(blocoTrabalho.idTrabalhador, cost, tempoEmMinParaVoltarACasa, blocoTrabalho.fim, blocoTrabalho.fim, no_Atual)
             noVolta.estado = False
             fronteira.append(noVolta)
            
@@ -406,35 +283,6 @@ def Greedy(cluster_Atividades: list[Atividade], list_workers: list[Trabalhador],
         no_Atual = no_Atual.pai
     return path[::-1]
 
-def calcular_Tempos(workBlock: BlocoTrabalho, dicionario_distancias: dict, gmaps, tempoViagem1KM: float, tempo_Atual: time, atividade_Atual: Atividade | Trabalhador, atividade: Atividade) -> tuple[int,int,time]:
-    """Calcula o tempo em minutos para chegar a atividade, o tempo em minutos para voltar a casa e a hora de chegada a casa
-
-    Args:
-        workBlock (BlocoTrabalho): bloco de trabalho que está a ser atribuido
-        dicionario_distancias (dict): dicionário com as distâncias já calculadas
-        gmaps (_type_): _description_
-        tempoViagem1KM (float): tempo de viagem para percorrer 1km
-        tempo_Atual (time): tempo atual da atribuição
-        atividade_Atual (Atividade | Trabalhador): última realizada
-        atividade (Atividade): atividade de ser considerada
-
-    Returns:
-        tuple[int,int,time]: [quantidade de minutos para chegar a atividade, tempo em minutos para voltar a casa, hora de chegada a casa]
-    """
-
-
-    from Helper import pedir_Travel_Time
-
-    # Tempo necessário para se deslocar até a Atividade
-    tempoEmMinParaIrParaAAtividade = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, atividade_Atual.latitude, atividade_Atual.longitude, atividade.latitude, atividade.longitude, gmaps) 
-
-    # Tempo necessário para se deslocar da Atividade até Casa
-    tempoEmMinParaVoltarACasa = pedir_Travel_Time(dicionario_distancias, tempoViagem1KM, atividade.latitude, atividade.longitude, workBlock.latitude, workBlock.longitude, gmaps)
-
-    # Hora de Chegada a Atividade
-    horaDeChegadaAAtividade = adicionar_Minutos_A_DatetimeTime(tempo_Atual, tempoEmMinParaIrParaAAtividade)
-
-    return tempoEmMinParaIrParaAAtividade,tempoEmMinParaVoltarACasa,horaDeChegadaAAtividade
 
 
 
@@ -445,24 +293,30 @@ def calcular_Tempos(workBlock: BlocoTrabalho, dicionario_distancias: dict, gmaps
 
 
 
-def local_Atual(worker_Activities_Cluster: list[Atividade], list_workers: list[Trabalhador], no_Atual: No)-> tuple[time, Atividade | Trabalhador, bool]:
 
-    # a hora em que o node atual acabou, a hora a partir da qual vamos começar
-    tempo_Atual = no_Atual.tempo_Fim
 
-    # se encontrar atividade passa a true, se não conseguir encontrar mais atividades, volta para casa
-    encontrou_Atividade = False
 
-        # aqui temos um problema pois se no futuro se for possivel um trabalhador e uma atividade terem o mesmo id, isto começa a dar raia
 
-    # como só guardamos o id da atividade no nó, vamos buscar a última atividade realizada pelo id
-    atividade_Atual = Encontrar_Atividade_Por_Id(worker_Activities_Cluster,no_Atual.id)
-
-    # se não existir uma atividade com o id é porque é um trabalhador
-    if not atividade_Atual:
-        atividade_Atual = Find_Worker_By_Id(list_workers, no_Atual.id)
+def atribuir_Atividade_Sem_Agendamento(workBlock, values_dict, considerAppointment, considerPriority, fronteira, no_Atual, atividade, tempo_De_Viagem_Para_A_Atividade, tempo_De_Viagem_Para_Voltar_A_Casa, hora_De_Chegada_A_Atividade, tempo_Para_Realizar_Atividade):
     
-    return tempo_Atual, atividade_Atual, encontrou_Atividade
+    from Helper import DateTimeTimeParaMinutosDoDia
+    
+    atividade_Hora_Fim_Real = adicionar_Minutos_A_DatetimeTime( hora_De_Chegada_A_Atividade, tempo_Para_Realizar_Atividade)
+
+    atividade_Hora_Chegar_Casa = adicionar_Minutos_A_DatetimeTime( atividade_Hora_Fim_Real, tempo_De_Viagem_Para_Voltar_A_Casa)
+
+    if atividade_Hora_Chegar_Casa < workBlock.fim:
+
+        minutos_Do_Dia_Comecar_Atividade = DateTimeTimeParaMinutosDoDia(hora_De_Chegada_A_Atividade)
+
+        MinutosDoDiaAcabarAtividadeAnterior = DateTimeTimeParaMinutosDoDia(no_Atual.tempo_Fim)
+                        
+        cost = CostCalculator(minutos_Do_Dia_Comecar_Atividade - MinutosDoDiaAcabarAtividadeAnterior, tempo_De_Viagem_Para_A_Atividade, tempo_Para_Realizar_Atividade, False, atividade.data_criacao, values_dict, considerAppointment, considerPriority)
+
+        fronteira.append(No(atividade.idAtividade, cost, tempo_De_Viagem_Para_A_Atividade, hora_De_Chegada_A_Atividade, atividade_Hora_Fim_Real , no_Atual))
+        return True
+
+    return False
 
 
 
@@ -470,11 +324,74 @@ def local_Atual(worker_Activities_Cluster: list[Atividade], list_workers: list[T
 
 
 
+def atribuir_Atividade_Com_Agendamento(blocoTrabalho: BlocoTrabalho, values_dict: dict, considerAppointment: bool, considerPriority: bool, fronteira: list[No], no_Atual: No, atividade: Atividade, tempo_De_Viagem_Para_A_Atividade: int, tempo_De_Viagem_Para_Voltar_A_Casa: int, hora_De_Chegada_A_Atividade: time, tempo_Para_Realizar_Atividade: int) -> bool:
+    
+    from Helper import DateTimeTimeParaMinutosDoDia
+    
+    
+    tolerancia_Atividade_Post: int = int (values_dict['WINDOW_TIME_POST'])
+    tolerancia_Atividade_Pre: int = int (values_dict['WINDOW_TIME_PRE'])
 
 
+    max_Time_Atividade: time = adicionar_Minutos_A_DatetimeTime(atividade.agendamento, tolerancia_Atividade_Post)
+    ''' o máximo de tempo que pode chegar atrasado '''
+
+    if hora_De_Chegada_A_Atividade <= max_Time_Atividade:
+        """Consegue chegar a atividades antes do tempo limite máximo, se não conseguir não a pode realizar"""
+        
+        hora_Minima_Para_Adiantamento = subtrairMinutosADatetimeTime(atividade.agendamento, tolerancia_Atividade_Pre)
+
+#------------------------------------------------------
+        if hora_De_Chegada_A_Atividade >= hora_Minima_Para_Adiantamento:
+            """Se chega depois do tempo mínimo, pode começar a trabalhar assim que chegar"""
+
+            atividade_Hora_Fim_Real =  adicionar_Minutos_A_DatetimeTime(hora_De_Chegada_A_Atividade, tempo_Para_Realizar_Atividade)
+            ''' hora em que acabaria de realizar a atividade '''
+
+            atividade_Hora_Chegar_Casa = adicionar_Minutos_A_DatetimeTime(atividade_Hora_Fim_Real, tempo_De_Viagem_Para_Voltar_A_Casa)
+            ''' hora em que chegaria a casa após a realização da atividade '''
+
+            if atividade_Hora_Chegar_Casa < blocoTrabalho.fim:
+                """Se tem tempo de voltar a casa após a realização da atividade"""
+                
+# Ele aqui chega depois do tempo de adiantamento, ou seja, se sair da ultima atividade, vier direto para esta, chega após a hora de adiantamento, o que lhe permite que comece a trabalhar emidiatamente, como também tem tempo para voltar a casa após a realização da atividade, a atribuição é possivel
+
+                minutos_Do_Dia_Comecar_Atividade = DateTimeTimeParaMinutosDoDia(hora_De_Chegada_A_Atividade)
+
+                tempo_Antre_Atividades = minutos_Do_Dia_Comecar_Atividade - DateTimeTimeParaMinutosDoDia(no_Atual.tempo_Fim)
+
+                cost = CostCalculator(tempo_Antre_Atividades, tempo_De_Viagem_Para_A_Atividade,tempo_Para_Realizar_Atividade, True, atividade.data_criacao, values_dict, considerAppointment, considerPriority)
+                
+                fronteira.append(No(atividade.idAtividade, cost, tempo_De_Viagem_Para_A_Atividade, hora_De_Chegada_A_Atividade, atividade_Hora_Fim_Real, no_Atual))
+                
+                return True
+
+#------------------------------------------------------
+        else:
+            """Se não chegar antes do tempo mínimo, tempo de esperar para começar a realizar a atividade"""
 
 
+            atividade_Hora_Fim_Real = adicionar_Minutos_A_DatetimeTime(hora_Minima_Para_Adiantamento, tempo_Para_Realizar_Atividade)
 
+            atividade_Hora_Chegar_Casa = adicionar_Minutos_A_DatetimeTime(atividade_Hora_Fim_Real, tempo_De_Viagem_Para_Voltar_A_Casa)
+
+            if atividade_Hora_Chegar_Casa < blocoTrabalho.fim:
+
+# Ele aqui chega antes do tempo de adiantamento, ou seja, se sair da ultima atividade, vier direto para esta, chega antes da hora de adiantamento, o que o obriga a ter de ficar a espera até a hora de adiantamento para poder começar a realizar a atividade, como também tem tempo para voltar a casa após a realização da atividade, a atribuição é possivel
+                
+                minutos_Do_Dia_Comecar_Atividade = DateTimeTimeParaMinutosDoDia(hora_Minima_Para_Adiantamento)
+
+                tempo_Antre_Atividades = minutos_Do_Dia_Comecar_Atividade - DateTimeTimeParaMinutosDoDia(no_Atual.tempo_Fim)
+
+                cost = CostCalculator(tempo_Antre_Atividades, tempo_De_Viagem_Para_A_Atividade, tempo_Para_Realizar_Atividade, True, atividade.data_criacao, values_dict, considerAppointment, considerPriority)
+                                
+                                # Adicionar nova Atividade a lista da Fronteira
+                fronteira.append(No(atividade.idAtividade, cost, tempo_De_Viagem_Para_A_Atividade, hora_Minima_Para_Adiantamento, atividade_Hora_Fim_Real , no_Atual))
+                
+                return True
+
+#------------------------------------------------------
+    return False
 
 
 
@@ -495,7 +412,7 @@ def Caminho_Nos(ultimo_No: No) -> list[No]:
     # preenche a lista ao contrário (da folha até a raiz) 
     while ultimo_No:
         path.append(ultimo_No)
-        ultimo_No = ultimo_No.pai
+        ultimo_No = ultimo_No.pai # type: ignore
             
     # inverter a lista
     path_invertido = path[::-1]

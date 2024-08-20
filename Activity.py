@@ -1,5 +1,7 @@
 from datetime import time, date
 
+from Workers import Trabalhador
+
 class Atividade:
     
     activities_quantity = 0
@@ -13,7 +15,8 @@ class Atividade:
         self.data_criacao: date = data_criacao
         self.agendamento: time = agendamento if agendamento is not None else time(0, 0)
         # 0 -> por marcar, 1 -> marcado, 2 -> a ser avaliada
-        self.estado = 0
+        self.estado: int = 0
+        
         Atividade.activities_quantity += 1
 
     def estado_A_0_Se_Diferente_De_1(self):
@@ -41,4 +44,5 @@ def Encontrar_Atividade_Por_Id(lista_atividades: list[Atividade], id: str) -> At
     for atividade in lista_atividades:
         if(atividade.idAtividade == id):
             return atividade
-    return None # raise ValueError(f"Item com o nome '{id}' não encontrado na lista.")
+    return None
+    raise ValueError(f"Item com o nome '{id}' não encontrado na lista.")

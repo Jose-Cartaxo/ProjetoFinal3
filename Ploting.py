@@ -92,7 +92,7 @@ def plot_activities_by_order(list_activities: list[Atividade], nodes: list[No], 
 
     '''
     plt.scatter(longitude_values, latitude_values, c=colors_order)
-    plt.title(str(work_Block.idTrabalhador) + ' Start:' + str(work_Block.inicio)+ ' End:' + str(work_Block.fim) + ' Lucro: ' + str(nodes[-1].custo_total))
+    plt.title(str(work_Block.idTrabalhador) + ' Start:' + str(work_Block.inicio)+ ' End:' + str(work_Block.fim) + ' Lucro: ' + str(nodes[-1].lucro_total))
     plt.xlabel('Longitude ')
     plt.ylabel('Latitude')
 
