@@ -37,10 +37,8 @@ def actividades_Para_Estado_1(nodes: list [No], list_activities: list[Atividade]
 
 # devolve a quantidade de Minutos necessários para relizar o trajeto
 def Travel_Time( travel_mult, lat1, lon1, lat2, lon2, gmaps):
-    Travel_Time.quantidade_de_chamadas += 1
     return int(Distance_Calculator( lat1, lon1, lat2, lon2) * travel_mult) # values_dict['TRAVEL_TIME']
 
-Travel_Time.quantidade_de_chamadas = 0
 
 def pedir_Travel_Time(dicionarioTempoViagem: dict, travel_mult: float, lat1: float, lon1: float, lat2: float, lon2: float, gmaps) -> int:
     """calcula a quantidade de tempo de viagem em minutos entre duas coordenadas
@@ -78,9 +76,6 @@ def Travel_Time( travel_mult, x1, y1, x2, y2, gmaps):
     return int(minutes)
 '''
 
-
-def Quantidade_Chamadas():
-    return Travel_Time.quantidade_de_chamadas
 
 
 # devolve a distancia em KM entre 2 pontos

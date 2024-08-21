@@ -164,7 +164,7 @@ def KNearest_Neighbors_Adaptado(list_activities: list[Atividade], list_workers: 
             atividade_in.estado = 2 
             
             # adiciona a coordenada da atividade que entrou a lista de coordenadas
-            list_coordenada_temp.append((atividade_in.longitude, atividade_in.latitude)) # type: ignore
+            list_coordenada_temp.append((atividade_in.latitude, atividade_in.longitude)) # type: ignore
             
             # adiciona a atividade ao cluster
             list_cluster.append(atividade_in)

@@ -15,7 +15,7 @@ import pandas as pd
 
 from Activity import Atividade
 
-from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, importar_Valores_Excel, preencherListaWorkBlocks, Quantidade_Chamadas, limpar_pasta
+from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, importar_Valores_Excel, preencherListaWorkBlocks, limpar_pasta
 
 from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
 
@@ -134,7 +134,7 @@ plot_heatmap_activities_by_state(listaAtividades)
     printar o tempo de execução do programa
 '''
 
-print("Travel_Time foi chamada:", Quantidade_Chamadas() ,"vezes\n")
+print("Travel_Time foi chamada:", len(dicionario_distancias) ,"vezes\n")
 print("Quantidade Node:", No.quantidadeNos)
 
 end_time = datetime.now() # type: ignore
