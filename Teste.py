@@ -19,7 +19,7 @@ def knnn():
     dbscan_max = -1
     dbscan_ite = -1
 
-    lista_knn_ite = [2,3,4,5,6,7,8,9,10,11,12]
+    lista_knn_ite = [2,3,4,5,6,7,8,9,10]
     tempo_dep = 60
     tempo_ant = 30
 
@@ -69,7 +69,7 @@ def knna():
     dbscan_max = -1
     dbscan_ite = -1
     
-    lista_knn_ite = [2,3,4,5,6,7,8,9,10,11,12]
+    lista_knn_ite = [2,3,4,5,6,7,8,9,10]
     tempo_dep = 60
     tempo_ant = 30
 
@@ -115,14 +115,11 @@ def knndbscan():
     # 3 - K-NearestNeighbors com DBSCANS
     metodoCluster = 3
 
-    # lista_dbscan_min = [1,2,3,4,5]
-    lista_dbscan_min = [5]
-    # lista_dbscan_max = [10,15,20,25,30,35,40]
-    lista_dbscan_max = [35,40]
+    lista_dbscan_min = [1,2,3,4,5]
+    lista_dbscan_max = [10,15,20,25,30,35,40]
     lista_dbscan_ite = [1,2,3,4,5]
 
-    # lista_knn_ite = [2,3,4,5,6,7,8,9,10,11,12]
-    lista_knn_ite = [7]
+    lista_knn_ite = [2,3,4,5,6,7,8,9,10]
     tempo_dep = 60
     tempo_ant = 30
 
@@ -227,7 +224,7 @@ def central():
     dbscan_max = -1
     dbscan_ite = -1
 
-    lista_knn_ite = [2,3,4,5,6,7,8,9,10,11,12]
+    lista_knn_ite = [2,3,4,5,6,7,8,9,10]
     tempo_dep = 60
     tempo_ant = 30
 
@@ -269,8 +266,8 @@ def central():
 
 
 
-# knnn()
-# knna()
+knnn()
+knna()
 knndbscan()
-# dbscan()
-# central()
+dbscan()
+central()

@@ -32,8 +32,12 @@ def CostCalculator(tempo_entre_atividades: int, tempo_em_viagem: int, tempo_em_a
     # retirar o multiplicador do tempo de trabalho do dicionário
     multTrabalhador = values_dict['multCustoTrabalhador']
 
+    # retirar o multiplicador do tempo ocioso do dicionário
+    multOcioso = values_dict['multTempoOcioso']
+
     # calcular o custo do trabalhador mais o custo da viagem
-    custo = ((tempo_entre_atividades + tempo_em_atividade) * multTrabalhador) + (tempo_em_viagem * multViagemReal)
+    custo = ((tempo_entre_atividades + tempo_em_atividade) * multTrabalhador) + (tempo_em_viagem * multViagemReal)+ ((tempo_entre_atividades - tempo_em_viagem) * multOcioso)
+
 
     # calcular o lucro obtido com a realização da atividade
     lucro = tempo_em_atividade * values_dict['multRecebimentoTrabalho']
@@ -85,8 +89,11 @@ def CostCalculatorBackHome(tempo_entre_atividades: int, tempo_em_viagem: int, va
     # retirar o multiplicador do tempo de trabalho do dicionário
     multTrabalhador = values_dict['multCustoTrabalhador']
 
+    # retirar o multiplicador do tempo ocioso do dicionário
+    multOcioso = values_dict['multTempoOcioso']
+    
     # calcular o custo do trabalhador mais o custo da viagem
-    cost = (((tempo_entre_atividades + tempo_em_viagem) * multTrabalhador) + (tempo_em_viagem * multViagemReal))
+    cost = (((tempo_entre_atividades + tempo_em_viagem) * multTrabalhador) + (tempo_em_viagem * multViagemReal))+ ((tempo_entre_atividades - tempo_em_viagem) * multOcioso)
 
     # da return ao custo, mas negativo porque é uma despesa
     return (-cost)

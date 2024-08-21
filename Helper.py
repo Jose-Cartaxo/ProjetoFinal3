@@ -113,6 +113,7 @@ def importarValoresExcel(valoresTemp_dict):
     velocidadeMediaViagemKMpH = valoresTemp_dict['Média_Velocidade_Viagem']
     comsumoMedioCombustivel100km = valoresTemp_dict['Consumo_Combustível']
     valorRecebimentoHora = valoresTemp_dict['Recebimento']
+    valorPenalizacaoOciosoHora = valoresTemp_dict['Penalizacao_Ocioso']
 
     #  Calcular quantos Km faz num minutos
     velocidadeMediaViagemKMpM = velocidadeMediaViagemKMpH / 60;
@@ -133,12 +134,16 @@ def importarValoresExcel(valoresTemp_dict):
     # Lucro por Min de trabalho do trabalhadar a realizar atividades
     valorRecebimentoMin = valorRecebimentoHora / 60;
 
+    # Penalizacao por Min de trabalho do trabalhadar a fazer nada
+    valorPenalizacaoOciosoMin = valorPenalizacaoOciosoHora / 60;
+
     valores_dict = {}
 
     valores_dict['tempoViagem1KM'] = velocidadeMediaViagemMpKM
     valores_dict['multViagemReal'] = comsumoMedioCombustivelEmEuro1m
     valores_dict['multCustoTrabalhador'] = valorCustoTrabalhadorMin
     valores_dict['multRecebimentoTrabalho'] = valorRecebimentoMin
+    valores_dict['multTempoOcioso'] = valorPenalizacaoOciosoMin
     
     return valores_dict
 
