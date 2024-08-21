@@ -33,7 +33,7 @@ def CostCalculator(tempo_entre_atividades: int, tempo_em_viagem: int, tempo_em_a
     multTrabalhador = values_dict['multCustoTrabalhador']
 
     # retirar o multiplicador do tempo ocioso do dicionário
-    multOcioso = values_dict['Penalizacao_Ocioso']
+    multOcioso = values_dict['multTempoOcioso']
 
     # calcular o custo do trabalhador mais o custo da viagem
     custo = ((tempo_entre_atividades + tempo_em_atividade) * multTrabalhador) + (tempo_em_viagem * multViagemReal) + ((tempo_entre_atividades - tempo_em_viagem) * multOcioso)
