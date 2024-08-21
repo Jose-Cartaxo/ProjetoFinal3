@@ -268,6 +268,6 @@ def central():
 
 knnn()
 knna()
-knndbscan()
-dbscan()
-central()
+#knndbscan()
+#dbscan()
+#central()

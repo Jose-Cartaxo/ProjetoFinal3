@@ -53,7 +53,7 @@ def main(metodoCluster: int, dbscan_min: int, dbscan_max: int , dbscan_ite: int,
 
     processarOpcao(False, False, metodoCluster, gmaps, dicionario_distancias, listaAtividades, listaTrabalhadores, valores_dict, competencias_dict, listaBlocoTrabalho)
 
-    quantidadeAtividade = CalcularQuantidadeAtividadesRealizadas(listaTrabalhadores)
+    quantidadeAtividade = CalcularQuantidadeAtividadesRealizadas(listaAtividades)
     quantidadeAtividadePercent = float(quantidadeAtividade) / 10
 
     return [ quantidadeAtividadePercent, len(dicionario_distancias), Node.quantidadeNodes]

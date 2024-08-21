@@ -95,12 +95,11 @@ def CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador(listTrabalhadores:
 
     return total / len(listTrabalhadores)
 
-def CalcularQuantidadeAtividadesRealizadas(listTrabalhadores: list[Worker]):
-    total = 0
-    for trabalhador in listTrabalhadores:
-        for workblock in trabalhador.work_Blocks:
-            total += len(workblock.listNodes)
-
+def CalcularQuantidadeAtividadesRealizadas(listaAtividades: list[Activity]):
+    total : int = 0
+    for atividade in listaAtividades:
+        if atividade.state == 1:
+            total += 1
     return total
 
 
