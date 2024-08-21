@@ -43,33 +43,32 @@ def CostCalculator(tempo_entre_atividades: int, tempo_em_viagem: int, tempo_em_a
 
     # verificar se é para daar prioridade as atividades de cumprir agendamento
     if considerAppointment and agendamento:
-
         # multiplicar o lucro pelo valor definido
         lucro = lucro * values_dict['PRIORITY_APPOINTMENT']
 
 
     # verificar se é para daar prioridade as atividades de acordo com a data de criação
-    lucro = considerarPrioridadeCriação(dataCriacao, values_dict, considerPriority, lucro)
+    if considerPriority:
+        lucro = considerarPrioridadeCriação(dataCriacao, values_dict, considerPriority, lucro)
 
     # devolve a diferença entre o custo e o lucro
     return (lucro - custo)
 
 def considerarPrioridadeCriação(dataCriacao, values_dict, considerPriority, lucro):
-    if considerPriority:
-        # verificar a data de hoje
-        dataHoje = datetime.now().date()
+    # verificar a data de hoje
+    dataHoje = datetime.now().date()
 
-        # diferenca de dias entre o dia de hoje e a data de criação da atividade
-        diferencadias = (dataHoje - dataCriacao).days
+    # diferenca de dias entre o dia de hoje e a data de criação da atividade
+    diferencadias = (dataHoje - dataCriacao).days
 
-        # transformar a diferença em dias, para diferença em semanas
-        diferencaSemanas = diferencadias // 7
+    # transformar a diferença em dias, para diferença em semanas
+    diferencaSemanas = diferencadias // 7
 
-        # aumentar o multiplicador de forma proporcianal a quantidade de semanas
-        mult = values_dict['PRIORITY_CREATION'] ** diferencaSemanas
+    # aumentar o multiplicador de forma proporcianal a quantidade de semanas
+    mult = values_dict['PRIORITY_CREATION'] ** diferencaSemanas
 
-        # multiplicar o lucro pelo valor definido
-        lucro = lucro * mult
+    # multiplicar o lucro pelo valor definido
+    lucro = lucro * mult
     return lucro
 
 
@@ -91,8 +90,11 @@ def CostCalculatorBackHome(tempo_entre_atividades: int, tempo_em_viagem: int, va
     # retirar o multiplicador do tempo de trabalho do dicionário
     multTrabalhador = values_dict['multCustoTrabalhador']
 
+    # retirar o multiplicador do tempo ocioso do dicionário
+    multOcioso = values_dict['multTempoOcioso']
+
     # calcular o custo do trabalhador mais o custo da viagem
-    cost = (((tempo_entre_atividades + tempo_em_viagem) * multTrabalhador) + (tempo_em_viagem * multViagemReal))
+    cost = (((tempo_entre_atividades + tempo_em_viagem) * multTrabalhador) + (tempo_em_viagem * multViagemReal)) + ((tempo_entre_atividades - tempo_em_viagem) * multOcioso)
 
     # da return ao custo, mas negativo porque é uma despesa
     return (-cost)
