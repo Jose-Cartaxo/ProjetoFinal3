@@ -1,9 +1,10 @@
 import datetime
 import pandas as pd
-from Helper import Travel_Time
+from Helper import Travel_Time, limpar_pasta
 
-gmaps = 0
-print(Travel_Time(1.1, 43.83, 2.99, 44.29, 2.57, gmaps))
+limpar_pasta("TXT_Logs")
+limpar_pasta("PNG_Graphics")
+
 
 
 

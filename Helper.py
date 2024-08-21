@@ -6,6 +6,22 @@ from Activity import Atividade, Encontrar_Atividade_Por_Id
 from Node import No
 from Workers import Trabalhador, BlocoTrabalho
 
+import os
+import shutil
+
+def limpar_pasta(caminho_pasta):
+    # Iterar por todos os arquivos e subpastas na pasta especificada
+    for filename in os.listdir(caminho_pasta):
+        file_path = os.path.join(caminho_pasta, filename)
+        
+        # Verifica se é um arquivo e remove
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        
+        # Verifica se é uma pasta e remove
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+
 def actividades_Para_Estado_1(nodes: list [No], list_activities: list[Atividade]):
     """Altera o estado de todas as atividades atribuidas para 1
 

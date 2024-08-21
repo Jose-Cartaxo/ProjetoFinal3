@@ -15,7 +15,7 @@ import pandas as pd
 
 from Activity import Atividade
 
-from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, importar_Valores_Excel, preencherListaWorkBlocks, Quantidade_Chamadas
+from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, importar_Valores_Excel, preencherListaWorkBlocks, Quantidade_Chamadas, limpar_pasta
 
 from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
 
@@ -30,7 +30,7 @@ from Node import No
 
 
 
-# os.system("cls")
+os.system("cls")
 
 print("Deseja que seja considerada a prioridade das Atividades com marcação?")
 considerarAgendamento: bool = pedir_s_n()
@@ -43,6 +43,9 @@ considerarPrioridade: bool = pedir_s_n()
 printCadaOpcao()
 metodoCluster: int = solicitar_input(1, 5)
 """Método de clustering escolhido"""
+
+limpar_pasta("TXT_Logs")
+limpar_pasta("PNG_Graphics")
 
 # Início da medição dos tempos
 start_time: datetime = datetime.now()
