@@ -9,6 +9,15 @@ from Workers import Trabalhador, BlocoTrabalho
 import os
 import shutil
 
+
+
+def CalcularQuantidadeAtividadesRealizadas(listaAtividades: list[Atividade]):
+    total : int = 0
+    for atividade in listaAtividades:
+        if atividade.estado == 1:
+            total += 1
+    return total
+
 def limpar_pasta(caminho_pasta):
     # Iterar por todos os arquivos e subpastas na pasta especificada
     for filename in os.listdir(caminho_pasta):
@@ -180,10 +189,6 @@ def importar_Valores_Excel(valoresTemp_dict: dict) -> dict:
     valores_dict['PRIORITY_APPOINTMENT'] = valoresTemp_dict['PRIORITY_APPOINTMENT']
     valores_dict['PRIORITY_CREATION'] = valoresTemp_dict['PRIORITY_CREATION']
     valores_dict['RAIO_ANALISE'] = valoresTemp_dict['RAIO_ANALISE']
-    print('multViagemReal:', valores_dict['multViagemReal'])
-    print('multCustoTrabalhador:', valores_dict['multCustoTrabalhador'])
-    print('multRecebimentoTrabalho:', valores_dict['multRecebimentoTrabalho'])
-    print('multTempoOcioso:', valores_dict['multTempoOcioso'])
 
     return valores_dict
 

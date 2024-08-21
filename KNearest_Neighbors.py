@@ -181,12 +181,6 @@ def KNearest_Neighbors_Adaptado(list_activities: list[Atividade], list_workers: 
 
 def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Atividade], listaTrabalhadores: list[Trabalhador], listaBlocoTrabalho: list[BlocoTrabalho], dicionario_distancias, skills_dict, valores_dict, considerarAgendamento: bool, considerarPrioridade: bool, gmaps):
     
-    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-    
-    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
-    list_worker_activityQuantity = []
-
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
@@ -202,34 +196,9 @@ def Opcao_K_NearestNeighbors_Adaptado(listaAtividades: list[Atividade], listaTra
         # colocar as atividades que foram atribuidas com o state == 1
         actividades_Para_Estado_1(nodes, listaAtividades)
 
-        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock 
-        plot_activities_by_order(cluster, nodes, blocoTrabalho)
-
         # colocar todas as atividades que não têm o state igual a 1 a 0 
         for activity in listaAtividades:
             activity.estado_A_0_Se_Diferente_De_1()
-
-        
-        # fazer um gráfico com a evolução da atribuição das atividades
-        activityQuantity = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
-        if blocoTrabalho.inicio < meio_dia:
-            list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
-        else:
-            list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
-
-
-    
-    plot_scatter_with_trendline(list_worker_activityQuantity)
-    
-    print('\nManha \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'manha':
-            print(stat.quantidade, end=", ")
-    print('\n\nTarde \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'tarde':
-            print(stat.quantidade, end=", ")
-    print('\n')
 
     return
 
@@ -250,12 +219,6 @@ def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Atividade], listaTraba
         gmaps (_type_): _description_
     """
 
-    meio_dia: time = datetime.strptime('11:00:00', '%H:%M:%S').time()
-    """Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde"""
-    
-    list_worker_activityQuantity: list[WorkBlockStats] = []
-    """lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem"""
-    
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']))
 
@@ -277,32 +240,9 @@ def Opcao_K_NearestNeighbors_Normal(listaAtividades: list[Atividade], listaTraba
         # altera o estado das atividades para 1 (atribuidas)
         actividades_Para_Estado_1(nodes, listaAtividades)
 
-        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-        plot_activities_by_order(cluster, nodes, blocoTrabalho)
-
         # colocar todas as atividades que não têm o state igual a 1 a 0
         for activity in listaAtividades:
             activity.estado_A_0_Se_Diferente_De_1()
-
-        # fazer um gráfico com a evolução da atribuição das atividades
-        activityQuantity = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
-        if blocoTrabalho.inicio < meio_dia:
-            list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
-        else:
-            list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
-
-
-    
-    plot_scatter_with_trendline(list_worker_activityQuantity)
-    print('\nManha \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'manha':
-            print(stat.quantidade, end=", ")
-    print('\n\nTarde \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'tarde':
-            print(stat.quantidade, end=", ")
-    print('\n')
             
     return
 
@@ -323,11 +263,6 @@ def Opcao_K_N_DBSCAN(listaAtividades: list[Atividade], listaTrabalhadores: list[
         gmaps (_type_): _description_
     """
     
-    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-    
-    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
-    list_worker_activityQuantity = []
 
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), 'K_NEAREST_NEIGHBORS:', int(valores_dict['K_NEAREST_NEIGHBORS']), 'MIN_DBSCAN_DISTANCE:', valores_dict['MIN_DBSCAN_DISTANCE'], 'MAX_DBSCAN_DISTANCE:', valores_dict['MAX_DBSCAN_DISTANCE'], 'DBSCANS_IT_NUM:', int(valores_dict['DBSCAN_IT_NUM']))
@@ -353,35 +288,9 @@ def Opcao_K_N_DBSCAN(listaAtividades: list[Atividade], listaTrabalhadores: list[
         # colocar as atividades que foram atribuidas com o state == 1 
         actividades_Para_Estado_1(nodes, listaAtividades)
 
-        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock 
-        plot_activities_by_order(cluster, nodes, blocoTrabalho)
-
         # colocar todas as atividades que não têm o state igual a 1 a 0 
         for activity in listaAtividades:
             activity.estado_A_0_Se_Diferente_De_1()
-
-
-        # fazer um gráfico com a evolução da atribuição das atividades 
-        activityQuantity = len(nodes) - 2
-
-        if blocoTrabalho.inicio < meio_dia:
-            list_worker_activityQuantity.append(WorkBlockStats('manha',activityQuantity))
-        else:
-            list_worker_activityQuantity.append(WorkBlockStats('tarde',activityQuantity))
-
-
-    
-    plot_scatter_with_trendline(list_worker_activityQuantity)
-
-    print('\nManha \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'manha':
-            print(stat.quantidade, end=", ")
-    print('\n\nTarde \n')
-    for stat in list_worker_activityQuantity:
-        if stat.tipo == 'tarde':
-            print(stat.quantidade, end=", ")
-    print('\n')
 
     return
 

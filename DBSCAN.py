@@ -172,23 +172,11 @@ def Opcao_DBSCAN(listaAtividades: list[Atividade], listaTrabalhadores: list[Trab
         considerarPrioridade (bool): bool com a opção de considerar prioridade
         gmaps (_type_): _description_
     """
-    
-    # Aqui guarda a hora "11:00" para depois comparar os blocos de trabalho da parte da manha e da parte da tarde
-    meio_dia = datetime.strptime('11:00:00', '%H:%M:%S').time()
-
-    # lista com a quantidade de atividades realizadas pelos trabalhadores, por ordem
-    lista_quantidade_atividades_trabalhador = []
 
     # Print básico com a informação
     print('Quantidade Atividades:', len(listaAtividades), 'Trabalhadores:', len(listaTrabalhadores), 'BlocoTrabalho:', len(listaBlocoTrabalho), '\nMIN_DBSCAN_DISTANCE:', valores_dict['MIN_DBSCAN_DISTANCE'], 'MAX_DBSCAN_DISTANCE:', valores_dict['MAX_DBSCAN_DISTANCE'], 'DBSCANS_IT_NUM:', int(valores_dict['DBSCAN_IT_NUM']))
 
     for blocoTrabalho in listaBlocoTrabalho:
-        
-        # trabalhador do bloco de trabalho a ser atribuido
-        trabalhador: Trabalhador = Find_Worker_By_Id(listaTrabalhadores, blocoTrabalho.idTrabalhador)
-        
-        # competencias do trabalhador
-        competencias: list[str] = trabalhador.competencia
         
         # vai criar o clustar para o bloco de trabalho
         cluster = DBSCANInicio(listaAtividades, listaTrabalhadores, blocoTrabalho, valores_dict['MIN_DBSCAN_DISTANCE'], valores_dict['MAX_DBSCAN_DISTANCE'], int(valores_dict['DBSCAN_IT_NUM']))
@@ -196,38 +184,11 @@ def Opcao_DBSCAN(listaAtividades: list[Atividade], listaTrabalhadores: list[Trab
         # chama o metodo de atribuição
         nodes = Greedy(cluster, listaTrabalhadores, blocoTrabalho, dicionario_distancias, competencias_dict, valores_dict, considerarAgendamento, considerarPrioridade, gmaps)
 
-        
         # altera o estado das atividades para 1 (atribuidas)
         actividades_Para_Estado_1(nodes, listaAtividades)
-
-        # fazer um gráfico de pontos, com as coordenadas das atividades do cluster, e mostrar o percurso do trabalhador neste workblock
-        plot_activities_by_order(cluster, nodes, blocoTrabalho)
 
         # colocar todas as atividades que não têm o state igual a 1 a 0
         for ativ in listaAtividades:
             ativ.estado_A_0_Se_Diferente_De_1()
-
-
-        
-        # fazer um gráfico com a evolução da atribuição das atividades
-        quantidade_atividades = len(nodes) - 2 # (o -2 é para retirar o bloco de sair de casa, e voltar a casa)
-        if blocoTrabalho.inicio < meio_dia:
-            lista_quantidade_atividades_trabalhador.append(WorkBlockStats('manha',quantidade_atividades))
-        else:
-            lista_quantidade_atividades_trabalhador.append(WorkBlockStats('tarde',quantidade_atividades))
-
-
-    
-    plot_scatter_with_trendline(lista_quantidade_atividades_trabalhador)
-
-    print('\nManha \n')
-    for stat in lista_quantidade_atividades_trabalhador:
-        if stat.tipo == 'manha':
-            print(stat.quantidade, end=", ")
-    print('\n\nTarde \n')
-    for stat in lista_quantidade_atividades_trabalhador:
-        if stat.tipo == 'tarde':
-            print(stat.quantidade, end=", ")
-    print('\n')
 
     return
