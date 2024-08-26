@@ -89,7 +89,7 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
         competencias (list[str]): competencias do trabalhador
         lat (float): latitude do trabalhador
         lon (float): longitude do trabalhador
-        central (list[str]): lista com os ids das centrais que já foram adicionadas
+        listaCentraisExistentes (list[str]): lista com os ids das centrais que já foram adicionadas
         k (int): quantidade de atividades
 
     Returns:
@@ -119,10 +119,10 @@ def CentralMaisProxima(listaGruposCentral: Lista_Grupos_Central, competencias: l
 
         # atividades da lsita com o state == 0 
         lista_atividades_estado_zero = [atividade for atividade in lista if atividade.estado == 0 and atividade.competencia in competencias]
-        # todo #1 
 
-        if len(lista_atividades_estado_zero) < k:
-            lista_atividades_estado_zero.extend(CentralMaisProxima(listaGruposCentral, lat, lon, central.append(primeiro_elemento[0]), k - len(lista_atividades_estado_zero))) # type: ignore
+        if (len(lista_atividades_estado_zero) < k):
+            listaCentraisExistentes.append(primeiro_elemento[0])
+            lista_atividades_estado_zero.extend(CentralMaisProxima(listaGruposCentral,competencias, lat, lon, listaCentraisExistentes, k - len(lista_atividades_estado_zero)))
         
         return lista_atividades_estado_zero
     return []

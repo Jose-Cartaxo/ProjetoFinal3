@@ -119,7 +119,7 @@ def knndbscan():
     lista_dbscan_max = [10,15,20,25,30,35,40]
     lista_dbscan_ite = [1,2,3,4,5]
 
-    lista_knn_ite = [2,3,4,5,6,7,8,9,10]
+    lista_knn_ite = [3,4,5,6,7,8,9,10]
     tempo_dep = 60
     tempo_ant = 30
 
@@ -165,6 +165,7 @@ def knndbscan():
 
 
 def dbscan():
+    
     # 4 - DBSCANS
     metodoCluster = 4
 
@@ -266,8 +267,8 @@ def central():
 
 
 
-knnn()
-knna()
+#knnn()
+#knna()
 #knndbscan()
 #dbscan()
-#central()
+central()
