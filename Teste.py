@@ -19,7 +19,7 @@ def knnn():
     dbscan_max = -1
     dbscan_ite = -1
 
-    lista_knn_ite = [2,3,4,5,6,7,8,9,10]
+    lista_knn_ite = [1,5]
     tempo_dep = 60
     tempo_ant = 30
 
@@ -267,8 +267,8 @@ def central():
 
 
 
-#knnn()
+knnn()
 #knna()
 #knndbscan()
 #dbscan()
-central()
+#central()
