@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-155
+- Quantidade atividades realizadas: 2
+
+- Raio: 20
+
+- Quantidade de atividades no seu raio: 192
+- Quantidade de atividades no seu raio disponiveis: 16
+- Quantidade de atividades no seu raio indisponiveis: 176
+
+- Quantidade de atividades no seu raio com competencia: 131
+- Quantidade de atividades no seu raio disponiveis com competencia: 11
+
+- Tempo em Viagem: 41
+- Tempo de Sobra: 370

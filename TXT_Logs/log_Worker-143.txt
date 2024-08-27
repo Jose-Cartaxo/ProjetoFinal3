@@ -1,0 +1,15 @@
+Informacoes:
+- ID do trabalhador: Worker-143
+- Quantidade atividades realizadas: 2
+
+- Raio: 20
+
+- Quantidade de atividades no seu raio: 10
+- Quantidade de atividades no seu raio disponiveis: 1
+- Quantidade de atividades no seu raio indisponiveis: 9
+
+- Quantidade de atividades no seu raio com competencia: 10
+- Quantidade de atividades no seu raio disponiveis com competencia: 1
+
+- Tempo em Viagem: 90
+- Tempo de Sobra: 360

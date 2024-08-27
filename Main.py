@@ -83,7 +83,7 @@ valores_dict: dict = importar_Valores_Excel(valoresTemp_dict)
 
 
 competencias_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
-competencias_dict: dict  = competencias_xlsx.set_index('Skill').to_dict()['TimeActivity']
+competencias_dict: dict  = competencias_xlsx.set_index('Skill').to_dict()['TempoAtividade']
 """Dicionário com todas as competências do Excel"""
 
 
