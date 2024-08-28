@@ -20,11 +20,12 @@ from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, impo
 from Printer import printCadaOpcao, processarOpcao, pedir_s_n, solicitar_input
 
 from Workers import BlocoTrabalho, Trabalhador
+from Teste import AnalisaTrabalhadorTeste
 
 from Stats import AnalisaDadosPorSkill, AnalisaDadosPorHora, CalcularMediaQuantidadeAtividadesRealizadasPorTrabalhador, AnalisaTrabalhador, AnalisaTemposTrabalhadores
 
 
-from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_heatmap_activities_by_state
+from Ploting import plot_heatmap_activities_by_hour, plot_activities_graph_by_state, plot_scatter_activities_by_state
 
 from Node import No
 
@@ -70,7 +71,7 @@ listaAtividades: list[Atividade] = []
 importar_Atividades_Excel(activities_xlsx, listaAtividades)
 
 
-workers_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') # type: ignore
+workers_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') 
 listaTrabalhadores: list[Trabalhador] = []
 """Lista com todos os trabalhadores do Excel"""
 importar_Trabalhadores_Excel(workers_xlsx, listaTrabalhadores)
@@ -126,7 +127,9 @@ for trabalhador in listaTrabalhadores:
 
 AnalisaTemposTrabalhadores(listaTrabalhadores, listaAtividades, dicionario_distancias, valores_dict['tempoViagem1KM'], gmaps)
 
-plot_heatmap_activities_by_state(listaAtividades)
+
+
+plot_scatter_activities_by_state(listaAtividades)
 
 
 

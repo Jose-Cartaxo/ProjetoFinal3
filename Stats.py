@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
+from datetime import time
 import os
 from Helper import Distance_Calculator, pedir_Travel_Time, DateTimeTimeParaMinutosDoDia
 from Workers import Trabalhador
@@ -162,9 +163,9 @@ def AnalisaTemposTrabalhadores(listaTrabalhadores: list[Trabalhador], listAtivid
     print('tempoTotalAtividades: ', tempoTotalAtividades, '(Tempo utilizado a realizar atividades)')
     print('tempoTotalViagem: ', tempoTotalViagem,'(Tempo gasto a realizar viagens)')
     print('tempoEspera: ', tempoEspera,'(Tempo gasto a espera da hora para realizar uma atividade)')
-    print('tempoNaoUsadoInicio: ', tempoNaoUsadoInicio,'(Tempo não usado no inicio do dia (o trabalhador pode sair mais tarde de casa))')
-    print('tempoNaoUsadoFim: ', tempoNaoUsadoFim,'(Tempo não usado no fim do dia (o trabalhador pode ir mais cedo para casa))')
-    print('tempoBlocosNaoUsados: ', tempoBlocosNaoUsados,'(blocos de trabalhado que não conseguiram obter nenhuma atribuição)')
+    print('tempoNaoUsadoInicio: ', tempoNaoUsadoInicio,'(Tempo não usado no inicio do bloco de trabalho)')
+    print('tempoNaoUsadoFim: ', tempoNaoUsadoFim,'(Tempo não usado no fim do bloco de trabalho)')
+    print('tempoBlocosNaoUsados: ', tempoBlocosNaoUsados,'(blocos de trabalhado que não tiveram nenhuma atribuição)')
     print('')
     
 
@@ -182,6 +183,8 @@ def AnalisaTrabalhador(trabalhador: Trabalhador, listaAtividades: list[Atividade
     atividadesDisponiveisCompetencia = 0
     tempoTotalEntreAtividades = 0
     quantidadeAtividades = 0
+    atividadeNaZonaSemAgendamentoCompativeis = 0
+    atividadeNaZonaComAgendamentoCompativeis = 0
 
     raio = valores_dict['RAIO_ANALISE']
     listaAnalise: list[Atividade] = []
@@ -201,6 +204,16 @@ def AnalisaTrabalhador(trabalhador: Trabalhador, listaAtividades: list[Atividade
             atividadesCompetencia += 1
             if atividade.estado == 0:
                 atividadesDisponiveisCompetencia += 1
+
+        if atividade.estado == 0 and (atividade.agendamento == time(0, 0)) and (atividade.competencia in trabalhador.competencia):
+            atividadeNaZonaSemAgendamentoCompativeis += 1
+
+        else:
+            for workblock in trabalhador.lista_Blocos_Trabalho:
+                if atividade.estado == 0 and (atividade.agendamento < workblock.fim) and (atividade.agendamento > workblock.inicio) and (atividade.competencia in trabalhador.competencia):
+                    atividadeNaZonaComAgendamentoCompativeis += 1
+
+
 
     tempoTotalViagem = 0
 
@@ -235,8 +248,11 @@ def AnalisaTrabalhador(trabalhador: Trabalhador, listaAtividades: list[Atividade
 - Quantidade de atividades no seu raio disponiveis: {atividadesDisponiveis}
 - Quantidade de atividades no seu raio indisponiveis: {atividadesIndisponiveis}
 
-- Quantidade de atividades no seu raio com competencia: {atividadesCompetencia}
-- Quantidade de atividades no seu raio disponiveis com competencia: {atividadesDisponiveisCompetencia}
+- Quantidade de atividades no seu raio com competencia compativel: {atividadesCompetencia}
+- Quantidade de atividades no seu raio disponiveis e com competencia compativel: {atividadesDisponiveisCompetencia}
+
+- Quantidade de atividades no seu raio com competencia compativel, disponiveis e sem agendamento: {atividadeNaZonaSemAgendamentoCompativeis}
+- Quantidade de atividades no seu raio com competencia compativel, disponiveis e com agendamento compativel: {atividadeNaZonaComAgendamentoCompativeis}
 
 - Tempo em Viagem: {tempoTotalViagem}
 - Tempo de Sobra: {tempoTotalEntreAtividades}

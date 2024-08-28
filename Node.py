@@ -8,14 +8,14 @@ class No:
 
     def __init__(self, id: str, lucro: float, tempo_Viagem: int, tempo_Inicio: time, tempo_Fim: time, pai : Optional['No']):
         
-        self.id: str = id  # id da atividade atribuida a este no
-        self.lucro: float = lucro # custo da realização da atividade
-        self.tempo_Viagem: int = tempo_Viagem # tempo em viagem entre Tarefas
+        self.id: str = id                      # id da atividade atribuida a este no
+        self.lucro: float = lucro              # custo da realização da atividade
+        self.tempo_Viagem: int = tempo_Viagem  # tempo em viagem entre Tarefas
         self.tempo_Inicio: time = tempo_Inicio # horas a que começa a realizar a tarefa
-        self.tempo_Fim: time = tempo_Fim # horas em que termina a tarefa
-        self.pai: No | None = pai # tarefa raelizada anteriormente
-        self.estado: bool = True
-        No.quantidadeNos += 1
+        self.tempo_Fim: time = tempo_Fim       # horas em que termina a tarefa
+        self.pai: No | None = pai              # tarefa raelizada anteriormente
+        self.estado: bool = True               # estado terminado ou não
+        No.quantidadeNos += 1                  
 
         if pai:
             self.gen: int = pai.gen + 1 # o numero da atividade, a 3ª atividade a ser realizada vai ser gen 3

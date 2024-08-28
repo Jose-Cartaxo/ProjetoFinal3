@@ -195,31 +195,34 @@ def plot_activities_graph_by_state(list_activities: list[Atividade]):
     plt.savefig('PNG_Graphics/GráficoCircularQuantidadePorEstado.png')
     plt.close()
 
-
-
-def plot_heatmap_activities_by_state(list_activities: list[Atividade]):
-    # Extrair coordenadas x, y e timestamps
+def plot_scatter_activities_by_state(list_activities: list[Atividade]):
+    # Extrair coordenadas x, y e estados
     longitude_values = [task.longitude for task in list_activities]
     latitude_values = [task.latitude for task in list_activities]
-    timestamps = [task.estado for task in list_activities]
+    states = [task.estado for task in list_activities]
 
-    # Converter timestamps para valores numéricos para representar as cores
-    # Por exemplo, você pode usar a hora do timestamp como o valor da cor
-    color_values = [timestamp for timestamp in timestamps]
+    # Definir as cores para os estados (0 -> não atribuída, 1 -> atribuída)
+    state_to_color = {0: 'red', 1: 'green'}
+    state_to_label = {0: 'Não Atribuída', 1: 'Atribuída'}
 
-    # Criar heatmap
+    # Aplicar as cores aos estados
+    color_values = [state_to_color[state] for state in states]
+
+    # Criar gráfico de dispersão
     plt.figure(figsize=(8, 6))
-    heatmap = plt.scatter(longitude_values, latitude_values, c=color_values, cmap='viridis', s=100, alpha=0.7)
-    plt.colorbar(heatmap, label='State')
-    plt.title('Heatmap das Atividades por State')
+    scatter = plt.scatter(longitude_values, latitude_values, c=color_values, s=100, alpha=0.7)
+
+    # Criar legenda
+    handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=state_to_color[state], markersize=10) for state in state_to_color]
+    plt.legend(handles, [state_to_label[state] for state in state_to_color], title='Estado')
+
+    plt.title('Atividades por Estado')
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
 
-    # Mostrar o heatmap
-    plt.savefig('PNG_Graphics/HeatMapState.png')
+    # Mostrar o gráfico de dispersão
+    plt.savefig('PNG_Graphics/ScatterPlotState.png')
     plt.show()
-
-
 
 def plot_heatmap_activities_by_hour(list_activities: list[Atividade]) -> None:
     """Faz um Heatmap com todas as atividades no seu local geográfico, a cor de cada ponto do heat map representa a sua hora de agendamento

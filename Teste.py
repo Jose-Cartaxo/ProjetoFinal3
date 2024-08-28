@@ -1,9 +1,184 @@
-import datetime
 import pandas as pd
 from Helper import Travel_Time, limpar_pasta
 
-limpar_pasta("TXT_Logs")
-limpar_pasta("PNG_Graphics")
+# limpar_pasta("TXT_Logs")
+# limpar_pasta("PNG_Graphics")
+
+import os
+import pandas as pd
+
+from datetime import datetime, time
+import math
+from Activity import Atividade
+from Helper import importar_Atividades_Excel, importar_Trabalhadores_Excel, importar_Valores_Excel
+from Workers import Trabalhador
+
+
+from Node import No
+# dicuinário coma s distâncias já calculadas
+dicionario_distancias: dict = {}
+
+# ler dados do Excel
+activities_xlsx: pd.DataFrame = pd.read_excel('DATA.xlsx', sheet_name='ACTIVITIES')
+listaAtividades: list[Atividade] = []
+"""Lista com todas as atividades do Excel importadas"""
+importar_Atividades_Excel(activities_xlsx, listaAtividades)
+
+
+workers_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='WORKERS') 
+listaTrabalhadores: list[Trabalhador] = []
+"""Lista com todos os trabalhadores do Excel"""
+importar_Trabalhadores_Excel(workers_xlsx, listaTrabalhadores)
+
+
+values_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='VALUES')
+valoresTemp_dict: dict = values_xlsx.set_index('VARIABLE').to_dict()['VALUE']
+valores_dict: dict = importar_Valores_Excel(valoresTemp_dict)
+"""Dicionário com os valores do Excel, consumos, lucros..."""
+
+
+competencias_xlsx: pd.DataFrame  = pd.read_excel('DATA.xlsx', sheet_name='SKILLS')
+competencias_dict: dict  = competencias_xlsx.set_index('Skill').to_dict()['TempoAtividade']
+"""Dicionário com todas as competências do Excel"""
+
+
+# devolve a distancia em KM entre 2 pontos
+def Distance_Calculator( lat1, lon1, lat2, lon2) -> float:
+    R = 6373.0
+
+    lat1 = math.radians(lat1)
+    lon1 = math.radians(lon1)
+    lat2 = math.radians(lat2)
+    lon2 = math.radians(lon2)
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
+def DateTimeTimeParaMinutosDoDia(tim):
+    """
+    Esta função calcula o minuto do dia através do datetime.time fornecido.
+
+    Parameters
+    ----------
+    tim: (datetime.time)
+        datetime.time a ser convertido.
+        
+    Returns
+    -------
+    Int
+        Retorna o minuto do dia calculado.
+    """
+    return (tim.hour * 60 + tim.minute)
+
+
+
+
+def AnalisaTrabalhadorTeste(trabalhador: Trabalhador, listaAtividades: list[Atividade], valores_dict):
+    nome_txt = "EXEMPLO_" + trabalhador.idTrabalhador + ".txt"
+    pasta = "TXT_Logs"
+    texto = ""
+
+    atividadesDisponiveis = 0
+    atividadesIndisponiveis = 0
+    atividadesCompetencia = 0
+    atividadesDisponiveisCompetencia = 0
+    tempoTotalEntreAtividades = 0
+    quantidadeAtividades = 0
+    atividadeNaZonaSemAgendamentoCompativeis = 0
+    atividadeNaZonaComAgendamentoCompativeis = 0
+
+    raio = valores_dict['RAIO_ANALISE']
+    listaAnalise: list[Atividade] = []
+    for atividade in listaAtividades:
+        distancia = Distance_Calculator(atividade.latitude, atividade.longitude, trabalhador.latitude, trabalhador.longitude)
+        if distancia < raio:
+            listaAnalise.append(atividade)
+
+
+    for atividade in listaAnalise:
+
+        if atividade.estado == 0:
+            atividadesDisponiveis += 1
+
+        else:
+            atividadesIndisponiveis += 1
+
+        if atividade.competencia in trabalhador.competencia:
+            atividadesCompetencia += 1
+            if atividade.estado == 0:
+                atividadesDisponiveisCompetencia += 1
+        
+        if atividade.estado == 0 and (atividade.agendamento == time(0, 0)) and (atividade.competencia in trabalhador.competencia):
+            atividadeNaZonaSemAgendamentoCompativeis += 1
+
+        else:
+            for workblock in trabalhador.lista_Blocos_Trabalho:
+                if atividade.estado == 0 and (atividade.agendamento < workblock.fim) and (atividade.agendamento > workblock.inicio) and (atividade.competencia in trabalhador.competencia):
+                    atividadeNaZonaComAgendamentoCompativeis += 1
+
+    tempoTotalViagem = 0
+
+
+    for workblock in trabalhador.lista_Blocos_Trabalho:
+
+        quantidadeAtividades += len(workblock.listaNos)
+        
+        if len(workblock.listaNos) > 0:
+            for node in workblock.listaNos:
+                tempoTotalViagem += node.tempo_Viagem
+
+
+            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.listaNos[0].tempo_Inicio) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
+            for i in range(1, len(workblock.listaNos)):
+                no_atual = workblock.listaNos[i]
+                no_anterior = workblock.listaNos[i - 1]
+                tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(no_atual.tempo_Inicio) - DateTimeTimeParaMinutosDoDia(no_anterior.tempo_Fim)
+
+
+            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.listaNos[len(workblock.listaNos) - 1].tempo_Fim)
+        else:
+            tempoTotalEntreAtividades += DateTimeTimeParaMinutosDoDia(workblock.fim) - DateTimeTimeParaMinutosDoDia(workblock.inicio)
+
+    texto = f"""Informacoes:
+- ID do trabalhador: {trabalhador.idTrabalhador}
+- Quantidade atividades realizadas: {quantidadeAtividades}
+
+- Raio: {raio}
+
+- Quantidade de atividades no seu raio: {len(listaAnalise)}
+- Quantidade de atividades no seu raio disponiveis: {atividadesDisponiveis}
+- Quantidade de atividades no seu raio indisponiveis: {atividadesIndisponiveis}
+
+- Quantidade de atividades no seu raio com competencia: {atividadesCompetencia}
+- Quantidade de atividades no seu raio disponiveis com competencia: {atividadesDisponiveisCompetencia}
+
+- Tempo em Viagem: {tempoTotalViagem}
+- Tempo de Sobra: {tempoTotalEntreAtividades}
+
+
+
+- atividadeNaZonaSemAgendamentoCompativeis: {atividadeNaZonaSemAgendamentoCompativeis}
+- atividadeNaZonaComAgendamentoCompativeis: {atividadeNaZonaComAgendamentoCompativeis}
+"""
+    
+    caminho_arquivo = os.path.join(pasta, nome_txt)
+
+    # Abre o arquivo para escrita e escreve o texto
+    with open(caminho_arquivo, 'w') as arquivo:
+        arquivo.write(texto)
+
+
+
+for trabalhador in listaTrabalhadores:
+    if trabalhador.idTrabalhador == 'Worker-155':
+        AnalisaTrabalhadorTeste(trabalhador, listaAtividades, valores_dict)
+
 
 
 

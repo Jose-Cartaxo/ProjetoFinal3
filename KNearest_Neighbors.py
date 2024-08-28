@@ -1,4 +1,5 @@
 from lib2to3.main import diff_texts
+from time import sleep
 
 from traitlets import Integer
 from Workers import Trabalhador, BlocoTrabalho, Find_Worker_By_Id, No
@@ -99,6 +100,8 @@ def KNearest_Neighbors_Normal(list_activities: list[Atividade], competencias: li
             break
     
     # retornar o cluster
+    if(workblock.idTrabalhador == 'Worker-155'):
+        sleep(1)
     return cluster
 
 
